@@ -1,0 +1,15 @@
+// KineticOs — Módulo notification
+// Recordatorios y push (FCM se integra en Fase 4). Consume eventos de dominio.
+dependencies {
+    api project(':modules:shared')
+
+    implementation libs.spring.boot.starter.data.jpa
+    implementation libs.spring.boot.starter.validation
+    implementation libs.spring.boot.starter.amqp
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+
+    testImplementation libs.spring.boot.starter.test
+    testImplementation libs.testcontainers.postgresql
+}

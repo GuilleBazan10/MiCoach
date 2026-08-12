@@ -1,0 +1,77 @@
+package com.kineticos.workout.application.port.in;
+
+import com.kineticos.workout.domain.Exercise;
+import com.kineticos.workout.domain.Muscle;
+import com.kineticos.workout.domain.SessionExercise;
+import com.kineticos.workout.domain.Workout;
+import com.kineticos.workout.domain.WorkoutSession;
+
+import java.math.BigDecimal;
+import java.util.List;
+
+/**
+ * Puerto de entrada del módulo workout (catálogo, rutinas y sesiones).
+ */
+public interface WorkoutUseCase {
+
+    // ------------------------- Catálogo -------------------------
+
+    List<Muscle> listMuscles();
+
+    List<Exercise> listExercises(ExerciseFilter filter);
+
+    Exercise getExercise(Long exerciseId);
+
+    // ------------------------- Rutinas -------------------------
+
+    List<Workout> listWorkouts(Long userId, boolean templates);
+
+    Workout getWorkout(Long userId, Long workoutId);
+
+    Workout createWorkout(Long userId, WorkoutData data);
+
+    Workout updateWorkout(Long userId, Long workoutId, WorkoutData data);
+
+    void deleteWorkout(Long userId, Long workoutId);
+
+    // ------------------------- Sesiones -------------------------
+
+    List<WorkoutSession> listSessions(Long userId);
+
+    WorkoutSession getSession(Long userId, Long sessionId);
+
+    WorkoutSession startSession(Long userId, StartSessionData data);
+
+    WorkoutSession completeSession(Long userId, Long sessionId, CompleteSessionData data);
+
+    WorkoutSession abortSession(Long userId, Long sessionId, String notes);
+
+    SessionExercise logSessionExercise(Long userId, Long sessionId, SessionExerciseData data);
+
+    record ExerciseFilter(String category, String difficulty, Long muscleId, String search) {
+    }
+
+    record WorkoutData(String name, String description, String objective, String level,
+                       Integer durationWeeks, List<WorkoutDayData> days) {
+    }
+
+    record WorkoutDayData(Integer dayIndex, String name, boolean restDay,
+                          List<PlannedExerciseData> exercises) {
+    }
+
+    record PlannedExerciseData(Long exerciseId, Integer orderIndex, Integer sets, Integer repsMin,
+                               Integer repsMax, Integer restSeconds, Integer intensityPercent,
+                               String tempo, String notes) {
+    }
+
+    record StartSessionData(Long workoutId, Long workoutDayId) {
+    }
+
+    record CompleteSessionData(Integer durationSeconds, String notes) {
+    }
+
+    record SessionExerciseData(Long workoutExerciseId, Long exerciseId, Integer setsDone,
+                               BigDecimal weightKg, Integer reps, Integer rpe,
+                               Integer durationSeconds, Integer distanceMeters, String notes) {
+    }
+}

@@ -1,0 +1,25 @@
+pluginManagement {
+    repositories {
+        mavenCentral()
+        gradlePluginPortal()
+    }
+}
+
+plugins {
+    // Resolución automática de toolchains (descarga el JDK 21 si no está instalado)
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.8.0'
+}
+
+rootProject.name = 'kineticos'
+
+// Módulos de dominio (bounded contexts) + aplicación que compone
+include 'modules:shared'
+include 'modules:auth'
+include 'modules:user'
+include 'modules:workout'
+include 'modules:nutrition'
+include 'modules:progress'
+include 'modules:notification'
+include 'modules:ai'
+include 'modules:admin'
+include 'app'

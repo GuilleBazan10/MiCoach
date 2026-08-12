@@ -1,0 +1,106 @@
+// KineticOs — Módulo app
+// Composición y arranque de todos los módulos (monolito modular).
+// Aquí se configuran: datasource, Flyway, RabbitMQ, Redis, seguridad del gateway.
+plugins {
+    alias(libs.plugins.spring.boot)
+}
+
+configurations {
+    // Classpath aislado para la CLI de Flyway (tarea flywayMigrate)
+    flywayCli
+}
+
+dependencies {
+    implementation project(':modules:shared')
+    implementation project(':modules:auth')
+    implementation project(':modules:user')
+    implementation project(':modules:workout')
+    implementation project(':modules:nutrition')
+    implementation project(':modules:progress')
+    implementation project(':modules:notification')
+    implementation project(':modules:ai')
+    implementation project(':modules:admin')
+
+    implementation libs.spring.boot.starter.web
+    implementation libs.spring.boot.starter.data.jpa
+    implementation libs.spring.boot.starter.security
+    implementation libs.spring.boot.starter.validation
+    implementation libs.spring.boot.starter.amqp
+    implementation libs.spring.boot.starter.data.redis
+    implementation libs.spring.boot.starter.actuator
+
+    // Flyway se aplica al arrancar la app (spring.flyway.enabled=true)
+    runtimeOnly libs.flyway.core
+    runtimeOnly libs.flyway.database.postgresql
+    runtimeOnly libs.postgresql
+
+    // CLI de Flyway para ./gradlew flywayMigrate (solo build time)
+    flywayCli libs.flyway.commandline
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+
+    testImplementation libs.spring.boot.starter.test
+    testImplementation libs.spring.boot.testcontainers
+    testImplementation libs.testcontainers.postgresql
+}
+
+tasks.named('bootJar') {
+    archiveFileName = 'kineticos.jar'
+    manifest {
+        attributes 'Implementation-Title': 'KineticOs', 'Implementation-Version': project.version
+    }
+}
+
+// =====================================================================
+// Integración con .env (raíz del repo: /KineticOs/.env)
+// Un único lugar para las keys de BD. Sin .env se usan los defaults de
+// .env.example. La variable real del sistema (exportada) tiene prioridad.
+// =====================================================================
+def dotenv = [:]
+def dotenvFile = file('../../.env')
+if (dotenvFile.exists()) {
+    dotenvFile.readLines('UTF-8').each { rawLine ->
+        def line = rawLine.trim()
+        if (!line || line.startsWith('#') || !line.contains('=')) return
+        def noExport = line.replaceFirst(/^export\s+/, '')
+        def idx = noExport.indexOf('=')
+        def key = noExport.substring(0, idx).trim()
+        def value = noExport.substring(idx + 1).trim()
+        if (value.length() >= 2 &&
+                ((value.startsWith('"') && value.endsWith('"')) ||
+                 (value.startsWith("'") && value.endsWith("'")))) {
+            value = value.substring(1, value.length() - 1)
+        }
+        dotenv[key] = value
+    }
+}
+
+def envOr = { String key, String fallback ->
+    (System.getenv(key) ?: dotenv[key]) ?: fallback
+}
+
+// =====================================================================
+// Tarea ./gradlew flywayMigrate
+// NO se usa el plugin Gradle de Flyway 10.x: su classloading impide detectar
+// flyway-database-postgresql y falla con "No database found to handle
+// jdbc:postgresql" (https://github.com/flyway/flyway/issues/3550).
+// En su lugar se ejecuta la CLI oficial de Flyway con el classpath del
+// proyecto (todos los artefactos en el mismo classloader). Las credenciales
+// se pasan por variables FLYWAY_* para no exponer el password en proceso.
+// =====================================================================
+tasks.register('flywayMigrate', JavaExec) {
+    group = 'Flyway tasks'
+    description = 'Aplica las migraciones Flyway (V1__...) a la base de datos configurada.'
+    classpath = configurations.flywayCli
+    mainClass = 'org.flywaydb.commandline.Main'
+    environment 'FLYWAY_URL', "jdbc:postgresql://${envOr('POSTGRES_HOST', 'localhost')}:${envOr('POSTGRES_PORT', '5432')}/${envOr('POSTGRES_DB', 'kineticos')}"
+    environment 'FLYWAY_USER', envOr('POSTGRES_USER', 'kineticos')
+    environment 'FLYWAY_PASSWORD', envOr('POSTGRES_PASSWORD', 'change_me_strong_password')
+    environment 'FLYWAY_LOCATIONS', 'filesystem:src/main/resources/db/migration'
+    args 'migrate'
+}
+
+// bootRun y test también leen el .env (fusión sobre las variables reales)
+tasks.named('bootRun') { environment dotenv }
+tasks.named('test') { environment dotenv }

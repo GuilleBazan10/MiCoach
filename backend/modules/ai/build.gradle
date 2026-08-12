@@ -1,0 +1,15 @@
+// KineticOs — Módulo ai
+// Estrategias de IA (LangChain4j + Strategy Pattern), prompts versionados, chat.
+// Se completa en la Fase 4.
+dependencies {
+    api project(':modules:shared')
+
+    implementation libs.spring.boot.starter.validation
+    implementation libs.spring.boot.starter.amqp
+    implementation libs.langchain4j
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+
+    testImplementation libs.spring.boot.starter.test
+}

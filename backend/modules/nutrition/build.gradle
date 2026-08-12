@@ -1,0 +1,15 @@
+// KineticOs — Módulo nutrition
+// Recetas, planes, macros, sustituciones, lista de compra. Media en MinIO.
+dependencies {
+    api project(':modules:shared')
+
+    implementation libs.spring.boot.starter.data.jpa
+    implementation libs.spring.boot.starter.validation
+    implementation libs.minio
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+
+    testImplementation libs.spring.boot.starter.test
+    testImplementation libs.testcontainers.postgresql
+}

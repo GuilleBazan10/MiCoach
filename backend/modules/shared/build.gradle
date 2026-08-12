@@ -1,0 +1,12 @@
+// KineticOs — Módulo shared
+// Único módulo del que dependen todos. Utilidades, DTOs base, eventos base,
+// errores y seguridad base. Nada de lógica de negocio específica.
+dependencies {
+    api libs.spring.boot.starter.validation
+    api libs.jjwt.api
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+
+    testImplementation libs.spring.boot.starter.test
+}

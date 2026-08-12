@@ -1,0 +1,14 @@
+// KineticOs — Módulo admin
+// Gestión, roles, permisos, auditoría. Solo accesible a usuarios con rol ADMIN.
+dependencies {
+    api project(':modules:shared')
+
+    implementation libs.spring.boot.starter.data.jpa
+    implementation libs.spring.boot.starter.validation
+
+    compileOnly libs.lombok
+    annotationProcessor libs.lombok
+
+    testImplementation libs.spring.boot.starter.test
+    testImplementation libs.testcontainers.postgresql
+}
