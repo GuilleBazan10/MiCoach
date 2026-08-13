@@ -11,8 +11,9 @@
 | 0 | Cimientos (estructura, infra, docs base) | ✅ COMPLETADA |
 | 1 | Modelo de base de datos + migraciones Flyway | ✅ COMPLETADA |
 | 2 | Backend módulo a módulo (Java/Spring) | ✅ COMPLETADA (shared, auth, user, workout, nutrition, progress, notification, admin, ai) |
-| 3 | Frontend Flutter | 🔄 EN CURSO (core ✅, auth ✅, profile ✅, workout ✅; nutrition/progress pendientes — sin módulo backend aún) |
-| 4 | Integración IA (LangChain4j + Ollama) | ⬜ Pendiente |
+| 3.1 | Frontend Mobile (Flutter) | ✅ COMPLETADA (core, auth, profile, workout, nutrition, progress — `admin`/`ai` sin frontend, es deliberado) |
+| 3.2 | Frontend Web (React) | 🟡 EN CURSO (`core`, `auth` — faltan `profile`, `workout`, `nutrition`, `progress`) |
+| 4 | Integración IA (LangChain4j + Ollama) | ⬜ Pendiente (empieza después de cerrar 3.2) |
 | 5 | Testing completo | ⬜ Pendiente |
 | 6 | CI/CD y despliegue | ⬜ Pendiente |
 | 7 | Documentación final (README, manuales) | ⬜ Pendiente |
@@ -314,7 +315,7 @@ tests unitarios. La `app` compone y arranca todos los módulos.
 - **`admin_audit_logs` sin escritores**: mismo caso — ningún módulo audita
   operaciones críticas todavía.
 
-## Fase 3 — Frontend (EN CURSO)
+## Fase 3.1 — Frontend Mobile (Flutter) (EN CURSO)
 
 `core` (tema, router, red, storage) → auth → profile → workout → nutrition → progress.
 Una feature por entrega, consumiendo la API real (no mocks) contra el backend ya
@@ -383,13 +384,211 @@ backend (Fase 2).
   herramienta, no del código); queda como verificación manual pendiente para quien
   continúe — ver `mobile/README.md` para los pasos.
 
-### Siguiente entrega
+### Entrega completada (2026-08-12) — feature `nutrition`
 
-- Verificación manual completa del flujo (register → login → perfil → crear rutina →
-  sesión) en un navegador real.
-- Features `nutrition` y `progress` cuando existan sus módulos backend.
+- [x] **`nutrition`**: `NutritionHomeScreen` (tabs Planes/Diario/Compras).
+  - **Planes**: `MealPlanFormScreen` (crear/editar con días y comidas anidadas +
+    `RecipePickerDialog` con búsqueda del catálogo, misma estrategia "replace" que
+    `workout`), `MealPlanDetailScreen`.
+  - **Diario**: `DailyIntakeView` — comidas de hoy + totales de macros, `LogIntakeDialog`
+    (elegís una receta y porciones, las macros se auto-completan pero quedan editables
+    a mano; también admite carga 100% manual sin receta).
+  - **Compras**: `ShoppingListListView` + `ShoppingListDetailScreen` (ítems con
+    checkbox para marcar comprado, agregar/borrar ítems).
+  - Contra `/api/v1/nutrition/*`. Se agregó la pestaña "Nutrición" al `AppShell`
+    (ahora 3 tabs: Rutinas/Nutrición/Perfil).
+  - Nota menor: se evitó `DateFormat` con símbolos de locale (`EEE`, nombres de mes)
+    porque requieren `initializeDateFormatting()` — se usan formatos numéricos
+    (`dd/MM/yyyy`) que no necesitan inicialización, para no agregar ese paso al arranque.
+
+### Verificación (2026-08-12) — feature `nutrition`
+
+- `flutter analyze` → **0 issues** (limpio en el primer intento).
+- `flutter test` → sigue pasando.
+- Igual que con `workout`: se confirmó con `fetch()` desde el origen real de la app
+  (`http://localhost:5050`) que el login y `GET /api/v1/nutrition/recipes` responden
+  correctamente con datos reales del seed. La automatización de clicks en el flujo
+  completo (crear plan → diario → compras) tampoco se pudo completar en este entorno
+  por la misma limitación del panel de navegador (sin capturas de pantalla, sin
+  elementos DOM reales por el renderizado en canvas) — mismo gap que quedó anotado
+  para `workout`, ahora también aplica a `nutrition`. Verificación manual pendiente
+  para quien continúe (pasos en `mobile/README.md`).
+
+### Entrega completada (2026-08-12) — feature `progress`, cierra la Fase 3
+
+- [x] **`progress`**: `ProgressHomeScreen` (tabs Métricas/Fotos), contra
+      `/api/v1/progress/*`.
+  - **Métricas**: `MetricEntriesView` — lista filtrable por tipo de métrica (chips:
+    peso, IMC, % grasa, circunferencias...), `AddEntryDialog` (unidad auto-sugerida
+    según la métrica elegida, editable), borrar registro.
+  - **Fotos**: `ProgressPhotosView` — grilla de fotos de progreso (por URL, sin flujo
+    de subida/MinIO todavía — el backend solo persiste la URL), diálogo para agregar
+    con ángulo opcional (frente/perfil/espalda), borrar foto.
+  - Se agregó la pestaña **"Progreso"** al `AppShell` (ahora 4 tabs: Rutinas /
+    Nutrición / Progreso / Perfil).
+  - Alcance deliberadamente simple: sin gráficos (fl_chart está declarado en
+    `pubspec.yaml` pero no se usó — agregar un gráfico de línea por métrica es una
+    mejora natural a futuro, no necesaria para el MVP).
+
+### Verificación (2026-08-12) — feature `progress`
+
+- `flutter analyze` → **0 issues**. `flutter test` → sigue pasando.
+- Confirmado con `fetch()` desde el origen real de la app: `POST /progress/entries`
+  (crea una métrica) → `GET /progress/entries` (la lista, formato correcto). Misma
+  limitación de siempre para probar el flujo de clicks completo en este entorno (panel
+  de navegador sin capturas) — pendiente de verificación manual por quien continúe.
+
+## Fase 3.1 — Frontend Mobile (Flutter) — CERRADA (2026-08-12)
+
+Las 6 features previstas para el usuario final están completas: `core`, `auth`,
+`profile`, `workout`, `nutrition`, `progress`. `admin` y `ai` no tienen — ni van a
+tener por ahora — pantalla en la app móvil: son gobernanza interna y base técnica sin
+UI de usuario final, respectivamente (ver sus entregas en la Fase 2 para el detalle).
+
+**Decisión tomada al cerrar esta fase (2026-08-12):** Flutter queda como **mobile-only**
+(Android/iOS, incluida la futura APK de prueba). La versión web deja de ser
+"Flutter Web" y pasa a ser un frontend aparte en React — ver **Fase 3.2** y
+**ADR-003**. Motivo (vivido en carne propia probando esta misma app): Flutter Web
+renderiza a `<canvas>` (CanvasKit), sin DOM real — eso complica SEO, herramientas de
+automatización/QA y debugging con devtools estándar. Para una segunda superficie web
+con paridad completa, conviene una tecnología que sí tenga DOM real.
+
+**Pendiente para quien continúe, no bloqueante:**
+- Verificación manual completa del flujo end-to-end (register → login → perfil →
+  rutina → sesión → plan de alimentación → diario → compras → métricas/fotos) en un
+  navegador real — la automatización de clicks no fue posible en este entorno de
+  desarrollo (limitación de la herramienta, no del código; la conectividad
+  navegador→backend sí se confirmó en cada feature vía `fetch()`).
+- Diseño visual: sigue usando los widgets de Material 3 por defecto. El sistema de
+  tema centralizado (`mobile/lib/core/theme/`) está listo para que quien se encargue
+  del diseño lo rehaga sin tocar la lógica de las pantallas.
+- Generar la APK de prueba (`flutter build apk`) — no se hizo todavía; la Fase 3.2
+  (web) existe justamente para tener una forma más rápida de probar mientras tanto.
+
+## Fase 3.2 — Frontend Web (React) (EN CURSO)
+
+> **Va ANTES de la Fase 4.** Objetivo del usuario del proyecto: tener una superficie
+> web con **toda** la funcionalidad de la app (no solo `admin`) para probar más rápido
+> que generando una APK cada vez, mientras mobile y web comparten el mismo backend.
+> Decisión completa y su justificación en **ADR-003**.
+
+### Alcance
+
+Paridad de funcionalidad completa con Fase 3.1: `core` (tema, router, cliente HTTP,
+storage de sesión) → `auth` → `profile` → `workout` → `nutrition` → `progress`. Mismo
+orden, una feature por entrega, contra la API real (no mocks) — igual que se hizo en
+mobile. `admin` y `ai` siguen sin pantalla de usuario final (mismo criterio que 3.1).
+
+### Stack
+
+- **React 18 + TypeScript + Vite** (SPA, sin SSR/Next.js: es una app autenticada tipo
+  dashboard, no un sitio público que necesite SEO — si eso cambia en el futuro, ahí sí
+  se reevalúa Next.js).
+- **TanStack Query (React Query)** para fetching/cache — mismo modelo mental que los
+  `FutureProvider` de Riverpod en mobile (cachea, invalida, refetchea).
+- **React Router** para navegación con guarda de autenticación (equivalente al
+  `redirect` de GoRouter en mobile).
+- **Tailwind CSS + shadcn/ui** para componentes — DOM real (a diferencia de Flutter
+  Web), accesible, fácil de automatizar/testear.
+- **React Hook Form + Zod** para formularios y validación.
+- **Axios** con interceptor de JWT + refresh automático ante 401 — mismo patrón que
+  `ApiClient` (Dio) en mobile.
+
+### Requisitos no funcionales (pedidos explícitamente)
+
+- **100% responsive**: un solo layout que se vea bien en teléfono y en PC (mobile-first
+  con los breakpoints de Tailwind), NO un sitio "m." aparte.
+- **Abierta a rediseño**: paleta de colores, tipografía y nombre del proyecto van a
+  cambiar. Todo eso debe vivir en UN punto centralizado (tokens de diseño en
+  `tailwind.config` + variables CSS), igual que `mobile/lib/core/theme/` en Flutter,
+  para que cambiar el look no implique tocar cada pantalla.
+
+### Estructura propuesta
+
+```
+web/
+├── package.json  vite.config.ts  tailwind.config.ts  tsconfig.json
+└── src/
+    ├── main.tsx                 # punto de entrada
+    ├── app/                     # layout raíz + router
+    ├── core/
+    │   ├── theme/               # ★ PUNTO ÚNICO DEL DISEÑO ★ (tokens, igual que mobile)
+    │   ├── api/                 # cliente Axios + interceptor JWT/refresh
+    │   └── auth/                # guarda de rutas autenticadas
+    └── features/
+        ├── auth/  profile/  workout/  nutrition/  progress/
+        │   └── api/ hooks/ components/ pages/
+```
+
+### Verificación de la fase
+
+- `npm run build` sin errores + `npm run lint` (ESLint/TypeScript) limpio por entrega.
+- Cada feature probada contra el backend real (curl/fetch como mínimo, navegador si la
+  herramienta de automatización lo permite en ese momento).
+- Responsive verificado al menos en dos anchos: ~375px (teléfono) y ~1280px (desktop).
+
+### Entrega completada (2026-08-12) — `core` + `auth`
+
+- [x] **Scaffold**: `web/` con Vite (React 19 + TS, plugin `@tailwindcss/vite`), ESLint
+      flat config (typescript-eslint + react-hooks + react-refresh) en vez del `oxlint`
+      que trae el scaffold por defecto, para respetar "ESLint/TypeScript" del plan.
+      Node 18 no alcanza para Vite 8/`create-vite` actual (exige Node ^20.19 || >=22.12);
+      se usa Node 24 (ya estaba instalado vía nvm) para instalar/compilar/correr la web.
+  - Dependencias: TanStack Query, React Router (`createBrowserRouter`), Axios, React
+    Hook Form + Zod (`@hookform/resolvers`), shadcn/ui (inicializado con `npx shadcn
+    init -t vite -b radix -p nova`, componentes base: button/input/label/card/alert).
+- [x] **`core/theme`** (`web/src/core/theme/tokens.css`): variables CSS con la misma
+      paleta que `mobile/lib/core/theme/app_colors.dart` (verde salud `#4CAF50` /
+      `#81C784` en oscuro, turquesa `#00BFA5` de acento), mapeadas a los tokens que
+      consumen los componentes shadcn (`--primary`, `--background`, etc.) — es el único
+      lugar a tocar para rediseñar, tal como pide ADR-003.
+- [x] **`core/api`**: `client.ts` (Axios) — mismo comportamiento que
+      `mobile/lib/core/network/api_client.dart`: adjunta `Authorization: Bearer` salvo en
+      `/auth/register|login|refresh`, agrega `X-Correlation-Id`, reintenta una vez tras
+      refrescar el token en un 401 y llama a `onSessionExpired` si el refresh también
+      falla. `tokenStorage.ts` usa `localStorage` (no hay almacenamiento seguro nativo en
+      un SPA; el access token vive 15 min de todos modos).
+- [x] **`core/router`**: `RequireAuth`/`RedirectIfAuthenticated` (guardas, equivalentes al
+      `redirect` de GoRouter), `AppShell` (header con email + logout; todavía sin tabs de
+      navegación porque `profile`/`workout`/`nutrition`/`progress` no existen aún en la
+      web), `SplashScreen` mientras se restaura la sesión.
+- [x] **`features/auth`**: `AuthProvider` (Context + reducer, estados
+      `unknown/authenticated/unauthenticated`, paridad con
+      `mobile/lib/features/auth/application/{auth_providers,auth_state}.dart`),
+      `LoginPage`/`RegisterPage` (React Hook Form + Zod, mensajes de error tomados del
+      `ApiError` unificado del backend).
+- [x] **`app/HomePage`**: placeholder temporal post-login (saluda al usuario, muestra
+      roles) hasta que aterrice `profile`/`workout` en la próxima entrega.
+
+#### Verificación (2026-08-12)
+
+- `npm run build` → sin errores (`tsc -b && vite build`).
+- `npm run lint` → 0 errores (1 warning benigno de `react-refresh` en
+  `src/components/ui/button.tsx`, generado por el propio `shadcn`, no tocado).
+- CORS: se agregó `http://localhost:5173` a `CORS_ALLOWED_ORIGINS` (`.env`,
+  `.env.example`). **Ojo**: el origen debe coincidir carácter a carácter — `vite --host
+  127.0.0.1` sirve en `http://127.0.0.1:5173`, que el navegador trata como un origen
+  distinto de `http://localhost:5173` y el preflight `OPTIONS` da 403. Hay que entrar
+  por `http://localhost:5173` (o agregar también el origen `127.0.0.1` si hiciera falta).
+- Probado en el navegador embebido contra el backend real (`./gradlew :app:bootRun
+  --args='--server.port=8081'` + Postgres): registro (201) → redirige a Home con el
+  email/roles reales → reload de página restaura la sesión (`GET /auth/me`) → logout
+  vuelve a `/login` → login (200) vuelve a Home → login con contraseña incorrecta
+  muestra "Credenciales inválidas" (401) en el formulario. Sin errores de consola.
+- Responsive verificado en 375px (el email del header se oculta, `padding` de 16px,
+  sin overflow horizontal) y 1280px (email visible, `padding` de 24px).
+
+**Simplificación consciente, no bloqueante**: los tokens JWT se guardan en
+`localStorage` (`web/src/core/api/tokenStorage.ts`), no en un storage seguro — un SPA no
+tiene el equivalente al `flutter_secure_storage` de mobile. Queda expuesto a robo de
+token vía XSS si en algún momento se introduce una vulnerabilidad de ese tipo en el
+código. Aceptable para esta fase (superficie de prueba interna); si la web se expone
+públicamente más adelante, migrar a cookies `httpOnly` es la mejora natural (implica
+cambios en el backend, que hoy responde el JWT en el body).
 
 ## Fase 4 — IA (PLAN)
+
+> Empieza después de cerrar la Fase 3.2.
 
 LangChain4j + Ollama de base. Strategy Pattern para alternar proveedores. Prompts
 versionados en recursos del módulo `ai`. Generación de rutinas, planes, sustituciones,
@@ -398,12 +597,13 @@ ajuste de calorías.
 ## Fase 5 — Testing (PLAN)
 
 Testcontainers (PostgreSQL, Redis, RabbitMQ reales) en integración. Widget/unit tests en
-Flutter. Cobertura objetivo ≥70% en dominio.
+Flutter mobile + tests de componentes en React (web). Cobertura objetivo ≥70% en dominio.
 
 ## Fase 6 — CI/CD (PLAN)
 
-GitHub Actions (build, test, lint). Dockerfile multi-stage para backend y Flutter web.
-Compose de "producción" con Nginx. Kubernetes solo como plan documentado.
+GitHub Actions (build, test, lint). Dockerfile multi-stage para backend, build de la web
+(React) y build de la APK Flutter. Compose de "producción" con Nginx. Kubernetes solo
+como plan documentado.
 
 ## Fase 7 — Documentación (PLAN)
 

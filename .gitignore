@@ -30,6 +30,12 @@ mobile/ios/Pods/
 mobile/ios/.symlinks/
 mobile/coverage/
 
+# ===== React / Node (web, Fase 3.2) =====
+web/node_modules/
+web/dist/
+web/.vite/
+web/*.local
+
 # ===== IDE =====
 .idea/
 *.iml

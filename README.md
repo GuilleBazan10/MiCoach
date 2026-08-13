@@ -3,12 +3,16 @@
 Plataforma de salud y bienestar impulsada por IA: planes personalizados de entrenamiento
 y alimentación, adaptados al perfil completo de cada usuario.
 
-> **Estado actual — FASE 3 (frontend, en curso).** Backend: **Fase 2 completa**, los 9
-> módulos (`shared`, `auth`, `user`, `workout`, `nutrition`, `progress`, `notification`,
-> `admin`, `ai`) implementados y verificados. Frontend: `core`, `auth`, `profile`,
-> `workout` implementados y corriendo contra la API real; faltan `nutrition` y
-> `progress`. Este README se ampliará en la Fase 7 con el manual completo y la
-> justificación detallada de cada herramienta. Para el estado detallado, lee
+> **Estado actual — Fases 2 y 3.1 completas, arrancando la 3.2.** Backend: los 9
+> módulos (`shared`, `auth`, `user`, `workout`, `nutrition`, `progress`,
+> `notification`, `admin`, `ai`) implementados y verificados. Frontend mobile
+> (Flutter, Android/iOS): `core`, `auth`, `profile`, `workout`, `nutrition`,
+> `progress` implementados y corriendo contra la API real (`admin`/`ai` no tienen
+> pantalla propia, es deliberado). **Sigue la Fase 3.2: frontend web en React**, con
+> paridad de funcionalidad completa, ANTES de arrancar la Fase 4 (integración real de
+> IA) — ver `docs/04-adr/ADR-003-frontend-web-react.md` para el porqué de tener dos
+> frontends separados. Este README se ampliará en la Fase 7 con el manual completo y
+> la justificación detallada de cada herramienta. Para el estado detallado, lee
 > `docs/00-progress.md`; para el contexto técnico, `docs/01-architecture.md` y
 > `docs/04-adr/`.
 
@@ -16,18 +20,23 @@ y alimentación, adaptados al perfil completo de cada usuario.
 
 ## ¿Qué es esto?
 
-Una aplicación multiplataforma (Android, iOS, Web) que genera rutinas de entrenamiento y
-planes de alimentación **personalizados con IA**. El perfil de cada usuario considera edad,
-sexo, peso, altura, IMC, objetivos, nivel, patologías, lesiones, medicación, restricciones
-alimentarias, horarios, equipamiento, tiempo disponible e historial de progreso. La IA
-adapta automáticamente todas las recomendaciones.
+Una plataforma de salud y bienestar con dos frontends (mobile y web) que genera
+rutinas de entrenamiento y planes de alimentación **personalizados con IA**. El perfil
+de cada usuario considera edad, sexo, peso, altura, IMC, objetivos, nivel, patologías,
+lesiones, medicación, restricciones alimentarias, horarios, equipamiento, tiempo
+disponible e historial de progreso. La IA adapta automáticamente todas las
+recomendaciones.
 
 ## Stack en una frase
 
 - **Backend:** Java 21 + Spring Boot 3, **monolito modular** (Gradle multi-módulo),
   PostgreSQL, Redis, RabbitMQ, MinIO, OpenSearch, Prometheus/Grafana/Jaeger.
-- **Frontend:** Flutter (Bloc + Riverpod, GoRouter, Freezed, Dio, Offline First,
-  Material 3, Dark Mode).
+- **Frontend mobile** (Android/iOS): Flutter (Riverpod, GoRouter, Dio, Material 3,
+  Dark Mode).
+- **Frontend web** (Fase 3.2, en curso): React + TypeScript + Vite (TanStack Query,
+  React Router, Tailwind CSS + shadcn/ui), 100% responsive, misma funcionalidad que
+  mobile. Por qué dos frontends separados en vez de Flutter Web:
+  `docs/04-adr/ADR-003-frontend-web-react.md`.
 - **IA:** LangChain4j con **Strategy Pattern** para alternar proveedores
   (Ollama local gratis, OpenAI, Claude, Gemini, Mistral, DeepSeek).
 - **DevOps:** Docker Compose, GitHub Actions, Nginx.
@@ -37,7 +46,8 @@ adapta automáticamente todas las recomendaciones.
 ```
 KineticOs/
 ├── backend/    → Java 21 + Spring Boot (módulos por dominio + app que compone)
-├── mobile/     → Flutter (Feature First, core tematizable)
+├── mobile/     → Flutter, mobile-only Android/iOS (Feature First, core tematizable)
+├── web/        → React, Fase 3.2 (misma funcionalidad que mobile, responsive)
 ├── infra/      → nginx, minio, plan k8s
 ├── docs/       → arquitectura, base de datos, contratos, ADRs, manuales, PROGRESO
 ├── scripts/    → arranque local (Windows/Linux/Mac) y seed de modelos IA
@@ -49,7 +59,8 @@ KineticOs/
 
 ## Arranque rápido (desarrollo)
 
-Requisitos: **Docker**, **JDK 21**, **Gradle** (se usa el wrapper), **Flutter SDK**.
+Requisitos: **Docker**, **JDK 21**, **Gradle** (se usa el wrapper), **Flutter SDK**
+(mobile), **Node.js 20+** (web, Fase 3.2).
 
 ```bash
 # 1. Copiar variables de entorno
@@ -62,26 +73,34 @@ docker compose up -d        # Windows: ejecutar como administrador si es necesar
 cd backend
 ./gradlew bootRun           # Windows: .\gradlew.bat bootRun
 
-# 4. Flutter (las carpetas de plataforma ya están generadas)
+# 4. App mobile (Flutter — las carpetas de plataforma ya están generadas)
 cd ../mobile
 flutter pub get
-flutter run -d web-server --web-port=5050   # abrir http://localhost:5050
+flutter run -d web-server --web-port=5050   # abrir http://localhost:5050 (para probar rápido; la app final es mobile-only, ver ADR-003)
+
+# 5. App web (React) — Fase 3.2, en curso. Todavía no existe web/; cuando esté:
+# cd ../web && npm install && npm run dev
 ```
 
-> Detalle completo (requisitos, CORS, cómo probar el flujo) en `mobile/README.md`.
+> Detalle completo del mobile (requisitos, CORS, cómo probar el flujo) en
+> `mobile/README.md`. El detalle de la web se documentará en `web/README.md` cuando
+> arranque la Fase 3.2 (ver `docs/00-progress.md`).
 
 > En Windows puedes usar `scripts\init-dev.ps1` que automatiza los pasos 1 y 2.
 
 ## Personalización del nombre y diseño
 
-El nombre **KineticOs** y el diseño son **fáciles de cambiar**:
+El nombre **KineticOs** y el diseño son **fáciles de cambiar** — en ambos frontends:
 
-- **Diseño (tema):** todo está centralizado en
+- **Diseño (tema) mobile:** centralizado en
   `mobile/lib/core/theme/` (`app_theme.dart`, `app_colors.dart`, `app_text_styles.dart`).
   Cambia colores/tipografía en esos 3 archivos y toda la app se re-tematiza
   (claro/oscuro incluidos).
+- **Diseño (tema) web:** centralizado en `web/src/core/theme/` (tokens de Tailwind +
+  variables CSS) — mismo criterio, un solo lugar para cambiar el look completo.
 - **Renombrar el proyecto:** mira la guía en `docs/01-architecture.md` (sección
-  "Renombrar el proyecto"), que lista TODOS los sitios donde aparece el nombre.
+  "Renombrar el proyecto"), que lista TODOS los sitios donde aparece el nombre,
+  incluida la web.
 
 ## ¿Cómo continuar el desarrollo con otra IA?
 
@@ -104,6 +123,8 @@ Si otro modelo va a seguir este proyecto, lo primero que debe leer es:
 | `docs/04-adr/` | Architecture Decision Records |
 | `docs/05-manuals/` | Manual técnico y funcional (Fase 7) |
 | `docs/08-ai-prompt-v2.md` | Prompt v2 para IA generadora |
+| `mobile/README.md` | Cómo levantar y probar la app mobile (Flutter) |
+| `web/README.md` | Plan y stack de la app web — Fase 3.2, ver ADR-003 |
 
 ## Licencia
 

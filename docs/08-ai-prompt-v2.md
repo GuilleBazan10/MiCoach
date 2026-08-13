@@ -16,16 +16,20 @@ adviertes riesgos. Pero una vez tomada una decisión (ver "DECISIONES TOMADAS"),
 re-abres sin una razón sólida.
 
 ## ESTADO DEL PROYECTO (LEER PRIMERO)
-- El repositorio ya existe. La FASE 0 está COMPLETADA (estructura, docker-compose,
-  .env.example, docs, ADRs, esqueletos backend/mobile).
+- El repositorio ya existe y tiene fases completadas — **NO asumas que empieza en la
+  Fase 0**. `docs/00-progress.md` es la ÚNICA fuente de verdad de en qué fase está el
+  proyecto (tabla "Estado general" al principio del archivo); este prompt describe el
+  PLAN completo de fases pero no se actualiza fase a fase.
 - Lee ANTES de escribir código: docs/00-progress.md, docs/01-architecture.md y
   docs/04-adr/. Respeta la estructura existente; NO la re-organicices.
-- Trabaja por fases según docs/00-progress.md (la siguiente es la FASE 1: base de datos).
+- Trabaja por fases según el orden de docs/00-progress.md, continuando desde la
+  primera fase marcada ⬜/🔄 en esa tabla (no desde la FASE 1).
 
 ## CONTEXTO DEL PROYECTO
 - Proyecto para un curso, NO comercial por ahora, pero debe poder escalar sin reescribir.
-- Plataforma multiplataforma (Android, iOS, Web) de salud y bienestar con IA que genera
-  planes PERSONALIZADOS de entrenamiento y alimentación.
+- Plataforma multiplataforma de salud y bienestar con IA que genera planes
+  PERSONALIZADOS de entrenamiento y alimentación. Dos frontends independientes contra
+  el mismo backend: mobile (Android/iOS, Flutter) y web (React) — ver ADR-003.
 - El perfil del usuario incluye: edad, sexo, peso, altura, IMC, objetivos, nivel de
   experiencia, patologías, lesiones, medicación, restricciones alimentarias, horarios,
   equipamiento, tiempo de entrenamiento e historial de progreso. La IA adapta
@@ -51,10 +55,16 @@ re-abres sin una razón sólida.
   NO usar Keycloak.
 - IA: LangChain4j + Ollama (local gratis) con Strategy Pattern para alternar proveedores
   (OpenAI, Claude, Gemini, Llama, Mistral, DeepSeek). Prompts versionados como recursos.
-- Frontend: Flutter, Feature First (Presentation/Application/Domain/Infrastructure),
-  Bloc + Riverpod, GoRouter, Freezed, Dio, Flutter Secure Storage, Firebase Messaging,
-  Responsive + Material 3 + Dark Mode + Accesibilidad + Offline First.
-  El tema está centralizado en mobile/lib/core/theme/ (no duplicar colores por feature).
+- Frontend mobile (Android/iOS, mobile-only): Flutter, Feature First
+  (Presentation/Application/Domain/Infrastructure), Riverpod (DI + estado; NO Bloc pese
+  a estar declarado en pubspec, ver mobile/README.md), GoRouter, Dio, Flutter Secure
+  Storage, Material 3 + Dark Mode. El tema está centralizado en mobile/lib/core/theme/
+  (no duplicar colores por feature).
+- Frontend web (Fase 3.2, ANTES de Fase 4): React + TypeScript + Vite (SPA, sin
+  Next.js), TanStack Query, React Router, Tailwind CSS + shadcn/ui, React Hook Form +
+  Zod, Axios con interceptor JWT/refresh. 100% responsive (mobile-first). Tema
+  centralizado en web/src/core/theme/. Paridad de funcionalidad completa con mobile.
+  Motivo de tener dos frontends separados (no Flutter Web): ADR-003.
 - DevOps: Docker Compose (dev), GitHub Actions (CI/CD), Nginx. Kubernetes solo se
   documenta, no se implementa en esta etapa.
 - Testing: JUnit 5, Mockito, Testcontainers; widget/unit/integration tests en Flutter.
@@ -71,7 +81,7 @@ KineticOs/
 │   ├── 01-architecture.md     # arquitectura + guía de renombrado
 │   ├── 02-database.md         # modelo BD (completar en Fase 1)
 │   ├── 03-api-contracts.md    # contratos (completar en Fase 2)
-│   ├── 04-adr/                # ADRs 001, 002
+│   ├── 04-adr/                # ADRs 001, 002, 003
 │   ├── 05-manuals/            # manuales (Fase 7)
 │   └── 08-ai-prompt-v2.md     # este prompt
 ├── backend/
@@ -79,9 +89,12 @@ KineticOs/
 │   ├── modules/{shared,auth,user,workout,nutrition,progress,notification,ai,admin}/
 │   └── app/                    # Spring Boot que compone los módulos
 │       └── src/main/resources/ (application.yml + db/migration/ para Flyway)
-├── mobile/
+├── mobile/                      # Flutter, MOBILE-ONLY (Android/iOS) — ver ADR-003
 │   ├── pubspec.yaml
 │   └── lib/ (core/theme/ centralizado + features/{auth,profile,workout,nutrition,progress}/)
+├── web/                         # React, Fase 3.2 — paridad completa con mobile
+│   ├── package.json  vite.config.ts  tailwind.config.ts
+│   └── src/ (core/theme/ centralizado + features/{auth,profile,workout,nutrition,progress}/)
 ├── infra/docker/ (nginx, minio, prometheus)  +  infra/k8s/ (solo plan)
 └── scripts/ (init-dev.ps1, init-dev.sh, seed-ai.sh)
 ```
@@ -112,8 +125,14 @@ FASE 2 — Backend módulo a módulo (UNO por entrega): shared → auth → user
   nutrition → progress → notification → admin → ai → app. Cada entrega: dominio, casos de
   uso, infraestructura, controllers, DTOs, eventos, validación, tests unitarios.
 
-FASE 3 — Frontend Flutter (core primero, luego UNA feature por entrega): core → auth →
-  profile → workout → nutrition → progress. Verificable: compila y navega con mock data.
+FASE 3.1 — Frontend Mobile Flutter (core primero, luego UNA feature por entrega):
+  core → auth → profile → workout → nutrition → progress. Contra la API real (no
+  mocks). Mobile-only: NO generar build web de Flutter (ver ADR-003).
+
+FASE 3.2 — Frontend Web React (mismo orden que 3.1, VA ANTES DE LA FASE 4): core →
+  auth → profile → workout → nutrition → progress. Paridad de funcionalidad completa
+  con mobile, 100% responsive, tema centralizado en web/src/core/theme/. Detalle del
+  stack y checklist de verificación en docs/00-progress.md § Fase 3.2.
 
 FASE 4 — Integración IA: LangChain4j, estrategias (Ollama de base), prompts versionados,
   chat, generación de rutinas/planes, sustituciones, ajuste de calorías.

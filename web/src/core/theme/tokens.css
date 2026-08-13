@@ -1,0 +1,102 @@
+/* =====================================================================
+   KineticOs — Tokens de diseño centralizados (paridad con
+   mobile/lib/core/theme/app_colors.dart).
+
+   >>> CAMBIA AQUÍ EL DISEÑO <<<
+   Paleta, tipografía y radios en un solo lugar. Los componentes de
+   src/components/ui/* (shadcn) y todas las pantallas consumen estas
+   variables vía las clases de Tailwind (bg-primary, text-foreground, etc.),
+   nunca colores hardcodeados.
+   ===================================================================== */
+
+:root {
+  --background: #fafafa; /* mobile: AppColors.light.background */
+  --foreground: #1c1b1f; /* mobile: AppColors.light.onSurface */
+
+  --card: #ffffff; /* mobile: AppColors.light.surface */
+  --card-foreground: #1c1b1f;
+  --popover: #ffffff;
+  --popover-foreground: #1c1b1f;
+
+  --primary: #4caf50; /* mobile: AppColors.light.primary — verde salud, cambiar acá */
+  --primary-foreground: #ffffff;
+
+  --secondary: #eef1ee;
+  --secondary-foreground: #1c1b1f;
+
+  --muted: #eef1ee;
+  --muted-foreground: #6b6f6b;
+
+  --accent: #00bfa5; /* mobile: AppColors.light.accent — turquesa (energía/hidratación) */
+  --accent-foreground: #ffffff;
+
+  --destructive: #b3261e; /* mobile: AppColors.light.error */
+  --destructive-foreground: #ffffff;
+
+  --border: #e2e5e2;
+  --input: #e2e5e2;
+  --ring: #4caf50;
+
+  --radius: 0.75rem;
+
+  /* Sidebar (sin uso todavía — admin no tiene pantalla, ver docs/00-progress.md) */
+  --sidebar: #ffffff;
+  --sidebar-foreground: #1c1b1f;
+  --sidebar-primary: #4caf50;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #eef1ee;
+  --sidebar-accent-foreground: #1c1b1f;
+  --sidebar-border: #e2e5e2;
+  --sidebar-ring: #4caf50;
+
+  /* Series de gráficos (progress/nutrition podrían usarlas a futuro) */
+  --chart-1: #4caf50;
+  --chart-2: #00bfa5;
+  --chart-3: #ffb300;
+  --chart-4: #5c6bc0;
+  --chart-5: #ef5350;
+}
+
+.dark {
+  --background: #121212; /* mobile: AppColors.dark.background */
+  --foreground: #e6e1e5; /* mobile: AppColors.dark.onSurface */
+
+  --card: #1e1e1e; /* mobile: AppColors.dark.surface */
+  --card-foreground: #e6e1e5;
+  --popover: #1e1e1e;
+  --popover-foreground: #e6e1e5;
+
+  --primary: #81c784; /* mobile: AppColors.dark.primary */
+  --primary-foreground: #00391f;
+
+  --secondary: #2a2a2a;
+  --secondary-foreground: #e6e1e5;
+
+  --muted: #2a2a2a;
+  --muted-foreground: #a1a5a1;
+
+  --accent: #00bfa5;
+  --accent-foreground: #00251f;
+
+  --destructive: #f2b8b5; /* mobile: AppColors.dark.error */
+  --destructive-foreground: #370907;
+
+  --border: rgba(255, 255, 255, 0.1);
+  --input: rgba(255, 255, 255, 0.15);
+  --ring: #81c784;
+
+  --sidebar: #1e1e1e;
+  --sidebar-foreground: #e6e1e5;
+  --sidebar-primary: #81c784;
+  --sidebar-primary-foreground: #00391f;
+  --sidebar-accent: #2a2a2a;
+  --sidebar-accent-foreground: #e6e1e5;
+  --sidebar-border: rgba(255, 255, 255, 0.1);
+  --sidebar-ring: #81c784;
+
+  --chart-1: #81c784;
+  --chart-2: #00bfa5;
+  --chart-3: #ffca28;
+  --chart-4: #7986cb;
+  --chart-5: #e57373;
+}

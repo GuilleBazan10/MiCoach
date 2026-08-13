@@ -252,8 +252,8 @@ Errores: `404 NOT_FOUND` (notificación/recordatorio de otro usuario), `400 VALI
 ## Módulo admin (implementado)
 
 Base path: `/api/v1/admin` (JWT requerido, **no** hay gate por `ROLE_ADMIN` todavía —
-ver nota en `docs/00-progress.md` § módulo admin). Gobernanza interna: sin frontend
-Flutter.
+ver nota en `docs/00-progress.md` § módulo admin). Gobernanza interna: sin pantalla
+propia en ningún frontend (ni mobile ni web).
 
 | Endpoint | Descripción |
 |---|---|

@@ -12,9 +12,9 @@ reescribir código.
 
 ```mermaid
 flowchart TB
-    subgraph Clients["Clientes"]
+    subgraph Clients["Clientes — dos frontends independientes, mismo backend"]
         M[Mobile App Flutter<br/>Android · iOS]
-        W[Web Flutter]
+        W[Web App React<br/>responsive, mismas features]
     end
 
     subgraph Backend["Backend — Monolito Modular (Java 21 + Spring Boot 3)"]
@@ -150,17 +150,43 @@ JWT corto + refresh token rotatorio, 2FA TOTP, OAuth2 (Google/Apple/Facebook), B
 AES para datos sensibles de salud, rate limiting (Redis), protección CSRF en web,
 auditoría de operaciones críticas, logs sin datos personales (pseudonimización).
 
-## 9. Frontend (Flutter)
+## 9. Frontend Mobile (Flutter)
+
+**Mobile-only** (Android/iOS) — la versión web NO es Flutter Web, es un frontend
+aparte en React (ver § 10 y ADR-003).
 
 Feature First: cada feature tiene `presentation/`, `application/`, `domain/`,
-`infrastructure/`. Estado con **Bloc**, inyección con **Riverpod**, navegación con
-**GoRouter** (guardas de auth y roles), red con **Dio**, storage seguro, Offline First,
-Material 3 + Dark Mode, accesibilidad.
+`infrastructure/`. Inyección y estado con **Riverpod** (providers +
+`Notifier`/`AsyncNotifier`; `flutter_bloc` queda declarado pero sin uso, ver
+`mobile/README.md` § Decisiones de arquitectura), navegación con **GoRouter** (guarda
+de autenticación reactiva a la sesión), red con **Dio** (interceptor de JWT + refresh
+automático), storage seguro (`flutter_secure_storage`), Material 3 + Dark Mode.
 
 El **tema es centralizado** en `mobile/lib/core/theme/` para poder re-diseñar sin tocar
-las features (ver abajo).
+las features.
 
-## 10. Renombrar el proyecto
+## 10. Frontend Web (React)
+
+Segundo frontend, **independiente del mobile**, contra el mismo backend REST — sin
+código compartido entre ambos (solo comparten el contrato de la API). Motivo de la
+separación y stack completo: **ADR-003**.
+
+- **React + TypeScript + Vite** (SPA). **TanStack Query** para fetching/cache/
+  invalidación (mismo rol que los providers de Riverpod en mobile). **React Router**
+  con guarda de autenticación. **Tailwind CSS + shadcn/ui** (DOM real, a diferencia de
+  Flutter Web). **React Hook Form + Zod** para formularios. **Axios** con interceptor
+  de JWT/refresh (mismo patrón que `ApiClient` en mobile).
+- **100% responsive** (mobile-first, un solo layout para teléfono y desktop — no un
+  sitio "m." separado).
+- Paridad de funcionalidad completa con mobile: mismo orden de features
+  (`core → auth → profile → workout → nutrition → progress`), `admin`/`ai` sin
+  pantalla propia (mismo criterio que mobile).
+- **Tema centralizado** en `web/src/core/theme/` (tokens de Tailwind + variables CSS),
+  igual criterio que `mobile/lib/core/theme/`: el diseño (colores, tipografía, nombre
+  del proyecto) va a cambiar, así que vive en un solo lugar.
+- Plan detallado y checklist de verificación: `docs/00-progress.md` § Fase 3.2.
+
+## 11. Renombrar el proyecto
 
 El nombre actual es **KineticOs** (paquete `com.kineticos`). Para cambiarlo:
 
@@ -170,11 +196,16 @@ El nombre actual es **KineticOs** (paquete `com.kineticos`). Para cambiarlo:
    `backend/modules/*` (todavía no hay código, es rápido).
 3. `backend/app/src/main/resources/application.yml` → `spring.application.name`.
 
-**Frontend (Flutter):**
+**Frontend Mobile (Flutter):**
 1. `mobile/pubspec.yaml` → `name:` y `description:`.
 2. `mobile/lib/` → paquete import (ej: `package:kineticos_mobile/...`).
 3. Tras `flutter create . --org com.kineticos --project-name <nuevo>`, los archivos
-   android/ios/web se generan con el nuevo nombre.
+   android/ios se regeneran con el nuevo nombre (ya no incluye `web/`, ver ADR-003).
+
+**Frontend Web (React) — cuando exista (Fase 3.2):**
+1. `web/package.json` → `name`.
+2. `web/index.html` → `<title>`.
+3. `web/src/core/theme/` → colores/tipografía (mismo punto único que en mobile).
 
 **Infraestructura:**
 1. `docker-compose.yml` y `docker-compose.full.yml` → `name:` y nombres de servicio.
@@ -185,8 +216,10 @@ El nombre actual es **KineticOs** (paquete `com.kineticos`). Para cambiarlo:
 > Si el nuevo nombre cambia también el paquete Java (ej: `com.miempresa.app`), actualiza
 > también `--org` en el comando `flutter create` y el `groupId` de Gradle.
 
-## 11. Proyectos de documentación relacionados
+## 12. Proyectos de documentación relacionados
 
 - `docs/02-database.md` — modelo de datos (Fase 1).
-- `docs/03-api-contracts.md` — contratos REST/eventos (Fase 2).
-- `docs/04-adr/` — decisiones de arquitectura.
+- `docs/03-api-contracts.md` — contratos REST/eventos (Fase 2, sirve tanto a mobile
+  como a la web — el contrato es el mismo para los dos frontends).
+- `docs/04-adr/` — decisiones de arquitectura (ver especialmente **ADR-003** para la
+  separación mobile/web).

@@ -26,7 +26,8 @@ un "porqué" defendible.
 | Métricas | Prometheus + Grafana | Par estándar open-source |
 | Auth | Propia (Spring Security + JWT + OAuth2 client) | Curso: demuestra el conocimiento; Keycloak añade un servidor más sin necesidad |
 | IA | LangChain4j + Ollama | LangChain4j = mejor soporte de múltiples proveedores en Java; Ollama = modelos locales gratis |
-| Frontend | Flutter (Bloc/Riverpod/GoRouter/Freezed/Dio) | Multiplataforma (Android/iOS/Web) con un solo código, tematizable |
+| Frontend mobile | Flutter (Riverpod/GoRouter/Dio), mobile-only | Un solo código para Android/iOS, tematizable. Ya NO cubre web — ver ADR-003 |
+| Frontend web | React + TypeScript + Vite (TanStack Query, React Router, Tailwind/shadcn) | DOM real (testeable/accesible), ecosistema maduro. Detalle y motivo completo en ADR-003 |
 | Push | Firebase Messaging | Tier gratuito estándar para móvil |
 | Infra | Docker Compose (+ K8s documentado) | Local sin fricción; K8s se documenta, no se implementa aún (justificación: complejidad sin necesidad) |
 | CI/CD | GitHub Actions | Gratuito, nativo GitHub |

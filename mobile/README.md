@@ -2,10 +2,12 @@
 
 ## Estado
 
-**Fase 3 en curso.** Implementado: `core` (tema, router con guarda de auth, cliente HTTP,
-storage seguro), `auth` (login/registro), `profile` (perfil de salud completo) y
-`workout` (catálogo, rutinas, sesiones de entrenamiento). Pendiente: `nutrition` y
-`progress` (esperan a que existan sus módulos backend).
+**Fase 3 completa.** Implementado: `core` (tema, router con guarda de auth, cliente
+HTTP, storage seguro), `auth` (login/registro), `profile` (perfil de salud completo),
+`workout` (catálogo, rutinas, sesiones de entrenamiento), `nutrition` (recetas, planes
+de alimentación, diario alimentario, listas de compra) y `progress` (métricas de
+seguimiento, fotos de progreso). `admin` y `ai` no tienen pantalla propia — son
+gobernanza interna y base técnica sin UI de usuario final (deliberado, no pendiente).
 
 Las carpetas de plataforma (`android/`, `web/`, `linux/`) ya están generadas.
 
@@ -69,8 +71,21 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8081/api/v1
    "Registrar ejercicio" (elegí uno del catálogo, cargá series/peso/reps/RPE) →
    "Completar sesión" (con duración en minutos y notas).
 5. **Historial**: pestaña "Rutinas" → "Historial" → la sesión completada debería listarse.
-6. **Logout**: ícono de salida en el AppBar de "Perfil" → debería volver a la pantalla de
-   login.
+6. **Plan de alimentación**: pestaña "Nutrición" → "Planes" → botón `+` → nombre, fechas →
+   "Agregar día" → dentro del día, "Agregar comida" (buscá una receta, ej. "Avena") →
+   elegí tipo de comida y porciones → "Crear plan".
+7. **Diario**: pestaña "Nutrición" → "Diario" → "Registrar comida" → elegí una receta
+   (las macros se auto-completan según porciones, editables) → "Registrar". Debería
+   sumarse al total del día.
+8. **Lista de compras**: pestaña "Nutrición" → "Compras" → `+` para crear una lista →
+   entrá y agregá ítems → tocá el checkbox para marcarlos comprados.
+9. **Métricas de progreso**: pestaña "Progreso" → "Métricas" → `+` → elegí una métrica
+   (ej. Peso) → cargá valor y unidad (se auto-completa) → "Registrar". Probá filtrar
+   con los chips de arriba.
+10. **Fotos de progreso**: pestaña "Progreso" → "Fotos" → botón de cámara → pegá una
+    URL de imagen pública (ej. `https://picsum.photos/400`) → elegí ángulo → "Agregar".
+11. **Logout**: ícono de salida en el AppBar de "Perfil" → debería volver a la pantalla
+    de login.
 
 Si algo falla, revisá la consola del navegador (F12) y que el backend esté corriendo en
 el puerto que espera `API_BASE_URL` (por defecto `http://localhost:8081/api/v1`).
@@ -98,8 +113,8 @@ mobile/lib/
     ├── auth/       # login, registro, sesión
     ├── profile/    # perfil de salud + objetivos/patologías/lesiones/medicación
     ├── workout/    # catálogo, rutinas, sesiones de entrenamiento
-    ├── nutrition/  # (pendiente — sin módulo backend aún)
-    └── progress/   # (pendiente — sin módulo backend aún)
+    ├── nutrition/  # recetas, planes de alimentación, diario, listas de compra
+    └── progress/   # métricas de seguimiento (peso, medidas...) + fotos de progreso
     # cada feature: domain/ application/ infrastructure/ presentation/
 ```
 

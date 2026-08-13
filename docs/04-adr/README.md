@@ -9,6 +9,7 @@ la **decisión** y las **consecuencias**. Se numera secuencialmente.
 |---|---|---|
 | [ADR-001](ADR-001-monolito-modular.md) | Monolito modular (no microservicios) | Aceptada |
 | [ADR-002](ADR-002-stack-tecnologico.md) | Stack tecnológico completo | Aceptada |
+| [ADR-003](ADR-003-frontend-web-react.md) | Frontend web separado en React (Flutter queda mobile-only) | Aceptada |
 
 ## Convención
 

@@ -8,7 +8,12 @@ import '../../features/auth/application/auth_providers.dart';
 import '../../features/auth/application/auth_state.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/register_screen.dart';
+import '../../features/nutrition/presentation/meal_plan_detail_screen.dart';
+import '../../features/nutrition/presentation/meal_plan_form_screen.dart';
+import '../../features/nutrition/presentation/nutrition_home_screen.dart';
+import '../../features/nutrition/presentation/shopping_list_detail_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/progress/presentation/progress_home_screen.dart';
 import '../../features/workout/presentation/session_screen.dart';
 import '../../features/workout/presentation/workout_detail_screen.dart';
 import '../../features/workout/presentation/workout_form_screen.dart';
@@ -47,6 +52,8 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, child) => AppShell(child: child),
         routes: [
           GoRoute(path: '/workouts', builder: (context, state) => const WorkoutHomeScreen()),
+          GoRoute(path: '/nutrition', builder: (context, state) => const NutritionHomeScreen()),
+          GoRoute(path: '/progress', builder: (context, state) => const ProgressHomeScreen()),
           GoRoute(path: '/profile', builder: (context, state) => const ProfileScreen()),
         ],
       ),
@@ -62,6 +69,20 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/sessions/:id',
         builder: (context, state) => SessionScreen(sessionId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(path: '/nutrition/plans/new', builder: (context, state) => const MealPlanFormScreen()),
+      GoRoute(
+        path: '/nutrition/plans/:id',
+        builder: (context, state) => MealPlanDetailScreen(mealPlanId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/nutrition/plans/:id/edit',
+        builder: (context, state) => MealPlanFormScreen(mealPlanId: int.parse(state.pathParameters['id']!)),
+      ),
+      GoRoute(
+        path: '/nutrition/shopping-lists/:id',
+        builder: (context, state) =>
+            ShoppingListDetailScreen(shoppingListId: int.parse(state.pathParameters['id']!)),
       ),
     ],
   );
