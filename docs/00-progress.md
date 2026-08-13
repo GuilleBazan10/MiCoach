@@ -10,7 +10,7 @@
 |---|---|---|
 | 0 | Cimientos (estructura, infra, docs base) | ✅ COMPLETADA |
 | 1 | Modelo de base de datos + migraciones Flyway | ✅ COMPLETADA |
-| 2 | Backend módulo a módulo (Java/Spring) | 🔄 EN CURSO (shared ✅, auth ✅, user ✅, workout ✅, restantes pendientes) |
+| 2 | Backend módulo a módulo (Java/Spring) | ✅ COMPLETADA (shared, auth, user, workout, nutrition, progress, notification, admin, ai) |
 | 3 | Frontend Flutter | 🔄 EN CURSO (core ✅, auth ✅, profile ✅, workout ✅; nutrition/progress pendientes — sin módulo backend aún) |
 | 4 | Integración IA (LangChain4j + Ollama) | ⬜ Pendiente |
 | 5 | Testing completo | ⬜ Pendiente |
@@ -164,9 +164,155 @@ tests unitarios. La `app` compone y arranca todos los módulos.
   `day_index`. Solución: `workoutDayRepository.flush()` explícito tras el delete, en
   `WorkoutRepositoryAdapter.saveWorkout`.
 
-### Siguiente entrega
-- Módulo `nutrition` (ingredientes, recetas, planes de comida, sustituciones).
-  Orden en `docs/00-progress.md` Fase 2: `shared → auth → user → workout → nutrition → ...`.
+### Entrega completada (2026-08-12)
+
+- [x] **Módulo `nutrition`** (ingredientes, recetas, planes de comida, diario alimentario,
+      sustituciones, listas de compra) — el módulo backend más grande hasta ahora (10 tablas):
+  - Hexagonal: dominio (`Ingredient`, `Recipe` + `RecipeIngredient` embebido; agregado
+    `MealPlan` con `MealPlanDay`/`MealPlanMeal`; `Substitution`; `DailyIntakeEntry`;
+    agregado `ShoppingList` con `ShoppingListItem`) + puertos (`NutritionUseCase`,
+    `NutritionRepository`) + adaptador JPA de las 10 tablas + `NutritionMappers`.
+  - `NutritionService`: catálogo de solo lectura (ingredientes/recetas con filtro en
+    memoria, mismo criterio que `workout` por ser catálogos chicos), CRUD de planes de
+    alimentación propios (estrategia "replace" en días/comidas, igual que rutinas —
+    aplicado el `flush()` preventivo del fix de `workout` desde el principio, sin
+    reproducir el bug), diario alimentario (log/list/delete) y listas de compra con
+    ítems (CRUD + marcar comprado).
+  - `NutritionController` en `/api/v1/nutrition` (JWT): ver `docs/03-api-contracts.md`.
+
+### Verificación (2026-08-12)
+
+- `cd backend && ./gradlew build` → BUILD SUCCESSFUL.
+- Módulo nutrition (curl): `GET /ingredients?category=proteins` y
+  `GET /recipes?mealCategory=breakfast` 200 con seed de V6 (nombres de ingredientes
+  resueltos dentro de cada receta) → `POST /meal-plans` 201 (plan con 1 día y 1 comida)
+  → `PUT` 200 (renombra y reemplaza días, sin el bug de flush que sí apareció en
+  `workout`) → `POST /intake` 201 → `GET /intake?date=...` 200 → `DELETE` 204 →
+  `POST /shopping-lists` 201 → `POST .../items` 201 → `PUT .../items/{id}` 200 (marca
+  comprado) → `DELETE /meal-plans/{id}` 204 → sin token 401.
+
+### Entrega completada (2026-08-12)
+
+- [x] **Módulo `progress`** (métricas de seguimiento + fotos de progreso, 2 tablas) —
+      el módulo más chico hasta ahora, mismo patrón simple de sub-recurso que
+      `user` (goals/pathologies/...): dominio (`ProgressEntry`, `ProgressPhoto`) +
+      puertos (`ProgressUseCase`, `ProgressRepository`) + adaptador JPA + mappers.
+      `ProgressController` en `/api/v1/progress`: `/entries` (GET con filtro opcional
+      `metricType`, POST, DELETE) y `/photos` (GET, POST, DELETE). Sin agregados ni
+      estrategia "replace" — cada registro es independiente, como en `user`.
+
+### Verificación (2026-08-12)
+
+- `cd backend && ./gradlew build` → BUILD SUCCESSFUL.
+- Módulo progress (curl): `POST /entries` 201 (weight, luego body_fat) →
+  `GET /entries` 200 (2 registros) → `GET /entries?metricType=weight` 200 (filtrado) →
+  `DELETE` 204 → `POST /photos` 201 → `GET /photos` 200 → `DELETE` 204 →
+  validación 400 (`metricType` vacío) → sin token 401.
+
+### Entrega completada (2026-08-12)
+
+- [x] **Módulo `notification`** (avisos, recordatorios, preferencias, 3 tablas):
+  - Dominio: `Notification` (con `data` JSONB → `Map<String,Object>`, transición de
+    estado `markRead()`), `Reminder` (con `scheduleConfig` JSONB, editable), `Preference`
+    (upsert por clave lógica `userId+eventType+channel`).
+  - `NotificationController` en `/api/v1/notifications`: notificaciones (GET con filtro
+    `status`, POST, `PUT /{id}/read`, DELETE), `/reminders` (GET, POST, PUT, DELETE),
+    `/preferences` (GET, `PUT` que crea o actualiza según exista la clave).
+  - Nota de alcance: no hay integración real de envío (push/email) todavía — eso es
+    Fase 4/infra (FCM, RabbitMQ). Este módulo deja la persistencia y la API lista para
+    que otro proceso (o la Fase 4 de IA) las use.
+
+### Verificación (2026-08-12)
+
+- `cd backend && ./gradlew build` → BUILD SUCCESSFUL.
+- Módulo notification (curl): `POST /notifications` 201 → `GET` 200 →
+  `PUT /{id}/read` 200 (status pending → read) → `GET ?status=read` 200 (filtrado) →
+  `DELETE` 204 → `POST /reminders` 201 (con `scheduleConfig` JSONB) →
+  `PUT /reminders/{id}` 200 (deshabilita) → `DELETE` 204 →
+  `PUT /preferences` 200 dos veces con la misma clave (mismo `id`, confirma upsert
+  real y no duplicado) → sin token 401.
+
+### Entrega completada (2026-08-12)
+
+- [x] **Módulo `admin`** (roles, permisos, asignaciones, auditoría, 5 tablas) — sin
+      frontend Flutter (es gobernanza interna, no una pantalla de usuario final):
+  - Dominio: `Role` (con `permissionCodes` resueltos), `Permission`, `UserRole`
+    (asignación con datos del rol resueltos), `AuditLogEntry` (solo lectura por ahora).
+  - `AdminController` en `/api/v1/admin`: `/roles` (GET, POST, DELETE — bloquea borrar
+    roles `is_system`), `/permissions` (GET, POST), `/roles/{id}/permissions/{id}`
+    (POST/DELETE para asignar/desasignar), `/users/{id}/roles` (GET) y
+    `/users/{id}/roles/{id}` (POST/DELETE), `/audit-logs` (GET con filtros
+    `userId`/`entityType`).
+  - **⚠️ Gap conocido, no cerrado en esta entrega**: los endpoints de `admin` están
+    protegidos solo con JWT (como el resto de la API), **no** con `ROLE_ADMIN`. La
+    razón: `AuthService.DEFAULT_ROLES` está hardcodeado a `["ROLE_USER"]` — el login
+    nunca consulta `admin_user_roles`, así que ningún usuario puede obtener
+    `ROLE_ADMIN` en su JWT todavía. Agregar el gate (`hasRole("ADMIN")` en
+    `SecurityConfig`) sin resolver esto dejaría el módulo completo inaccesible sin
+    forma de probarlo. Cerrar este gap requiere decidir cómo `auth` resuelve roles al
+    loguear (consultar `admin_user_roles` ahí, o mover esa resolución a `app`) —
+    decisión de arquitectura pendiente para quien continúe, no tomada unilateralmente.
+  - **Bug real encontrado y corregido**: `POST /admin/roles` y `POST /admin/permissions`
+    fallaban con `duplicate key value violates unique constraint` (500). Causa: `V6`
+    sembró `admin_roles`/`admin_permissions` (y también `workout_muscles`,
+    `workout_exercises`, `nutrition_allergens`, `nutrition_diets`,
+    `nutrition_ingredients`, `nutrition_recipes`) con **id explícito**, sin sincronizar
+    la secuencia `SERIAL` de Postgres — el próximo insert por `IDENTITY` reintentaba
+    `id=1`. No se había detectado antes porque ninguna de esas tablas tenía un
+    create-endpoint hasta `admin`. Fix: `V7__fix_catalog_sequences.sql` (nueva
+    migración, no se tocó V6 ya aplicada) con `setval(pg_get_serial_sequence(...), MAX(id))`
+    para las 8 tablas afectadas.
+
+### Verificación (2026-08-12)
+
+- `cd backend && ./gradlew build` → BUILD SUCCESSFUL.
+- Módulo admin (curl): `GET /roles`/`GET /permissions` 200 (seed de V6 con
+  `permissionCodes` resueltos) → `POST /roles` y `POST /permissions` **500 al
+  principio** (bug de secuencia, ver arriba) → aplicado `V7`, reiniciado el backend →
+  reintentado: 201 en ambos → asignar/desasignar permiso a rol 204 → asignar/desasignar
+  rol a usuario 204 → `DELETE` sobre rol `is_system` 409 → `DELETE` sobre rol propio
+  204 → sin token 401. Regresión: `GET /workouts/exercises` sigue en 200 (la
+  migración V7 no rompió nada de `workout`/`nutrition`).
+
+### Entrega completada (2026-08-12) — cierra la Fase 2
+
+- [x] **Módulo `ai`** (base técnica: prompts versionados, conversaciones y auditoría
+      de generación, 4 tablas). **Sin integración real con LangChain4j/Ollama** — eso
+      es la Fase 4 completa; acá solo queda lista la persistencia y la API:
+  - Dominio: `Prompt` (versionado por `slug`, `setActive()`), agregado `Conversation`
+    con `ChatMessage`, `GenerationLog` (solo lectura, nada escribe ahí todavía porque
+    no hay generación real que auditar).
+  - `AiController` en `/api/v1/ai`: `/prompts` (GET con filtros `slug`/`activeOnly`,
+    POST — la versión se autoincrementa por `slug`, no se pasa a mano —,
+    `PUT /{id}/active` para activar/desactivar una versión), `/conversations` (GET,
+    GET por id con mensajes, POST, `PUT /{id}/archive`,
+    `POST /{id}/messages` para loguear un mensaje), `/generation-logs` (GET con
+    filtros `userId`/`promptSlug`).
+  - Con este módulo se cierra la **Fase 2 completa**: los 9 módulos backend
+    (`shared`, `auth`, `user`, `workout`, `nutrition`, `progress`, `notification`,
+    `admin`, `ai`) están implementados, compilando juntos y verificados contra
+    Postgres real.
+
+### Verificación (2026-08-12)
+
+- `cd backend && ./gradlew build` → BUILD SUCCESSFUL (los 9 módulos + `app`).
+- Módulo ai (curl): `POST /prompts` 201 dos veces con el mismo `slug`
+  (`workout_generator`) → confirma versión 1 y 2 autoincrementadas → `GET ?slug=`
+  200 (2 versiones, v2 primero) → `PUT /{id}/active` 200 (desactiva v2) →
+  `GET ?slug=&activeOnly=true` 200 (solo v1) → `POST /conversations` 201 →
+  `POST .../messages` 201 dos veces (user + assistant, con `tokenUsage` JSONB) →
+  `GET /conversations/{id}` 200 (trae los 2 mensajes) → `PUT .../archive` 200 →
+  `GET /generation-logs` 200 (vacío, nada escribe ahí todavía) → sin token 401.
+
+### Pendientes conocidos de la Fase 2 (no bloquean, documentados para continuar)
+- **RBAC de `admin` sin cerrar**: ver nota en la entrega del módulo `admin` — ningún
+  usuario puede tener `ROLE_ADMIN` en su JWT todavía porque `AuthService` no consulta
+  `admin_user_roles` al loguear.
+- **`ai_generation_logs` sin escritores**: quedará vacío hasta que algún módulo
+  (probablemente `workout`/`nutrition` en Fase 4, al generar contenido con IA de
+  verdad) empiece a loguear ahí.
+- **`admin_audit_logs` sin escritores**: mismo caso — ningún módulo audita
+  operaciones críticas todavía.
 
 ## Fase 3 — Frontend (EN CURSO)
 

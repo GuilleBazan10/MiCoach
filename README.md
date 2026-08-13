@@ -3,11 +3,13 @@
 Plataforma de salud y bienestar impulsada por IA: planes personalizados de entrenamiento
 y alimentación, adaptados al perfil completo de cada usuario.
 
-> **Estado actual — FASE 3 (frontend, en curso).** Backend: `shared`, `auth`, `user`,
-> `workout` implementados. Frontend: `core`, `auth`, `profile`, `workout` implementados
-> y corriendo contra la API real. Este README se ampliará en la Fase 7 con el manual
-> completo y la justificación detallada de cada herramienta. Para el estado detallado,
-> lee `docs/00-progress.md`; para el contexto técnico, `docs/01-architecture.md` y
+> **Estado actual — FASE 3 (frontend, en curso).** Backend: **Fase 2 completa**, los 9
+> módulos (`shared`, `auth`, `user`, `workout`, `nutrition`, `progress`, `notification`,
+> `admin`, `ai`) implementados y verificados. Frontend: `core`, `auth`, `profile`,
+> `workout` implementados y corriendo contra la API real; faltan `nutrition` y
+> `progress`. Este README se ampliará en la Fase 7 con el manual completo y la
+> justificación detallada de cada herramienta. Para el estado detallado, lee
+> `docs/00-progress.md`; para el contexto técnico, `docs/01-architecture.md` y
 > `docs/04-adr/`.
 
 ---

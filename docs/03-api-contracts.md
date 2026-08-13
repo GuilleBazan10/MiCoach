@@ -1,8 +1,8 @@
 # KineticOs — Contratos de API
 
-> **Estado: FASE 2 (en curso).** Documento vivo: se completa a medida que se implementan
-> los módulos. Implementado hasta ahora: **auth**, **user** (2026-08-11), **workout**
-> (2026-08-12).
+> **Estado: FASE 2 COMPLETADA.** Los 9 módulos backend (`shared`, **auth**, **user**
+> (2026-08-11), **workout**, **nutrition**, **progress**, **notification**, **admin**,
+> **ai** (2026-08-12)) están implementados y documentados acá.
 
 ## Convenciones ya definidas
 
@@ -147,6 +147,151 @@ igual que el resto de la API salvo auth).
 | `POST /workouts/sessions/{sessionId}/exercises` | Registra la ejecución real de un ejercicio (`201`). |
 
 Errores comunes: `404 NOT_FOUND` (rutina/ejercicio/sesión inexistente o de otro usuario),
+`400 VALIDATION_ERROR`, `401 UNAUTHORIZED` sin JWT.
+
+## Módulo nutrition (implementado)
+
+Base path: `/api/v1/nutrition` (todos los endpoints requieren `Authorization: Bearer <JWT>`).
+
+### Catálogo (lectura)
+
+| Endpoint | Descripción |
+|---|---|
+| `GET /nutrition/ingredients` | Catálogo de ingredientes. Query params: `category`, `search`. |
+| `GET /nutrition/ingredients/{ingredientId}` | Detalle de un ingrediente. |
+| `GET /nutrition/ingredients/{ingredientId}/substitutions` | Sustitutos sugeridos para ese ingrediente (por alergia/intolerancia/preferencia). |
+| `GET /nutrition/recipes` | Catálogo de recetas. Query params: `mealCategory`, `difficulty`, `search`. |
+| `GET /nutrition/recipes/{recipeId}` | Detalle de una receta con sus ingredientes (nombre resuelto, no solo el id). |
+
+### Planes de alimentación
+
+| Endpoint | Descripción |
+|---|---|
+| `GET /nutrition/meal-plans` | Planes propios del usuario. |
+| `GET /nutrition/meal-plans/{mealPlanId}` | Plan con sus días y comidas. `404` si no es propio. |
+| `POST /nutrition/meal-plans` | Crea un plan con días/comidas anidados. `201`. |
+| `PUT /nutrition/meal-plans/{mealPlanId}` | Reemplaza datos y **todos** los días/comidas (estrategia replace, igual que rutinas). `200`. |
+| `DELETE /nutrition/meal-plans/{mealPlanId}` | Borra el plan (cascada a días y comidas). `204`. |
+
+```json
+// POST /api/v1/nutrition/meal-plans (request)
+{
+  "name": "Plan de la semana", "startDate": "2026-08-17", "endDate": "2026-08-23",
+  "targetCalories": 2200,
+  "days": [
+    {"planDate": "2026-08-17", "meals": [
+      {"recipeId": 1, "mealType": "breakfast", "orderIndex": 1, "servings": 1}
+    ]}
+  ]
+}
+```
+
+### Diario alimentario
+
+| Endpoint | Descripción |
+|---|---|
+| `GET /nutrition/intake?date=YYYY-MM-DD` | Registros del día (sin `date`, devuelve todo el historial del usuario). |
+| `POST /nutrition/intake` | Registra qué comió (`recipeId` y/o macros manuales). `201`. |
+| `DELETE /nutrition/intake/{intakeId}` | Borra un registro. `204`. |
+
+### Listas de compra
+
+| Endpoint | Descripción |
+|---|---|
+| `GET /nutrition/shopping-lists` | Listas del usuario. |
+| `GET /nutrition/shopping-lists/{shoppingListId}` | Lista con sus ítems. |
+| `POST /nutrition/shopping-lists` | Crea una lista vacía (`name`, `weekStart` opcionales). `201`. |
+| `DELETE /nutrition/shopping-lists/{shoppingListId}` | Borra la lista (cascada a ítems). `204`. |
+| `POST /nutrition/shopping-lists/{shoppingListId}/items` | Agrega un ítem (`ingredientId` del catálogo o `itemName` libre). `201`. |
+| `PUT /nutrition/shopping-lists/{shoppingListId}/items/{itemId}` | Marca/desmarca comprado (`{"checked": true}`). |
+| `DELETE /nutrition/shopping-lists/{shoppingListId}/items/{itemId}` | Borra el ítem. `204`. |
+
+Errores comunes: `404 NOT_FOUND` (plan/lista/ítem inexistente o de otro usuario),
+`400 VALIDATION_ERROR`, `401 UNAUTHORIZED` sin JWT.
+
+## Módulo progress (implementado)
+
+Base path: `/api/v1/progress` (todos los endpoints requieren `Authorization: Bearer <JWT>`).
+Mismo patrón simple que los sub-recursos de `user` (sin agregados): cada registro es
+independiente.
+
+| Endpoint | Descripción |
+|---|---|
+| `GET /progress/entries` | Métricas del usuario, más recientes primero. Query param opcional `metricType` (weight, bmi, body_fat, waist, chest, arm, hip, thigh, neck, calf, water_percent, muscle_mass, bone_mass, visceral_fat, resting_hr). |
+| `POST /progress/entries` | Registra una métrica (`metricType`, `value`, `unit`, `measuredAt` opcional → default ahora). `201`. |
+| `DELETE /progress/entries/{entryId}` | Borra un registro. `204`. |
+| `GET /progress/photos` | Fotos de progreso, más recientes primero. |
+| `POST /progress/photos` | Registra una foto (`photoUrl`, `angle` opcional: front/side/back). `201`. |
+| `DELETE /progress/photos/{photoId}` | Borra una foto. `204`. |
+
+Errores: `404 NOT_FOUND` (registro/foto de otro usuario), `400 VALIDATION_ERROR`,
+`401 UNAUTHORIZED` sin JWT.
+
+## Módulo notification (implementado)
+
+Base path: `/api/v1/notifications` (todos los endpoints requieren `Authorization: Bearer <JWT>`).
+Solo persistencia + API; el envío real (push/email) llega con la infraestructura de
+Fase 4/6 (FCM, RabbitMQ).
+
+| Endpoint | Descripción |
+|---|---|
+| `GET /notifications` | Notificaciones del usuario. Query param opcional `status` (pending, sent, delivered, failed, read). |
+| `POST /notifications` | Crea una notificación (`type`, `title`, `body`, `data` JSON libre, `channel`: push/email/in_app, `scheduledAt` opcional). `201`, `status: pending`. |
+| `PUT /notifications/{notificationId}/read` | Marca como leída (`status: read`, setea `readAt`). |
+| `DELETE /notifications/{notificationId}` | Borra la notificación. `204`. |
+| `GET /notifications/reminders` | Recordatorios recurrentes del usuario. |
+| `POST /notifications/reminders` | Crea un recordatorio (`reminderType`: workout/meal/water/medication/measurement/weekly_report, `scheduleCron` y/o `scheduleConfig` JSON libre, `enabled`). `201`. |
+| `PUT /notifications/reminders/{reminderId}` | Reemplaza el recordatorio (incl. `enabled` para pausarlo). |
+| `DELETE /notifications/reminders/{reminderId}` | Borra el recordatorio. `204`. |
+| `GET /notifications/preferences` | Preferencias de notificación del usuario (alta/baja por evento+canal). |
+| `PUT /notifications/preferences` | Crea o actualiza una preferencia (`eventType`, `channel`, `enabled`) — upsert por esa clave, no duplica filas. |
+
+Errores: `404 NOT_FOUND` (notificación/recordatorio de otro usuario), `400 VALIDATION_ERROR`,
+`401 UNAUTHORIZED` sin JWT.
+
+## Módulo admin (implementado)
+
+Base path: `/api/v1/admin` (JWT requerido, **no** hay gate por `ROLE_ADMIN` todavía —
+ver nota en `docs/00-progress.md` § módulo admin). Gobernanza interna: sin frontend
+Flutter.
+
+| Endpoint | Descripción |
+|---|---|
+| `GET /admin/roles` | Roles con sus `permissionCodes` resueltos. |
+| `POST /admin/roles` | Crea un rol custom (`code`, `name`, `description`). `201`. |
+| `DELETE /admin/roles/{roleId}` | Borra el rol. `409 CONFLICT` si es un rol del sistema (`is_system=true`, ej. ROLE_USER). |
+| `GET /admin/permissions` | Catálogo de permisos. |
+| `POST /admin/permissions` | Crea un permiso (`code`, `name`, `description`). `201`. |
+| `POST /admin/roles/{roleId}/permissions/{permissionId}` | Asigna el permiso al rol. `204`. |
+| `DELETE /admin/roles/{roleId}/permissions/{permissionId}` | Desasigna. `204`. |
+| `GET /admin/users/{userId}/roles` | Roles asignados a un usuario. |
+| `POST /admin/users/{userId}/roles/{roleId}` | Asigna el rol al usuario. `204`. |
+| `DELETE /admin/users/{userId}/roles/{roleId}` | Desasigna. `204`. |
+| `GET /admin/audit-logs` | Auditoría, filtros opcionales `userId`/`entityType`. Solo lectura: nada escribe todavía (ningún módulo audita operaciones críticas aún). |
+
+Errores: `404 NOT_FOUND` (rol/permiso inexistente), `409 CONFLICT` (borrar rol del
+sistema), `401 UNAUTHORIZED` sin JWT.
+
+## Módulo ai (implementado — base técnica, sin proveedor real todavía)
+
+Base path: `/api/v1/ai` (JWT requerido). **No hay integración real con LangChain4j ni
+Ollama en esta fase** — eso es la Fase 4 completa. Acá solo vive la persistencia y la
+API para prompts versionados, historial de chat y auditoría de generación.
+
+| Endpoint | Descripción |
+|---|---|
+| `GET /ai/prompts` | Prompts. Query params opcionales `slug`, `activeOnly`. |
+| `GET /ai/prompts/{promptId}` | Detalle de un prompt. |
+| `POST /ai/prompts` | Crea una nueva versión de un prompt (`slug`, `content`, `provider`/`model` opcionales — default `ollama`/`llama3.2`, `params` JSON libre). La versión **se autoincrementa** por `slug`, no se pasa en el body. `201`, queda activo. |
+| `PUT /ai/prompts/{promptId}/active` | Activa/desactiva esa versión (`{"active": true|false}`). |
+| `GET /ai/conversations` | Conversaciones del usuario (con sus mensajes). Query param opcional `topic`. |
+| `GET /ai/conversations/{conversationId}` | Detalle con mensajes. |
+| `POST /ai/conversations` | Crea una conversación (`topic` opcional: nutrition/workout/general). `201`. |
+| `PUT /ai/conversations/{conversationId}/archive` | Marca la conversación como archivada. |
+| `POST /ai/conversations/{conversationId}/messages` | Agrega un mensaje (`role`: user/assistant/system/tool, `content`, `provider`/`model`/`tokenUsage` opcionales). `201`. |
+| `GET /ai/generation-logs` | Auditoría de generaciones. Filtros opcionales `userId`/`promptSlug`. Solo lectura: vacío hasta que algún módulo genere contenido con IA de verdad. |
+
+Errores: `404 NOT_FOUND` (prompt/conversación inexistente o de otro usuario),
 `400 VALIDATION_ERROR`, `401 UNAUTHORIZED` sin JWT.
 
 ## Eventos de dominio (borrador inicial)
