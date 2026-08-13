@@ -42,6 +42,7 @@ web/*.local
 .vscode/
 !.vscode/extensions.json
 !.vscode/settings.json
+.claude/
 
 # ===== OS =====
 .DS_Store
