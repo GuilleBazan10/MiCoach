@@ -13,6 +13,7 @@ public enum ErrorCode {
     INVALID_TOKEN,
     TOKEN_EXPIRED,
     UNAUTHORIZED,
+    FORBIDDEN,
     NOT_FOUND,
     CONFLICT,
     INTERNAL_ERROR

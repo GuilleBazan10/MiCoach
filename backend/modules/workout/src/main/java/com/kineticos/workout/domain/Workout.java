@@ -52,6 +52,13 @@ public class Workout {
                 false, false, "active", days, now, now);
     }
 
+    public static Workout createAiGenerated(Long userId, String name, String description, String objective,
+                                            String level, Integer durationWeeks, List<WorkoutDay> days) {
+        Instant now = Instant.now();
+        return new Workout(null, userId, name, description, objective, level, durationWeeks,
+                false, true, "active", days, now, now);
+    }
+
     public static Workout restore(Long id, Long userId, String name, String description,
                                   String objective, String level, Integer durationWeeks,
                                   boolean template, boolean aiGenerated, String status,

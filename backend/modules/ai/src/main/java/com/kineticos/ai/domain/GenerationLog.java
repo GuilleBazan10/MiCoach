@@ -48,4 +48,11 @@ public class GenerationLog {
         return new GenerationLog(id, userId, promptSlug, promptVersion, provider, model, inputContext, output,
                 durationMs, status, createdAt);
     }
+
+    public static GenerationLog create(Long userId, String promptSlug, Integer promptVersion, String provider,
+                                       String model, Map<String, Object> inputContext, Map<String, Object> output,
+                                       Integer durationMs, String status) {
+        return new GenerationLog(null, userId, promptSlug, promptVersion, provider, model, inputContext, output,
+                durationMs, status, Instant.now());
+    }
 }

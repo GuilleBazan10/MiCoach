@@ -3,18 +3,17 @@
 Plataforma de salud y bienestar impulsada por IA: planes personalizados de entrenamiento
 y alimentación, adaptados al perfil completo de cada usuario.
 
-> **Estado actual — Fases 2 y 3.1 completas, arrancando la 3.2.** Backend: los 9
-> módulos (`shared`, `auth`, `user`, `workout`, `nutrition`, `progress`,
-> `notification`, `admin`, `ai`) implementados y verificados. Frontend mobile
-> (Flutter, Android/iOS): `core`, `auth`, `profile`, `workout`, `nutrition`,
-> `progress` implementados y corriendo contra la API real (`admin`/`ai` no tienen
-> pantalla propia, es deliberado). **Sigue la Fase 3.2: frontend web en React**, con
-> paridad de funcionalidad completa, ANTES de arrancar la Fase 4 (integración real de
-> IA) — ver `docs/04-adr/ADR-003-frontend-web-react.md` para el porqué de tener dos
-> frontends separados. Este README se ampliará en la Fase 7 con el manual completo y
-> la justificación detallada de cada herramienta. Para el estado detallado, lee
-> `docs/00-progress.md`; para el contexto técnico, `docs/01-architecture.md` y
-> `docs/04-adr/`.
+> **Estado actual — Fases 2, 3.1 y 3.2 completas.** Backend: los 9 módulos (`shared`,
+> `auth`, `user`, `workout`, `nutrition`, `progress`, `notification`, `admin`, `ai`)
+> implementados y verificados. Frontend mobile (Flutter, Android/iOS) y frontend web
+> (React) tienen paridad completa: `core`, `auth`, `profile`, `workout`, `nutrition`,
+> `progress` implementados y corriendo contra la API real en ambos (`admin`/`ai` no
+> tienen pantalla propia en ninguno de los dos, es deliberado) — ver
+> `docs/04-adr/ADR-003-frontend-web-react.md` para el porqué de tener dos frontends
+> separados en vez de Flutter Web. **Sigue la Fase 4: integración real de IA.** Este
+> README se ampliará en la Fase 7 con el manual completo y la justificación detallada
+> de cada herramienta. Para el estado detallado, lee `docs/00-progress.md`; para el
+> contexto técnico, `docs/01-architecture.md` y `docs/04-adr/`.
 
 ---
 
@@ -33,9 +32,9 @@ recomendaciones.
   PostgreSQL, Redis, RabbitMQ, MinIO, OpenSearch, Prometheus/Grafana/Jaeger.
 - **Frontend mobile** (Android/iOS): Flutter (Riverpod, GoRouter, Dio, Material 3,
   Dark Mode).
-- **Frontend web** (Fase 3.2, en curso): React + TypeScript + Vite (TanStack Query,
-  React Router, Tailwind CSS + shadcn/ui), 100% responsive, misma funcionalidad que
-  mobile. Por qué dos frontends separados en vez de Flutter Web:
+- **Frontend web:** React + TypeScript + Vite (TanStack Query, React Router, Tailwind
+  CSS + shadcn/ui), 100% responsive, misma funcionalidad que mobile. Por qué dos
+  frontends separados en vez de Flutter Web:
   `docs/04-adr/ADR-003-frontend-web-react.md`.
 - **IA:** LangChain4j con **Strategy Pattern** para alternar proveedores
   (Ollama local gratis, OpenAI, Claude, Gemini, Mistral, DeepSeek).
@@ -47,7 +46,7 @@ recomendaciones.
 KineticOs/
 ├── backend/    → Java 21 + Spring Boot (módulos por dominio + app que compone)
 ├── mobile/     → Flutter, mobile-only Android/iOS (Feature First, core tematizable)
-├── web/        → React, Fase 3.2 (misma funcionalidad que mobile, responsive)
+├── web/        → React (misma funcionalidad que mobile, responsive)
 ├── infra/      → nginx, minio, plan k8s
 ├── docs/       → arquitectura, base de datos, contratos, ADRs, manuales, PROGRESO
 ├── scripts/    → arranque local (Windows/Linux/Mac) y seed de modelos IA
@@ -60,7 +59,7 @@ KineticOs/
 ## Arranque rápido (desarrollo)
 
 Requisitos: **Docker**, **JDK 21**, **Gradle** (se usa el wrapper), **Flutter SDK**
-(mobile), **Node.js 20+** (web, Fase 3.2).
+(mobile), **Node.js ≥20.19 o ≥22.12** (web — Vite 8 no arranca con versiones menores).
 
 ```bash
 # 1. Copiar variables de entorno
@@ -78,13 +77,15 @@ cd ../mobile
 flutter pub get
 flutter run -d web-server --web-port=5050   # abrir http://localhost:5050 (para probar rápido; la app final es mobile-only, ver ADR-003)
 
-# 5. App web (React) — Fase 3.2, en curso. Todavía no existe web/; cuando esté:
-# cd ../web && npm install && npm run dev
+# 5. App web (React)
+cd ../web
+npm install
+npm run dev   # abre http://localhost:5173 — entrar por localhost, no 127.0.0.1 (ver web/README.md § CORS)
 ```
 
 > Detalle completo del mobile (requisitos, CORS, cómo probar el flujo) en
-> `mobile/README.md`. El detalle de la web se documentará en `web/README.md` cuando
-> arranque la Fase 3.2 (ver `docs/00-progress.md`).
+> `mobile/README.md`. Detalle completo de la web (stack, estructura, CORS) en
+> `web/README.md`.
 
 > En Windows puedes usar `scripts\init-dev.ps1` que automatiza los pasos 1 y 2.
 
@@ -124,7 +125,7 @@ Si otro modelo va a seguir este proyecto, lo primero que debe leer es:
 | `docs/05-manuals/` | Manual técnico y funcional (Fase 7) |
 | `docs/08-ai-prompt-v2.md` | Prompt v2 para IA generadora |
 | `mobile/README.md` | Cómo levantar y probar la app mobile (Flutter) |
-| `web/README.md` | Plan y stack de la app web — Fase 3.2, ver ADR-003 |
+| `web/README.md` | Stack, estructura y arranque de la app web (ver ADR-003) |
 
 ## Licencia
 

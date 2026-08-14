@@ -43,8 +43,8 @@ final class ExerciseMapper {
     static Exercise toDomain(ExerciseJpa jpa, List<ExerciseMuscle> muscles) {
         return Exercise.restore(jpa.getId(), jpa.getName(), jpa.getDescription(), jpa.getCategory(),
                 jpa.getEquipment(), jpa.getDifficulty(), jpa.getInstructions(), jpa.getVideoUrl(),
-                jpa.getImageUrl(), jpa.isAiGenerated(), jpa.isActive(), muscles, jpa.getCreatedAt(),
-                jpa.getUpdatedAt());
+                jpa.getImageUrl(), jpa.getMeasurementType(), jpa.isAiGenerated(), jpa.isActive(), muscles,
+                jpa.getCreatedAt(), jpa.getUpdatedAt());
     }
 }
 

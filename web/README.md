@@ -2,9 +2,10 @@
 
 ## Estado
 
-**Fase 3.2 — EN CURSO.** `core` y `auth` implementados y verificados contra el backend
-real (ver `docs/00-progress.md` § Fase 3.2 para el detalle de la entrega). Faltan
-`profile`, `workout`, `nutrition`, `progress` — mismo orden que en mobile.
+**Fase 3.2 — CERRADA (2026-08-13).** Las 6 features (`core`, `auth`, `profile`,
+`workout`, `nutrition`, `progress`) están implementadas y verificadas contra el backend
+real, con paridad completa respecto a mobile — ver `docs/00-progress.md` § Fase 3.2 para
+el detalle de cada entrega.
 
 > Por qué existe un frontend web separado de la app mobile (y no "Flutter Web"):
 > `docs/04-adr/ADR-003-frontend-web-react.md`. Plan completo, alcance y checklist de
@@ -53,25 +54,23 @@ web/
 ├── package.json  vite.config.ts  tsconfig.json  components.json (shadcn)
 └── src/
     ├── main.tsx  App.tsx         # punto de entrada + providers (Query/Auth/Router)
-    ├── app/                      # páginas de layout raíz (HomePage placeholder)
-    ├── components/ui/            # primitivos shadcn (button, input, card, ...)
+    ├── components/               # primitivos shadcn (ui/) + composiciones propias
+    │                               (option-select.tsx, reutilizado por varias features)
     ├── core/
     │   ├── theme/                # ★ PUNTO ÚNICO DEL DISEÑO ★ (tokens.css)
     │   ├── api/                  # cliente Axios + interceptor JWT/refresh
-    │   └── router/                # router raíz, AppShell, guardas de auth
+    │   └── router/                # router raíz, AppShell (nav a las 4 secciones), guardas de auth
     └── features/
-        ├── auth/  (implementada)
-        │   └── api/ application/ domain/ pages/
-        └── profile/ workout/ nutrition/ progress/   # pendientes
+        └── auth/ profile/ workout/ nutrition/ progress/
+            └── api/ application/ domain/ pages/ components/
 ```
 
-## Orden de implementación
+## Orden de implementación (completo)
 
 Mismo criterio que se usó en mobile: `core` primero, después una feature completa por
 entrega, siempre contra la API real (nunca mocks):
 
-`core → auth → profile → workout → nutrition → progress`
-                    ↑ estamos acá
+`core → auth → profile → workout → nutrition → progress` — las 6 completas.
 
 ## Backend
 

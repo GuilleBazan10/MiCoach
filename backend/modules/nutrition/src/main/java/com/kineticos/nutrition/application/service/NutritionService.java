@@ -26,9 +26,17 @@ import java.util.List;
 public class NutritionService implements NutritionUseCase {
 
     private final NutritionRepository repository;
+    private final NutritionAiGenerator aiGenerator;
+    private final NutritionSubstitutionAiGenerator substitutionAiGenerator;
+    private final NutritionCalorieAdjuster calorieAdjuster;
 
-    public NutritionService(NutritionRepository repository) {
+    public NutritionService(NutritionRepository repository, NutritionAiGenerator aiGenerator,
+                            NutritionSubstitutionAiGenerator substitutionAiGenerator,
+                            NutritionCalorieAdjuster calorieAdjuster) {
         this.repository = repository;
+        this.aiGenerator = aiGenerator;
+        this.substitutionAiGenerator = substitutionAiGenerator;
+        this.calorieAdjuster = calorieAdjuster;
     }
 
     // ------------------------- Catálogo -------------------------
@@ -65,6 +73,15 @@ public class NutritionService implements NutritionUseCase {
         return repository.findSubstitutions(ingredientId);
     }
 
+    @Override
+    @Transactional
+    public Substitution generateSubstitution(Long userId, Long ingredientId, SubstitutionRequestData data) {
+        Ingredient ingredient = getIngredient(ingredientId);
+        List<Ingredient> catalog = repository.findIngredients(new IngredientFilter(null, null));
+        Substitution substitution = substitutionAiGenerator.generate(userId, ingredient, data, catalog);
+        return repository.saveSubstitution(substitution);
+    }
+
     // ------------------------- Planes de alimentación -------------------------
 
     @Override
@@ -95,6 +112,29 @@ public class NutritionService implements NutritionUseCase {
         mealPlan.update(data.name(), data.description(), data.startDate(), data.endDate(),
                 data.targetCalories(), data.targetProteinG(), data.targetCarbsG(), data.targetFatG(),
                 toDays(data.days()));
+        return repository.saveMealPlan(mealPlan);
+    }
+
+    @Override
+    @Transactional
+    public MealPlan adjustMealPlanCalories(Long userId, Long mealPlanId) {
+        MealPlan existing = requireOwnedMealPlan(userId, mealPlanId);
+        List<Recipe> catalog = repository.findRecipes(new RecipeFilter(null, null, null));
+        MealPlanData data = calorieAdjuster.adjust(userId, existing, catalog);
+        existing.update(existing.getName(), existing.getDescription(), data.startDate(), data.endDate(),
+                data.targetCalories(), data.targetProteinG(), data.targetCarbsG(), data.targetFatG(),
+                toDays(data.days()));
+        return repository.saveMealPlan(existing);
+    }
+
+    @Override
+    @Transactional
+    public MealPlan generateMealPlan(Long userId, String goal) {
+        List<Recipe> catalog = repository.findRecipes(new RecipeFilter(null, null, null));
+        MealPlanData data = aiGenerator.generate(userId, goal, catalog);
+        MealPlan mealPlan = MealPlan.createAiGenerated(userId, data.name(), data.description(),
+                data.startDate(), data.endDate(), data.targetCalories(), data.targetProteinG(),
+                data.targetCarbsG(), data.targetFatG(), toDays(data.days()));
         return repository.saveMealPlan(mealPlan);
     }
 

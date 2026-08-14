@@ -12,6 +12,7 @@ import com.kineticos.workout.application.port.in.WorkoutUseCase.WorkoutDayData;
 import com.kineticos.workout.presentation.WorkoutDtos.AbortSessionRequest;
 import com.kineticos.workout.presentation.WorkoutDtos.CompleteSessionRequest;
 import com.kineticos.workout.presentation.WorkoutDtos.ExerciseResponse;
+import com.kineticos.workout.presentation.WorkoutDtos.GenerateWorkoutRequest;
 import com.kineticos.workout.presentation.WorkoutDtos.MuscleResponse;
 import com.kineticos.workout.presentation.WorkoutDtos.PlannedExerciseRequest;
 import com.kineticos.workout.presentation.WorkoutDtos.SessionExerciseRequest;
@@ -91,6 +92,13 @@ public class WorkoutController {
     public WorkoutResponse createWorkout(@AuthenticationPrincipal AuthenticatedUser user,
                                          @Valid @RequestBody WorkoutRequest request) {
         return WorkoutResponse.from(useCase.createWorkout(user.id(), toWorkoutData(request)));
+    }
+
+    @PostMapping("/generate")
+    @ResponseStatus(HttpStatus.CREATED)
+    public WorkoutResponse generateWorkout(@AuthenticationPrincipal AuthenticatedUser user,
+                                           @Valid @RequestBody GenerateWorkoutRequest request) {
+        return WorkoutResponse.from(useCase.generateWorkout(user.id(), request.goal()));
     }
 
     @PutMapping("/{workoutId}")

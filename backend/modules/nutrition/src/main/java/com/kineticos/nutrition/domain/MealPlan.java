@@ -59,6 +59,15 @@ public class MealPlan {
                 targetProteinG, targetCarbsG, targetFatG, false, "active", days, now, now);
     }
 
+    public static MealPlan createAiGenerated(Long userId, String name, String description, LocalDate startDate,
+                                             LocalDate endDate, Integer targetCalories,
+                                             BigDecimal targetProteinG, BigDecimal targetCarbsG,
+                                             BigDecimal targetFatG, List<MealPlanDay> days) {
+        Instant now = Instant.now();
+        return new MealPlan(null, userId, name, description, startDate, endDate, targetCalories,
+                targetProteinG, targetCarbsG, targetFatG, true, "active", days, now, now);
+    }
+
     public static MealPlan restore(Long id, Long userId, String name, String description, LocalDate startDate,
                                    LocalDate endDate, Integer targetCalories, BigDecimal targetProteinG,
                                    BigDecimal targetCarbsG, BigDecimal targetFatG, boolean aiGenerated,

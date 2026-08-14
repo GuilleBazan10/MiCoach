@@ -37,4 +37,10 @@ public class Substitution {
         return new Substitution(id, recipeId, ingredientId, substituteIngredientId, substituteIngredientName,
                 reason, notes, createdAt);
     }
+
+    public static Substitution create(Long ingredientId, Long substituteIngredientId,
+                                      String substituteIngredientName, String reason, String notes) {
+        return new Substitution(null, null, ingredientId, substituteIngredientId, substituteIngredientName,
+                reason, notes, Instant.now());
+    }
 }

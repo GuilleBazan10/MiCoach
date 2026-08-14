@@ -10,6 +10,9 @@ dependencies {
     implementation libs.spring.boot.starter.validation
     implementation libs.spring.boot.starter.amqp
     implementation libs.langchain4j
+    implementation libs.langchain4j.ollama
+    implementation libs.langchain4j.open.ai
+    implementation libs.langchain4j.google.ai.gemini
 
     compileOnly libs.lombok
     annotationProcessor libs.lombok

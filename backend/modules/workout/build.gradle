@@ -2,6 +2,8 @@
 // Ejercicios, músculos, rutinas, generación de entrenamientos. Media en MinIO.
 dependencies {
     api project(':modules:shared')
+    api project(':modules:ai')
+    api project(':modules:user')
 
     implementation libs.spring.boot.starter.web
     implementation libs.spring.boot.starter.data.jpa

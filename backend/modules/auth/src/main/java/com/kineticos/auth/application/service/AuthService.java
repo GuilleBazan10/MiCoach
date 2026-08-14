@@ -12,6 +12,7 @@ import com.kineticos.auth.presentation.dto.RegisterRequest;
 import com.kineticos.shared.error.DomainException;
 import com.kineticos.shared.error.ErrorCode;
 import com.kineticos.shared.event.UserRegisteredEvent;
+import com.kineticos.shared.security.UserRoleProvider;
 import io.jsonwebtoken.Claims;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,19 +28,20 @@ import java.util.List;
 @Service
 public class AuthService implements AuthUseCase {
 
-    private static final List<String> DEFAULT_ROLES = List.of("ROLE_USER");
-
     private final AuthUserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final ApplicationEventPublisher eventPublisher;
+    private final UserRoleProvider roleProvider;
 
     public AuthService(AuthUserRepository userRepository, PasswordEncoder passwordEncoder,
-                       JwtService jwtService, ApplicationEventPublisher eventPublisher) {
+                       JwtService jwtService, ApplicationEventPublisher eventPublisher,
+                       UserRoleProvider roleProvider) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.eventPublisher = eventPublisher;
+        this.roleProvider = roleProvider;
     }
 
     @Override
@@ -97,9 +99,10 @@ public class AuthService implements AuthUseCase {
     }
 
     private AuthResponse buildAuthResponse(AuthUser user) {
-        String accessToken = jwtService.generateAccessToken(user.getId(), user.getEmail(), DEFAULT_ROLES);
+        List<String> roles = roleProvider.rolesFor(user.getId());
+        String accessToken = jwtService.generateAccessToken(user.getId(), user.getEmail(), roles);
         String refreshToken = jwtService.generateRefreshToken(user.getId(), user.getEmail());
         return new AuthResponse(accessToken, refreshToken, "Bearer", 15 * 60,
-                new AuthUserResponse(user.getId(), user.getEmail(), DEFAULT_ROLES));
+                new AuthUserResponse(user.getId(), user.getEmail(), roles));
     }
 }

@@ -1,28 +1,87 @@
 package com.kineticos.ai.application.service;
 
+import com.kineticos.shared.crypto.TextEncryptor;
 import com.kineticos.shared.error.DomainException;
 import com.kineticos.shared.error.ErrorCode;
 import com.kineticos.ai.application.port.in.AiUseCase;
+import com.kineticos.ai.application.port.out.AiProviderStrategy;
 import com.kineticos.ai.application.port.out.AiRepository;
+import com.kineticos.ai.application.port.out.ResolvedProvider;
+import com.kineticos.ai.domain.AiProviderConfig;
 import com.kineticos.ai.domain.ChatMessage;
 import com.kineticos.ai.domain.Conversation;
 import com.kineticos.ai.domain.GenerationLog;
 import com.kineticos.ai.domain.Prompt;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 
 /**
- * Implementación de casos de uso del módulo ai. Depende solo del puerto de salida.
+ * Implementación de casos de uso del módulo ai. Depende del puerto de salida de
+ * persistencia y de las estrategias de proveedor de IA (Strategy Pattern) — el proveedor
+ * a usar ya no es una property estática, se lee de {@code ai_provider_configs} (editable
+ * en runtime desde el panel de admin, sin reiniciar el backend).
  */
 @Service
 public class AiService implements AiUseCase {
 
     private final AiRepository repository;
+    private final List<AiProviderStrategy> strategies;
+    private final TextEncryptor encryptor;
 
-    public AiService(AiRepository repository) {
+    public AiService(AiRepository repository, List<AiProviderStrategy> strategies, TextEncryptor encryptor) {
         this.repository = repository;
+        this.strategies = strategies;
+        this.encryptor = encryptor;
+    }
+
+    // ------------------------- Config de proveedores (admin) -------------------------
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<AiProviderConfig> listProviderConfigs() {
+        return repository.findProviderConfigs();
+    }
+
+    @Override
+    @Transactional
+    public AiProviderConfig updateProviderConfig(String provider, ProviderConfigData data) {
+        AiProviderConfig config = requireProviderConfig(provider);
+        String newKeyEncrypted = data.apiKey() == null || data.apiKey().isBlank()
+                ? null
+                : encryptor.encrypt(data.apiKey());
+        config.update(data.displayName(), data.baseUrl(), data.model(), newKeyEncrypted, data.enabled());
+        return repository.saveProviderConfig(config);
+    }
+
+    @Override
+    @Transactional
+    public AiProviderConfig activateProvider(String provider) {
+        AiProviderConfig config = requireProviderConfig(provider);
+        repository.deactivateAllProviderConfigs();
+        config.activate();
+        return repository.saveProviderConfig(config);
+    }
+
+    @Override
+    public ProviderTestResult testProvider(String provider) {
+        AiProviderConfig config = requireProviderConfig(provider);
+        try {
+            String reply = strategyFor(config.getProvider()).complete(
+                    "Respondé únicamente con la palabra OK.", resolve(config));
+            return new ProviderTestResult(true, reply == null ? "" : reply.trim());
+        } catch (RuntimeException e) {
+            return new ProviderTestResult(false, e.getMessage());
+        }
+    }
+
+    private AiProviderConfig requireProviderConfig(String provider) {
+        return repository.findProviderConfigByProvider(provider)
+                .orElseThrow(() -> new DomainException(404, ErrorCode.NOT_FOUND,
+                        "Proveedor de IA desconocido: '" + provider + "'"));
     }
 
     // ------------------------- Prompts -------------------------
@@ -110,5 +169,66 @@ public class AiService implements AiUseCase {
     @Transactional(readOnly = true)
     public List<GenerationLog> listGenerationLogs(GenerationLogFilter filter) {
         return repository.findGenerationLogs(filter);
+    }
+
+    // ------------------------- Generación -------------------------
+
+    // REQUIRES_NEW: la llamada al proveedor de IA y su auditoría deben persistir aunque
+    // el llamador (ej. workout.generateWorkout, que arma el Workout con esta respuesta)
+    // termine haciendo rollback de su propia transacción por un error posterior — si no,
+    // Spring revierte también el INSERT en ai_generation_logs y se pierde justo el dato
+    // que hace falta para diagnosticar qué devolvió el modelo.
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public GenerationResult generate(Long userId, String promptSlug, Map<String, Object> variables) {
+        Prompt prompt = repository.findPrompts(promptSlug, true).stream().findFirst()
+                .orElseThrow(() -> new DomainException(404, ErrorCode.NOT_FOUND,
+                        "No hay un prompt activo para '" + promptSlug + "'"));
+        AiProviderConfig activeConfig = repository.findActiveProviderConfig()
+                .orElseThrow(() -> new DomainException(502, ErrorCode.INTERNAL_ERROR,
+                        "No hay ningún proveedor de IA activo (configuralo en /admin)"));
+        AiProviderStrategy strategy = strategyFor(activeConfig.getProvider());
+        ResolvedProvider resolved = resolve(activeConfig);
+        String rendered = renderTemplate(prompt.getContent(), variables);
+
+        long start = System.currentTimeMillis();
+        String output;
+        try {
+            output = strategy.complete(rendered, resolved);
+        } catch (RuntimeException e) {
+            logAttempt(userId, prompt, resolved, variables, Map.of("error", String.valueOf(e.getMessage())),
+                    (int) (System.currentTimeMillis() - start), "error");
+            throw e;
+        }
+        int durationMs = (int) (System.currentTimeMillis() - start);
+        logAttempt(userId, prompt, resolved, variables, Map.of("raw", output), durationMs, "success");
+        return new GenerationResult(output, resolved.provider(), resolved.model(), durationMs);
+    }
+
+    private ResolvedProvider resolve(AiProviderConfig config) {
+        String apiKey = config.hasApiKey() ? encryptor.decrypt(config.getApiKeyEncrypted()) : null;
+        return new ResolvedProvider(config.getProvider(), config.getBaseUrl(), apiKey, config.getModel());
+    }
+
+    private AiProviderStrategy strategyFor(String providerId) {
+        return strategies.stream()
+                .filter(s -> s.providerId().equals(providerId))
+                .findFirst()
+                .orElseThrow(() -> new DomainException(500, ErrorCode.INTERNAL_ERROR,
+                        "No hay implementación para el proveedor de IA '" + providerId + "'"));
+    }
+
+    private void logAttempt(Long userId, Prompt prompt, ResolvedProvider provider, Map<String, Object> input,
+                            Map<String, Object> output, int durationMs, String status) {
+        repository.saveGenerationLog(GenerationLog.create(userId, prompt.getSlug(), prompt.getVersion(),
+                provider.provider(), provider.model(), input, output, durationMs, status));
+    }
+
+    private String renderTemplate(String template, Map<String, Object> variables) {
+        String result = template;
+        for (Map.Entry<String, Object> entry : variables.entrySet()) {
+            result = result.replace("{{" + entry.getKey() + "}}", String.valueOf(entry.getValue()));
+        }
+        return result;
     }
 }

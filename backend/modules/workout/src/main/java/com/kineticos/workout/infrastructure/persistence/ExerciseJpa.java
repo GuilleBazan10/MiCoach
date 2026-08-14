@@ -57,6 +57,9 @@ public class ExerciseJpa {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "measurement_type", nullable = false)
+    private String measurementType;
+
     @Column(name = "is_ai_generated", nullable = false)
     private boolean aiGenerated;
 

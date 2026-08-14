@@ -28,6 +28,8 @@ class Exercise {
   final String? instructions;
   final String? videoUrl;
   final String? imageUrl;
+  /// 'reps' (default) o 'duration' — ej. Plancha se sostiene X segundos, no se repite X veces.
+  final String measurementType;
   final bool aiGenerated;
   final List<ExerciseMuscle> muscles;
 
@@ -41,6 +43,7 @@ class Exercise {
     this.instructions,
     this.videoUrl,
     this.imageUrl,
+    this.measurementType = 'reps',
     this.aiGenerated = false,
     this.muscles = const [],
   });
@@ -55,6 +58,7 @@ class Exercise {
         instructions: json['instructions'] as String?,
         videoUrl: json['videoUrl'] as String?,
         imageUrl: json['imageUrl'] as String?,
+        measurementType: json['measurementType'] as String? ?? 'reps',
         aiGenerated: json['aiGenerated'] as bool? ?? false,
         muscles: (json['muscles'] as List<dynamic>? ?? const [])
             .map((e) => ExerciseMuscle.fromJson(e as Map<String, dynamic>))

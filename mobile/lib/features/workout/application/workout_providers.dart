@@ -74,6 +74,12 @@ class WorkoutActions {
     _invalidateLists();
   }
 
+  Future<Workout> generateWorkout(String goal) async {
+    final generated = await _api.generateWorkout(goal);
+    _invalidateLists();
+    return generated;
+  }
+
   void _invalidateLists() {
     _ref.invalidate(workoutListProvider(false));
     _ref.invalidate(workoutListProvider(true));

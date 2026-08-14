@@ -10,32 +10,39 @@
    ===================================================================== */
 
 :root {
-  --background: #fafafa; /* mobile: AppColors.light.background */
-  --foreground: #1c1b1f; /* mobile: AppColors.light.onSurface */
+  --background: #f6faf6; /* leve tinte verde, no gris neutro puro — más "vivo" que #fafafa */
+  --foreground: #16211a; /* mobile: AppColors.light.onSurface */
 
   --card: #ffffff; /* mobile: AppColors.light.surface */
-  --card-foreground: #1c1b1f;
+  --card-foreground: #16211a;
   --popover: #ffffff;
-  --popover-foreground: #1c1b1f;
+  --popover-foreground: #16211a;
 
-  --primary: #4caf50; /* mobile: AppColors.light.primary — verde salud, cambiar acá */
+  --primary: #1fa251; /* verde más saturado/vívido que el original #4caf50 — más "energía" */
   --primary-foreground: #ffffff;
 
-  --secondary: #eef1ee;
-  --secondary-foreground: #1c1b1f;
+  --secondary: #e7f2e9;
+  --secondary-foreground: #16211a;
 
   --muted: #eef1ee;
-  --muted-foreground: #6b6f6b;
+  --muted-foreground: #62685f;
 
-  --accent: #00bfa5; /* mobile: AppColors.light.accent — turquesa (energía/hidratación) */
+  --accent: #00c2a8; /* turquesa (energía/hidratación), un poco más vívido */
   --accent-foreground: #ffffff;
+
+  /* Acento cálido nuevo — rachas, badges "generado con IA", destacados. Los fitness apps
+     necesitan un segundo color además del verde de marca o todo se ve monocromático. */
+  --highlight: #ff7a33;
+  --highlight-foreground: #ffffff;
+
+  --gradient-hero: linear-gradient(135deg, #1fa251 0%, #00c2a8 100%);
 
   --destructive: #b3261e; /* mobile: AppColors.light.error */
   --destructive-foreground: #ffffff;
 
   --border: #e2e5e2;
   --input: #e2e5e2;
-  --ring: #4caf50;
+  --ring: #1fa251;
 
   --radius: 0.75rem;
 
@@ -75,8 +82,13 @@
   --muted: #2a2a2a;
   --muted-foreground: #a1a5a1;
 
-  --accent: #00bfa5;
+  --accent: #00d9bc;
   --accent-foreground: #00251f;
+
+  --highlight: #ff9257;
+  --highlight-foreground: #2a1200;
+
+  --gradient-hero: linear-gradient(135deg, #1c7a3e 0%, #00877a 100%);
 
   --destructive: #f2b8b5; /* mobile: AppColors.dark.error */
   --destructive-foreground: #370907;

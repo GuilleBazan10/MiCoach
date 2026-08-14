@@ -87,14 +87,20 @@ class _MealPlanDetailBody extends StatelessWidget {
         const SizedBox(height: AppSpacing.lg),
         Text('Días', style: Theme.of(context).textTheme.titleMedium),
         const SizedBox(height: AppSpacing.sm),
-        for (final day in plan.days)
+        for (final MapEntry(key: dayIndex, value: day) in plan.days.asMap().entries)
           Card(
             margin: const EdgeInsets.only(bottom: AppSpacing.sm),
             child: Padding(
               padding: const EdgeInsets.all(AppSpacing.sm),
               child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                Text('${day.planDate.day}/${day.planDate.month}/${day.planDate.year}',
-                    style: Theme.of(context).textTheme.titleSmall),
+                Text.rich(TextSpan(children: [
+                  TextSpan(text: 'Día ${dayIndex + 1} ', style: Theme.of(context).textTheme.titleSmall),
+                  TextSpan(
+                    text: '· ${day.planDate.day}/${day.planDate.month}/${day.planDate.year}',
+                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant, fontWeight: FontWeight.normal),
+                  ),
+                ])),
                 for (final meal in day.meals)
                   Padding(
                     padding: const EdgeInsets.only(top: AppSpacing.xs),

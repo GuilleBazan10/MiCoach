@@ -58,6 +58,17 @@ class NutritionApi {
 
   Future<void> deleteMealPlan(int id) => _dio.delete('/nutrition/meal-plans/$id');
 
+  /// Genera un plan de alimentación con IA a partir de un pedido en lenguaje natural.
+  /// Puede tardar hasta un par de minutos (proveedor local por CPU) — timeout largo.
+  Future<MealPlan> generateMealPlan(String goal) async {
+    final response = await _dio.post(
+      '/nutrition/meal-plans/generate',
+      data: {'goal': goal},
+      options: Options(sendTimeout: const Duration(seconds: 10), receiveTimeout: const Duration(seconds: 180)),
+    );
+    return MealPlan.fromJson(response.data as Map<String, dynamic>);
+  }
+
   // ------------------------- Diario alimentario -------------------------
 
   Future<List<DailyIntakeEntry>> listIntake({DateTime? date}) async {

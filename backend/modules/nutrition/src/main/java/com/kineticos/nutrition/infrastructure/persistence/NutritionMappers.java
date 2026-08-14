@@ -147,6 +147,18 @@ final class SubstitutionMapper {
                 jpa.getSubstituteIngredientId(), substituteIngredientName, jpa.getReason(), jpa.getNotes(),
                 jpa.getCreatedAt());
     }
+
+    static SubstitutionJpa toJpa(Substitution domain) {
+        return SubstitutionJpa.builder()
+                .id(domain.getId())
+                .recipeId(domain.getRecipeId())
+                .ingredientId(domain.getIngredientId())
+                .substituteIngredientId(domain.getSubstituteIngredientId())
+                .reason(domain.getReason())
+                .notes(domain.getNotes())
+                .createdAt(domain.getCreatedAt())
+                .build();
+    }
 }
 
 final class DailyIntakeMapper {

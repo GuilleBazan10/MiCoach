@@ -1,11 +1,39 @@
 package com.kineticos.ai.infrastructure.persistence;
 
+import com.kineticos.ai.domain.AiProviderConfig;
 import com.kineticos.ai.domain.ChatMessage;
 import com.kineticos.ai.domain.Conversation;
 import com.kineticos.ai.domain.GenerationLog;
 import com.kineticos.ai.domain.Prompt;
 
 import java.util.List;
+
+final class AiProviderConfigMapper {
+
+    private AiProviderConfigMapper() {
+    }
+
+    static AiProviderConfig toDomain(AiProviderConfigJpa jpa) {
+        return AiProviderConfig.restore(jpa.getId(), jpa.getProvider(), jpa.getDisplayName(), jpa.getBaseUrl(),
+                jpa.getModel(), jpa.getApiKeyEnc(), jpa.isEnabled(), jpa.isActive(), jpa.getCreatedAt(),
+                jpa.getUpdatedAt());
+    }
+
+    static AiProviderConfigJpa toJpa(AiProviderConfig domain) {
+        return AiProviderConfigJpa.builder()
+                .id(domain.getId())
+                .provider(domain.getProvider())
+                .displayName(domain.getDisplayName())
+                .baseUrl(domain.getBaseUrl())
+                .model(domain.getModel())
+                .apiKeyEnc(domain.getApiKeyEncrypted())
+                .enabled(domain.isEnabled())
+                .active(domain.isActive())
+                .createdAt(domain.getCreatedAt())
+                .updatedAt(domain.getUpdatedAt())
+                .build();
+    }
+}
 
 final class PromptMapper {
 
@@ -88,5 +116,21 @@ final class GenerationLogMapper {
         return GenerationLog.restore(jpa.getId(), jpa.getUserId(), jpa.getPromptSlug(), jpa.getPromptVersion(),
                 jpa.getProvider(), jpa.getModel(), jpa.getInputContext(), jpa.getOutput(), jpa.getDurationMs(),
                 jpa.getStatus(), jpa.getCreatedAt());
+    }
+
+    static GenerationLogJpa toJpa(GenerationLog domain) {
+        return GenerationLogJpa.builder()
+                .id(domain.getId())
+                .userId(domain.getUserId())
+                .promptSlug(domain.getPromptSlug())
+                .promptVersion(domain.getPromptVersion())
+                .provider(domain.getProvider())
+                .model(domain.getModel())
+                .inputContext(domain.getInputContext())
+                .output(domain.getOutput())
+                .durationMs(domain.getDurationMs())
+                .status(domain.getStatus())
+                .createdAt(domain.getCreatedAt())
+                .build();
     }
 }

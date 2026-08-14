@@ -12,8 +12,8 @@
 | 1 | Modelo de base de datos + migraciones Flyway | ✅ COMPLETADA |
 | 2 | Backend módulo a módulo (Java/Spring) | ✅ COMPLETADA (shared, auth, user, workout, nutrition, progress, notification, admin, ai) |
 | 3.1 | Frontend Mobile (Flutter) | ✅ COMPLETADA (core, auth, profile, workout, nutrition, progress — `admin`/`ai` sin frontend, es deliberado) |
-| 3.2 | Frontend Web (React) | 🟡 EN CURSO (`core`, `auth` — faltan `profile`, `workout`, `nutrition`, `progress`) |
-| 4 | Integración IA (LangChain4j + Ollama) | ⬜ Pendiente (empieza después de cerrar 3.2) |
+| 3.2 | Frontend Web (React) | ✅ COMPLETADA (core, auth, profile, workout, nutrition, progress — mismo alcance que 3.1) |
+| 4 | Integración IA (LangChain4j + Ollama) | 🟡 EN CURSO (generación de rutinas ✅ — faltan planes/sustituciones/calorías) |
 | 5 | Testing completo | ⬜ Pendiente |
 | 6 | CI/CD y despliegue | ⬜ Pendiente |
 | 7 | Documentación final (README, manuales) | ⬜ Pendiente |
@@ -465,7 +465,7 @@ con paridad completa, conviene una tecnología que sí tenga DOM real.
 - Generar la APK de prueba (`flutter build apk`) — no se hizo todavía; la Fase 3.2
   (web) existe justamente para tener una forma más rápida de probar mientras tanto.
 
-## Fase 3.2 — Frontend Web (React) (EN CURSO)
+## Fase 3.2 — Frontend Web (React) — CERRADA (2026-08-13)
 
 > **Va ANTES de la Fase 4.** Objetivo del usuario del proyecto: tener una superficie
 > web con **toda** la funcionalidad de la app (no solo `admin`) para probar más rápido
@@ -586,13 +586,409 @@ código. Aceptable para esta fase (superficie de prueba interna); si la web se e
 públicamente más adelante, migrar a cookies `httpOnly` es la mejora natural (implica
 cambios en el backend, que hoy responde el JWT en el body).
 
-## Fase 4 — IA (PLAN)
+### Entrega completada (2026-08-13) — `profile`, `workout`, `nutrition`, `progress`, cierra la Fase 3.2
 
-> Empieza después de cerrar la Fase 3.2.
+Puerto 1:1 de las 4 features restantes de mobile, mismo criterio que las anteriores
+(TanStack Query para estado, Zod solo donde ya se usaba, shadcn/ui, contra el backend
+real). `app/HomePage.tsx` (placeholder) se borró: `/` redirige a `/workouts`, igual que
+en mobile.
+
+- [x] **`profile`**: `ProfileForm` (datos físicos/entrenamiento, `Select` + `Input` +
+      `Textarea`) y 4 secciones (`GoalSection`/`PathologySection`/`InjurySection`/
+      `MedicationSection`) con `Accordion` + `Dialog` para alta, botón de borrado inline
+      — mismo patrón simple que mobile (sin confirmación en el borrado).
+- [x] **`workout`**: `WorkoutHomePage` (tabs Mis rutinas/Plantillas/Historial),
+      `WorkoutForm` (días/ejercicios anidados + `ExercisePickerDialog` con búsqueda),
+      `WorkoutDetailPage` (iniciar sesión por día o libre, editar/borrar si es dueño),
+      `SessionPage` (registrar ejercicio ejecutado, completar/abandonar).
+- [x] **`nutrition`**: `NutritionHomePage` (tabs Planes/Diario/Compras), `MealPlanForm`
+      (días/comidas anidadas + `RecipePickerDialog`), `MealPlanDetailPage`,
+      `DailyIntakeView` + `LogIntakeDialog` (auto-completa macros al elegir receta x
+      porciones, igual que mobile), `ShoppingListDetailPage` (ítems con checkbox).
+- [x] **`progress`**: `ProgressHomePage` (tabs Métricas/Fotos), `MetricEntriesView` con
+      chips de filtro por tipo de métrica + `AddEntryDialog` (autocompleta la unidad
+      según la métrica), `ProgressPhotosView` (grilla, `onError` de `<img>` con estado
+      React en vez de manipular el DOM a mano).
+- [x] **`AppShell`**: navegación completa a las 4 secciones + Perfil. Mobile-first real
+      (no solo "se ve bien angosto"): bottom tab bar fija (`sm:hidden`) igual que el
+      `NavigationBar` de mobile, y nav horizontal en el header a partir de `sm`
+      (`hidden sm:flex`) — dos renders del mismo `NavItem`, uno por breakpoint, en vez de
+      intentar un único layout que sirva para ambos casos (un bottom-nav no tiene sentido
+      en desktop y viceversa).
+
+#### Bugs encontrados y corregidos durante la verificación (2026-08-13)
+
+- **Backend, `POST /users/me/goals` → 500**: `user_goals.priority` es `NOT NULL` en el
+  schema pero la API lo documenta como opcional (`docs/03-api-contracts.md`). Fix en
+  `UserGoal.create` (`backend/modules/user/.../domain/UserGoal.java`): default a `1`
+  cuando `priority` viene `null`, sin tocar el schema.
+- **Frontend, carga de perfil → 404 intermitente en `/goals`, `/pathologies`, etc.**:
+  `useProfile` pedía las 5 llamadas (`profile` + 4 sub-recursos) con `Promise.all` en
+  paralelo. El perfil se crea de forma perezosa en el propio `GET /profile`
+  (`getOrCreateProfile`), y los sub-recursos asumen que ya existe — en paralelo hay
+  carrera con el commit de esa creación. Mobile ya lo hacía secuencial
+  (`profile_providers.dart`) por esta misma razón; se corrigió `useProfile.ts` para
+  esperar `profile` antes de disparar el resto.
+- **Frontend, overflow horizontal con `Tabs` + contenido angosto sin wrap** (los 15
+  chips de filtro de métricas empujaban un botón fuera del viewport y sus clicks no
+  llegaban a destino): el `TabsContent` de shadcn es un flex item de una columna sin
+  `min-w-0`, así que el contenido con `overflow-x-auto` no se contiene — el bug clásico
+  de flexbox donde `min-width: auto` por defecto ignora el `max-width` de un ancestro.
+  Fix: `min-w-0` en cada `<TabsContent>` de `WorkoutHomePage`/`NutritionHomePage`/
+  `ProgressHomePage` (los tres usan el mismo patrón de tabs, aunque solo `progress` lo
+  disparaba con datos reales).
+
+#### Verificación (2026-08-13)
+
+- `npm run build` y `npm run lint` → sin errores (mismos 3 warnings benignos de
+  `react-refresh` en archivos generados por `shadcn`, sin tocar).
+- Probado end-to-end en el navegador contra el backend real: perfil (editar datos +
+  alta/baja de objetivo y patología) → rutina (crear con 1 día + 1 ejercicio → detalle →
+  iniciar sesión → registrar ejercicio → completar → editar nombre → borrar) → plan de
+  alimentación (crear con 1 comida → detalle con nombre de receta resuelto) → diario
+  (registrar comida con receta, macros auto-calculadas, totales del día) → lista de
+  compras (crear → agregar ítem → marcar comprado) → progreso (filtrar por métrica,
+  registrar peso, agregar y borrar foto). Sin errores de consola nuevos en ningún paso.
+- Responsive verificado en 375px y 1280px en las 4 páginas de sección: sin overflow
+  horizontal (`document.body.scrollWidth === document.documentElement.clientWidth` en
+  ambos anchos) y el nav correcto visible en cada breakpoint (bottom bar en 375px, nav de
+  header en 1280px).
+
+## Fase 4 — IA (EN CURSO)
 
 LangChain4j + Ollama de base. Strategy Pattern para alternar proveedores. Prompts
-versionados en recursos del módulo `ai`. Generación de rutinas, planes, sustituciones,
-ajuste de calorías.
+versionados en `ai_prompts` (BD, no en recursos del jar — se pueden versionar/activar
+por API sin redeploy). Generación de rutinas, planes, sustituciones, ajuste de
+calorías. Se hace **una superficie de usuario a la vez**, mismo criterio que el resto
+del proyecto — empieza por rutinas (la más directa de verificar end-to-end).
+
+### Entrega completada (2026-08-13) — generación de rutinas con IA
+
+- [x] **Strategy Pattern** (`ai` module): `AiProviderStrategy` (puerto de salida) +
+      `OllamaProviderStrategy` (infraestructura, LangChain4j `OllamaChatModel`). Agregar
+      un proveedor cloud (OpenAI/Claude/Gemini/Mistral/DeepSeek) es implementar esa
+      interfaz y no toca nada más — `AiService` resuelve la estrategia activa por
+      `kineticos.ai.provider` (`AI_PROVIDER` en `.env`) entre todas las que Spring
+      inyecta como `List<AiProviderStrategy>`.
+- [x] **`AiUseCase.generate(userId, promptSlug, variables)`**: caso de uso genérico y
+      reutilizable — busca el prompt activo de ese slug, reemplaza `{{variable}}` por
+      su valor, llama al proveedor resuelto, audita el intento completo en
+      `ai_generation_logs` (éxito o error) y devuelve el texto crudo. Cualquier módulo
+      que necesite generar contenido con IA (workout ya lo usa; nutrition queda
+      pendiente) llama a este único método — no reimplementa nada del lado de IA.
+- [x] **`POST /api/v1/workouts/generate`**: `workout` pasa a depender de `ai`
+      (`build.gradle`). `WorkoutAiGenerator` arma el contexto (pedido del usuario +
+      catálogo completo de ejercicios), llama a `AiUseCase.generate` con el slug
+      `workout_generator`, parsea el JSON de salida y **resuelve cada nombre de
+      ejercicio que devuelve el modelo contra el catálogo real** (match exacto
+      case-insensitive, con fallback a "contiene") — un LLM no conoce los ids de la
+      base, así que esto es obligatorio; los ejercicios que no matchean se descartan en
+      vez de romper toda la generación. Crea la rutina con `aiGenerated: true`
+      (`Workout.createAiGenerated`, nuevo factory en el dominio).
+- [x] **Migración `V8`**: siembra la v3 del prompt `workout_generator` (contenido real,
+      formato JSON pedido, instrucciones de usar SOLO nombres del catálogo) y desactiva
+      las v1/v2 que ya existían como datos de prueba de la Fase 2 (creadas a mano por
+      curl con contenido placeholder tipo `"{perfil}"`, incompatibles con el parser).
+- [x] **Web**: botón "Generar con IA" en `WorkoutHomePage` (`GenerateWorkoutDialog`) —
+      un textarea con el pedido en lenguaje natural, `timeout` de request extendido a
+      180s (una llamada normal usa 15s; una inferencia LLM en CPU tarda muchísimo más),
+      navega al detalle de la rutina generada al terminar.
+
+#### Bugs encontrados y corregidos durante la verificación (2026-08-13)
+
+- **Rollback del log de auditoría cuando fallaba el parseo posterior**: `AiService
+  .generate()` corría con la propagación de transacción por defecto (`REQUIRED`), así
+  que al ejecutarse dentro de la transacción ya abierta por `WorkoutService
+  .generateWorkout()`, si el parseo del JSON fallaba **después** de que la llamada a
+  Ollama ya había sido exitosa y auditada, la excepción sin capturar que subía desde
+  `WorkoutAiGenerator` marcaba **toda la transacción** para rollback — incluido el
+  `INSERT` en `ai_generation_logs` que se había hecho segundos antes. Resultado: el
+  primer intento real falló (ver debajo) y la auditoría que hubiera explicado por qué
+  quedó vacía, exactamente el caso en el que más se necesita. Fix: `AiService.generate`
+  pasa a `@Transactional(propagation = Propagation.REQUIRES_NEW)` — la llamada al
+  proveedor y su auditoría son independientes de lo que haga el módulo que las llama.
+- **Extracción de JSON frágil ante texto extra del modelo**: el primer intento real
+  (rutina de fuerza, 3 días) tiró `500` con `"Unexpected character ('{' ...)"` de
+  Jackson. El parser original cortaba del primer `{` al **último** `}` de todo el
+  texto — si el modelo agrega alguna palabra con llaves después del JSON (algo que
+  `llama3.2` 3B hace pese a que el prompt pide "solo JSON"), esa última `}` no es la
+  que cierra el objeto real. Fix: `WorkoutAiGenerator.extractFirstJsonObject` cuenta
+  llaves balanceadas (respetando strings/escapes) desde el primer `{` y corta ahí,
+  quedándose solo con el objeto JSON real sin importar qué haya después.
+- Con los dos fixes aplicados: pedido real ("rutina de fuerza, 3 días a la semana,
+  nivel intermedio...") → Ollama respondió en **2m32s** (CPU, sin GPU, `llama3.2` 3B a
+  ~6.5 tokens/seg) → rutina creada con 9 días y ejercicios reales del catálogo
+  (Sentadilla, Peso muerto, Press militar...) con series/reps, `aiGenerated: true` en
+  BD, auditada en `ai_generation_logs` (status `success`, `durationMs` real). El modelo
+  no respetó el límite de "3 a 6 días" del prompt (generó 9) — comportamiento esperable
+  de un modelo de 3B, no un bug del código; ajustar el prompt o pasar a un modelo más
+  grande queda como mejora futura si hace falta más control sobre el resultado.
+
+**Simplificación consciente, no bloqueante**: `WorkoutAiGenerator.renderTemplate`
+(dentro de `AiService`) hace reemplazo de texto simple `{{variable}}` con
+`String.replace`, no un motor de templates. Alcanza para los prompts actuales
+(variables planas, sin loops/condicionales) y evita sumar una dependencia nueva; si un
+prompt futuro necesita lógica (ej. iterar sobre una lista con formato propio), ahí sí
+conviene un motor real.
+
+### Entrega completada (2026-08-13) — perfil real, planes de alimentación con IA, catálogos ampliados
+
+Pedido explícito del usuario tras probar la primera entrega: que la IA tenga en cuenta
+el perfil (no solo workout — nutrition también, desde que existiera), que responda más
+rápido, y que el catálogo tenga más variedad. Se hicieron las cuatro cosas juntas:
+
+- [x] **Perfil real en `workout`**: `workout` pasa a depender también de `user`
+      (`build.gradle`). `WorkoutAiGenerator.buildProfileText` arma un bloque con nivel de
+      experiencia, nivel de actividad, equipamiento, objetivo, patologías y lesiones
+      reportadas, y se lo suma al prompt como `{{profile}}` — con instrucción explícita
+      de evitar ejercicios que agraven una lesión reportada.
+- [x] **`nutrition` genera planes de alimentación con IA (nueva)**: mismo patrón end a
+      end que workout — `nutrition` pasa a depender de `ai` y `user`;
+      `NutritionAiGenerator` arma el catálogo de recetas + perfil (objetivo dietario,
+      peso, TDEE, patologías) y llama al prompt `meal_plan_generator`; `MealPlan
+      .createAiGenerated` (nuevo factory, `aiGenerated: true`); `POST
+      /api/v1/nutrition/meal-plans/generate`; botón "Generar con IA" en
+      `NutritionHomePage` (`GenerateMealPlanDialog`, mismo componente que
+      `GenerateWorkoutDialog` en workout). Las fechas reales las calcula el backend a
+      partir de un `dayOffset` relativo que devuelve la IA (no hay forma confiable de
+      que un LLM sepa qué día es "hoy").
+- [x] **Modelo más rápido**: sin GPU disponible en el entorno de desarrollo (se
+      verificó con `lspci` — hay una Intel iGPU y una AMD vieja, ninguna soportada por
+      Ollama), la inferencia corre 100% en CPU (8 núcleos). Se cambió el modelo por
+      defecto de ambos prompts de `llama3.2` (3B) a `llama3.2:1b` (1B) — bajó el tiempo
+      de generación de 1m46s–2m32s a 35s–43s. Costo: el modelo chico sigue peor las
+      instrucciones del prompt (ver bugs abajo), compensado con más validación
+      defensiva del lado del código en vez de confiar en que la IA responda siempre
+      bien formado.
+- [x] **Catálogos ampliados** (migración `V10`): +20 ejercicios (32 → 52, cubriendo más
+      grupos musculares y equipamiento — hip thrust, jalón al pecho, farmer's walk,
+      comba, etc.) y +15 recetas (12 → 27, reutilizando los 60 ingredientes ya
+      sembrados en `V6`, sin necesidad de agregar ingredientes nuevos). Mismo cuidado
+      que `V7`: `setval(pg_get_serial_sequence(...), MAX(id))` al final para las dos
+      tablas con ids explícitos, evitando reproducir el bug de secuencias de la Fase 2.
+- [x] **Migración `V9`**: prompts v4 (`workout_generator`) y v1 (`meal_plan_generator`)
+      con `{{profile}}`, instrucciones más estrictas sobre cantidad de días, y modelo
+      `llama3.2:1b`.
+
+#### Bugs encontrados y corregidos (2026-08-13, segunda ronda)
+
+Los tres aparecieron probando con datos reales (perfil con una lesión cargada, pedidos
+concretos) — ningún test unitario los iba a atrapar sin pegarle a un LLM de verdad:
+
+- **500 sin capturar por `objective` fuera del enum**: `workout_workouts.objective` es
+  `VARCHAR(30)` con `CHECK (objective IN (...))`. El modelo devolvió una oración libre
+  ("fortalecer piernas y espalda, mejorar la estabilidad...") en vez de un valor del
+  enum — ni entraba en la columna ni pasaba el `CHECK`, y Postgres tiró la excepción
+  sin que nada la tradujera a un error de API legible. Fix:
+  `WorkoutAiGenerator.normalizeEnum` — si el valor no está en la lista blanca
+  (`lose_fat`, `gain_muscle`, ...), se guarda `null` en vez de reventar. Mismo
+  problema existía latente en `nutrition` con `meal_type` (`NOT NULL` + `CHECK`, más
+  grave porque ahí ni siquiera puede quedar `null`) — `NutritionAiGenerator
+  .normalizeMealType` corrige y además defaultea a `snack` si no matchea (no puede
+  ser `null`).
+- **`restDay: true` en días con ejercicios cargados**: el modelo marcó los 4 días como
+  descanso pese a que cada uno tenía ejercicios reales adentro — una inconsistencia
+  lógica del propio JSON que la validación de esquema no detecta (es JSON válido, solo
+  que no tiene sentido). Fix: `restDay` se recalcula en el código —
+  `exercises.isEmpty() && restDay` — nunca puede ser `true` si el día tiene ejercicios,
+  sin importar lo que haya dicho el modelo.
+- **JSON truncado a mitad de generación** (`meal_plan_generator`, primer intento real):
+  la respuesta de Ollama cortaba en medio del array de días, sin el cierre final —
+  `extractFirstJsonObject` (correctamente) no encontró el `}` de cierre y tiró "JSON
+  inválido" en vez de crashear, pero la causa de fondo era un límite de tokens de
+  salida no configurado explícitamente en `OllamaChatModel`. Fix:
+  `.numPredict(2048)` en `OllamaProviderStrategy` — sin este valor, el cliente estaba
+  usando algún default demasiado bajo para una respuesta JSON larga (varios días con
+  varias comidas cada uno).
+
+#### Limitación conocida, no bloqueante: `llama3.2:1b` no sigue instrucciones a la perfectilidad
+
+Con la validación defensiva de arriba el sistema **no crashea** ante una respuesta mal
+formada, pero eso no significa que la IA respete siempre el *contenido* de las
+instrucciones — con el modelo de 1B, en las pruebas reales:
+
+- Generó una rutina con `objective` inválido (se normalizó a `null`, la rutina quedó
+  igual de usable, solo sin ese campo).
+- El `dayOffset` de un plan de nutrición no salió secuencial (`3, 4, 5` en vez de
+  `0, 1, 2, 3`) — el plan quedó igual coherente (los días son relativos, no importa
+  el valor exacto), pero no siguió la instrucción al pie de la letra.
+- No hay garantía de que evite sistemáticamente ejercicios riesgosos para una lesión
+  reportada — el perfil SÍ le llega al modelo (verificado), pero un modelo de 1B no
+  razona con la misma confiabilidad que uno más grande sobre restricciones complejas.
+
+Si en algún momento se necesita más adherencia a las instrucciones, la palanca más
+directa es un modelo más grande (ida y vuelta velocidad/calidad) o un proveedor cloud
+(Strategy Pattern ya deja esa puerta abierta sin tocar el resto del código).
+
+### Panel de admin: múltiples proveedores de IA (Groq, OpenRouter, Gemini además de Ollama)
+
+Se usó exactamente la puerta que dejó abierta el Strategy Pattern: la selección de
+proveedor pasó de ser una property estática (`kineticos.ai.provider` en `application.yml`,
+requería reiniciar el backend) a una tabla `ai_provider_configs` (migración V11)
+editable en runtime desde `/admin/ai` — sin redeploy.
+
+- **Backend**: `AiProviderConfig` (agregado hexagonal nuevo en el módulo `ai`, mismo
+  patrón que `admin`) guarda por proveedor: baseUrl, modelo, API key cifrada
+  (AES/GCM, `TextEncryptor` nuevo en `shared`, reusa `AES_SECRET` que ya existía sin
+  usar desde la Fase 2) y flags `enabled`/`is_active` (un índice único parcial
+  garantiza que solo uno esté activo). `AiProviderStrategy.complete()` ahora recibe un
+  `ResolvedProvider` (baseUrl/key ya descifrada/modelo) en vez de un `model` suelto —
+  la key nunca sale del backend en texto plano, ni siquiera en las respuestas de la
+  API admin (`hasApiKey: boolean`, no el valor).
+- **Groq y OpenRouter** comparten una sola implementación
+  (`OpenAiCompatibleProviderStrategy`, LangChain4j `langchain4j-open-ai`) porque ambas
+  exponen una API compatible con OpenAI — solo cambia la `baseUrl`. Gemini usa su
+  propio cliente (`langchain4j-google-ai-gemini`) porque el endpoint no es configurable.
+- **RBAC real, no placeholder**: hasta esta entrega `AuthService` emitía siempre
+  `ROLE_USER` hardcodeado (bug preexistente desde la Fase 2, el comentario de
+  `AdminController` ya lo admitía). Se conectó vía un puerto nuevo en `shared`
+  (`UserRoleProvider`, implementado en `admin`, consumido por `auth` sin dependencia
+  de compilación entre ambos módulos) para que el JWT lleve los roles reales de
+  `admin_user_roles`. `AdminController` y el nuevo `AiProviderConfigController` quedan
+  detrás de `@PreAuthorize("hasAuthority('ROLE_ADMIN')")`
+  (`@EnableMethodSecurity` en `SecurityConfig`). De paso se agregó el `ErrorCode.FORBIDDEN`
+  y su manejo en `GlobalExceptionHandler` — antes un 403 real caía en el catch-all
+  genérico y se devolvía como 500.
+- **Web**: sección nueva `/admin/ai` (guard `RequireAdmin`, ítem de nav visible solo
+  con `ROLE_ADMIN`) con una tarjeta por proveedor: editar baseUrl/modelo/API key
+  (input `password`, siempre vacío al cargar — dejarlo vacío al guardar no pisa la key
+  ya guardada), habilitar/deshabilitar, "Probar conexión" (llama al proveedor con un
+  prompt corto y muestra el resultado real, sin tocar la config activa) y "Activar".
+- Verificado end-to-end: 403 real para un usuario sin `ROLE_ADMIN`, guardado de API
+  key cifrada, prueba de conexión contra Ollama (real) y OpenRouter (con key dummy,
+  falla con el error real del proveedor en vez de romper), y una generación de rutina
+  completa contra Ollama para confirmar que el nuevo flujo de resolución de proveedor
+  no rompió lo que ya funcionaba.
+- **Bug encontrado y corregido tras el primer uso real**: activar un proveedor exigía
+  que ya estuviera `enabled: true`, pero habilitar y activar eran dos guardados
+  separados en la UI — el usuario probó Groq con éxito y aun así no podía activarlo
+  porque el toggle "Habilitado" nunca se había guardado. Fix: `activate()` ahora
+  también habilita (`AiProviderConfig.activate()`), no tiene sentido un proveedor
+  activo pero deshabilitado. Confirmado con Groq real: **2.5s** para generar una
+  rutina completa, contra 30-40s de Ollama en CPU.
+- **Privacidad**: los datos de perfil (incluidas lesiones/patologías) viajan tal cual
+  dentro del prompt al proveedor que esté activo — antes solo a Ollama local, ahora
+  potencialmente a un proveedor cloud. No se agregó ninguna anonimización; es una
+  decisión de producto pendiente si se quiere (aviso en el panel al activar un
+  proveedor cloud, o mantener Ollama activo para generaciones con datos sensibles).
+
+### Paridad de IA en Flutter + legibilidad de los registros generados
+
+- **Flutter**: se agregaron `generateWorkout`/`generateMealPlan` (mismo patrón que la
+  web: `WorkoutApi`/`NutritionApi` + `WorkoutActions`/`NutritionActions` + diálogo con
+  loading state), botón ✨ en el AppBar de Rutinas/Nutrición. `flutter analyze` limpio;
+  no se pudo verificar a ojo en esta sesión por una limitación del entorno (el panel
+  de Browser no compone capturas), se dejó un `flutter run -d web-server` corriendo en
+  `localhost:5050` para que el usuario lo probara directamente.
+- **Legibilidad de rutinas generadas**: `"3 x 8-12"` (jerga) → `"3 series · 8-12 reps"`.
+  Planes de nutrición no tenían numeración de día, solo la fecha pelada → se agregó
+  `"Día N · fecha"`. Aplicado en web y Flutter.
+- **`measurement_type` en el catálogo de ejercicios** (migración V12): la Plancha
+  (único ejercicio isométrico real del catálogo, verificado por su propia descripción
+  "Isométrico...") mostraba `"3 series · 30-60 reps"` cuando en realidad son 30-60
+  **segundos** de sostén, no repeticiones. `workout_exercises.measurement_type`
+  (`'reps'` default | `'duration'`) se propaga a `Exercise` → DTO → `formatSetsReps`
+  en ambas plataformas, que ahora muestra `"seg"` en vez de `"reps"` cuando corresponde.
+  Cardio (Carrera continua, Bicicleta, etc.) queda fuera de este fix a propósito —
+  se prescribe típicamente en minutos, no segundos, y resolverlo bien requeriría una
+  unidad adicional; no estaba en el alcance de lo reportado.
+- **Detalle de ejercicio al tocar el nombre**: `videoUrl`/`imageUrl`/`instructions` ya
+  existían en el schema desde la Fase 2 (nunca se habían expuesto en la UI). Ahora
+  tocar el nombre de un ejercicio (en una rutina o durante una sesión) abre un diálogo
+  con categoría/dificultad/equipo, imagen o placeholder, link a video o aviso de que
+  no hay, e instrucciones — estas últimas con contenido real y completo desde el seed
+  original (V6/V10), simplemente no se mostraban. **No se inventaron URLs de
+  video/imagen** — quedan `null` hasta que se carguen reales (edición manual en BD o
+  una futura pantalla de administración de catálogo).
+
+### Catálogo de ejercicios ampliado a 106 + filtro para la IA
+
+- **52 → 106 ejercicios** (migraciones V13/V14) usando `free-exercise-db` (GitHub,
+  licencia Unlicense/dominio público, sin API key, sin rate limit) como referencia —
+  54 ejercicios nuevos con nombre/descripción/instrucciones traducidos y adaptados
+  (no traducción literal), categoría/equipamiento mapeados a nuestro schema, músculos
+  asignados, `measurement_type` correcto e imagen real verificada (HTTP 200 antes de
+  escribir la migración). Cubre huecos reales: antebrazos (no existía ningún
+  ejercicio), más variedad de pecho/espalda/hombro, estiramientos/movilidad,
+  kettlebell, bandas elásticas.
+- Se frenó en 106, no en los 150-200 pedidos originalmente — seguir sumando empieza a
+  exigir traducir/curar movimientos cada vez más de nicho, se priorizó calidad sobre
+  cantidad. Documentado como decisión consciente, no como límite técnico.
+- **Filtro de catálogo antes de mandarlo a la IA** (`WorkoutAiGenerator.filterByEquipment`):
+  con 106 ejercicios, mandar la lista completa en cada prompt infla el tamaño del
+  request y le da a la IA más variantes parecidas entre las que confundirse. Ahora se
+  filtra por el equipamiento del perfil del usuario (bodyweight siempre incluido; si
+  el perfil no tiene equipamiento cargado, o el filtro deja <15 ejercicios, se manda
+  el catálogo completo en vez de arriesgar una rutina pobre). Verificado con Groq real:
+  perfil con mancuernas+bodyweight redujo 106→61 líneas de catálogo, generó en 3.3s.
+
+### Rediseño visual (dirección "energético/motivador", elegida por el usuario)
+
+Diagnóstico antes de tocar nada: el sistema de tokens (verde+turquesa) ya existía
+desde la Fase 3 pero casi no se usaba en la práctica — todo eran tarjetas blancas
+sobre gris clarito, sin acentos de color, cero imágenes en las listas pese a tener
+ya 106 fotos reales de ejercicios.
+
+- **Tokens** (`core/theme/tokens.css`): paleta más saturada/vívida, nuevo color
+  `--highlight` (naranja cálido) para rachas/badges "generado con IA", nuevo
+  `--gradient-hero` para banners.
+- **`HeroBanner`** y **`EmptyState`** (`web/src/components/`, nuevos, compartidos):
+  banner con gradiente + stats rápidas al tope de Rutinas/Nutrición/Progreso (en vez
+  de un `<h1>` pelado); estados vacíos con ícono en círculo de color en vez de texto
+  gris centrado.
+- **Tarjetas con identidad de color**: ícono por objetivo/categoría (verde=fuerza,
+  turquesa=cardio, etc.), badge ✨ en lo generado con IA.
+- **`ExerciseThumb`** (nuevo): las fotos reales del catálogo ahora se ven en el
+  picker de ejercicios, el detalle de rutina y las sesiones — antes de esto, las
+  imágenes que agregamos no se mostraban en ningún lado excepto el diálogo de detalle.
+- **`AppShell`**: logo con marca de color, barra de gradiente superior, estado activo
+  de nav con fondo en vez de solo cambio de color de texto.
+- Verificado responsive en mobile (375px, sin overflow horizontal) y en desktop.
+
+### Cierre de la Fase 4: USDA, catálogo de recetas, sustitución y ajuste de calorías
+
+Decisión explícita del usuario: el panel `/admin/ai` (multi-proveedor) **queda solo en
+la web a propósito** — no se porta a Flutter. El resto de los pendientes se cerró en la
+misma entrega.
+
+- **Ingredientes desde USDA FoodData Central**: 60 → 206. Igual que con
+  `free-exercise-db`, se usó la descarga directa del dataset SR Legacy
+  (`fdc.nal.usda.gov/fdc-datasets/...sr_legacy_food_json_2018-04.zip`) — dominio
+  público (CC0), **sin API key**, sin necesidad de que el usuario genere nada. 146
+  ingredientes nuevos con nombres traducidos y valores nutricionales reales de USDA
+  (no estimados), sin duplicados con el catálogo original.
+- **Catálogo de recetas**: 27 → 60. 33 recetas nuevas usando el catálogo de
+  ingredientes ampliado; los macros por porción se calculan de verdad a partir de los
+  ingredientes y cantidades reales de cada receta (mismo criterio que las 27 originales
+  de V6/V10), no están inventados.
+- **Sustitución de ingredientes con IA**: se descubrió que el módulo `nutrition` ya
+  tenía la tabla `nutrition_substitutions` y el dominio `Substitution` armados desde la
+  Fase 2 (`reason` limitado a `allergy|intolerance|unavailable|preference`), pero sin
+  escritura ni IA — solo lectura. Se completó: `NutritionSubstitutionAiGenerator`
+  (mismo patrón que `WorkoutAiGenerator`) resuelve un sustituto real del catálogo,
+  filtrado por la misma categoría del ingrediente original cuando hay suficientes
+  opciones, y lo persiste. Nueva UI: `RecipeDetailDialog` (el mismo patrón que
+  `ExerciseDetailDialog` — las recetas tampoco tenían pantalla de detalle hasta ahora)
+  con botón "Sustituir" por ingrediente. Verificado con Groq real: "Palta" por alergia
+  → sugirió "Aceite de oliva" (grasas/calorías similares, no es el mismo alérgeno) en
+  ~2s, con explicación.
+- **Ajuste de calorías según progreso**: `NutritionCalorieAdjuster` calcula la
+  tendencia de peso reciente (`progress_entries`) de forma **determinística en
+  código**, no con IA — a propósito, un modelo chico no es confiable haciendo
+  aritmética de tendencias. Si el usuario declaró `lose_fat` pero no está bajando (o
+  `gain_muscle` pero no está subiendo), ajusta el objetivo calórico ±250 kcal y le pide
+  a la IA que regenere las comidas dentro de ese nuevo presupuesto, mismo rango de días
+  que el plan original. Verificado real: perfil `lose_fat` + peso estancado (80kg dos
+  veces en 15 días) → 2500 kcal bajó a 2250 kcal exactas, plan regenerado en 2.2s.
+- Ambas features nuevas (sustitución, ajuste de calorías) quedaron **solo en web por
+  ahora** — no se portaron a Flutter en esta entrega (a diferencia de generación de
+  rutina/plan, que sí tienen paridad). Pendiente si se quiere completar más adelante.
+
+### Pendiente
+
+- [ ] Paridad Flutter de sustitución de ingredientes y ajuste de calorías.
+- [ ] Commit + push a GitHub — pendiente hasta cerrar toda la Fase 4 (pedido explícito
+      del usuario). Con esta entrega, la Fase 4 queda funcionalmente completa.
 
 ## Fase 5 — Testing (PLAN)
 

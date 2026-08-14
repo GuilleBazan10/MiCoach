@@ -46,8 +46,12 @@ jjwt-jackson = { module = "io.jsonwebtoken:jjwt-jackson", version.ref = "jjwt" }
 # --- MinIO / S3 ---
 minio = { module = "io.minio:minio", version = "8.5.12" }
 
-# --- IA (se añade en Fase 4) ---
+# --- IA (Fase 4) ---
 langchain4j = { module = "dev.langchain4j:langchain4j", version = "0.35.0" }
+langchain4j-ollama = { module = "dev.langchain4j:langchain4j-ollama", version = "0.35.0" }
+# API compatible con OpenAI: sirve para Groq y OpenRouter (solo cambia la baseUrl).
+langchain4j-open-ai = { module = "dev.langchain4j:langchain4j-open-ai", version = "0.35.0" }
+langchain4j-google-ai-gemini = { module = "dev.langchain4j:langchain4j-google-ai-gemini", version = "0.35.0" }
 
 # --- Testing ---
 testcontainers-postgresql = { module = "org.testcontainers:postgresql" }

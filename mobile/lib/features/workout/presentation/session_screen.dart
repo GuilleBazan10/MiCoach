@@ -173,6 +173,8 @@ class _SessionBody extends ConsumerWidget {
               subtitle: Text([
                 if (exercise.setsDone != null) '${exercise.setsDone} series',
                 if (exercise.reps != null) '${exercise.reps} reps',
+                if (exercise.durationSeconds != null) '${exercise.durationSeconds} seg',
+                if (exercise.distanceMeters != null) '${exercise.distanceMeters} m',
                 if (exercise.weightKg != null) '${exercise.weightKg} kg',
                 if (exercise.rpe != null) 'RPE ${exercise.rpe}',
               ].join(' · ')),

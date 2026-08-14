@@ -23,9 +23,11 @@ import java.util.List;
 public class WorkoutService implements WorkoutUseCase {
 
     private final WorkoutRepository repository;
+    private final WorkoutAiGenerator aiGenerator;
 
-    public WorkoutService(WorkoutRepository repository) {
+    public WorkoutService(WorkoutRepository repository, WorkoutAiGenerator aiGenerator) {
         this.repository = repository;
+        this.aiGenerator = aiGenerator;
     }
 
     // ------------------------- Catálogo -------------------------
@@ -78,6 +80,16 @@ public class WorkoutService implements WorkoutUseCase {
         Workout workout = requireOwnedWorkout(userId, workoutId);
         workout.update(data.name(), data.description(), data.objective(), data.level(),
                 data.durationWeeks(), toDays(data.days()));
+        return repository.saveWorkout(workout);
+    }
+
+    @Override
+    @Transactional
+    public Workout generateWorkout(Long userId, String goal) {
+        List<Exercise> catalog = repository.findExercises(new ExerciseFilter(null, null, null, null));
+        WorkoutData data = aiGenerator.generate(userId, goal, catalog);
+        Workout workout = Workout.createAiGenerated(userId, data.name(), data.description(), data.objective(),
+                data.level(), data.durationWeeks(), toDays(data.days()));
         return repository.saveWorkout(workout);
     }
 

@@ -10,7 +10,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../auth/application/auth_providers.dart';
 import '../application/workout_providers.dart';
 import '../domain/workout.dart';
-import 'widgets/exercise_name_text.dart';
+import 'widgets/planned_exercise_row.dart';
 import 'workout_labels.dart';
 
 class WorkoutDetailScreen extends ConsumerWidget {
@@ -122,14 +122,7 @@ class _WorkoutDetailBody extends ConsumerWidget {
                       onPressed: () => _startSession(context, ref, day.id),
                     ),
                 ]),
-                for (final exercise in day.exercises)
-                  Padding(
-                    padding: const EdgeInsets.only(top: AppSpacing.xs),
-                    child: Row(children: [
-                      Expanded(child: ExerciseNameText(exerciseId: exercise.exerciseId)),
-                      Text('${exercise.sets ?? '-'} x ${exercise.repsMin ?? '?'}-${exercise.repsMax ?? '?'}'),
-                    ]),
-                  ),
+                for (final exercise in day.exercises) PlannedExerciseRow(exercise: exercise),
               ]),
             ),
           ),

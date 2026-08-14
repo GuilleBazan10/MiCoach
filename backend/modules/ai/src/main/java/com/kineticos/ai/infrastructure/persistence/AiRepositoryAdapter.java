@@ -2,6 +2,7 @@ package com.kineticos.ai.infrastructure.persistence;
 
 import com.kineticos.ai.application.port.in.AiUseCase.GenerationLogFilter;
 import com.kineticos.ai.application.port.out.AiRepository;
+import com.kineticos.ai.domain.AiProviderConfig;
 import com.kineticos.ai.domain.ChatMessage;
 import com.kineticos.ai.domain.Conversation;
 import com.kineticos.ai.domain.GenerationLog;
@@ -17,19 +18,51 @@ import java.util.Optional;
 @Component
 public class AiRepositoryAdapter implements AiRepository {
 
+    private final AiProviderConfigJpaRepository providerConfigRepository;
     private final PromptJpaRepository promptRepository;
     private final ConversationJpaRepository conversationRepository;
     private final ChatMessageJpaRepository chatMessageRepository;
     private final GenerationLogJpaRepository generationLogRepository;
 
-    public AiRepositoryAdapter(PromptJpaRepository promptRepository,
+    public AiRepositoryAdapter(AiProviderConfigJpaRepository providerConfigRepository,
+                               PromptJpaRepository promptRepository,
                                ConversationJpaRepository conversationRepository,
                                ChatMessageJpaRepository chatMessageRepository,
                                GenerationLogJpaRepository generationLogRepository) {
+        this.providerConfigRepository = providerConfigRepository;
         this.promptRepository = promptRepository;
         this.conversationRepository = conversationRepository;
         this.chatMessageRepository = chatMessageRepository;
         this.generationLogRepository = generationLogRepository;
+    }
+
+    // ------------------------- Config de proveedores -------------------------
+
+    @Override
+    public List<AiProviderConfig> findProviderConfigs() {
+        return providerConfigRepository.findAllByOrderByProviderAsc().stream()
+                .map(AiProviderConfigMapper::toDomain).toList();
+    }
+
+    @Override
+    public Optional<AiProviderConfig> findProviderConfigByProvider(String provider) {
+        return providerConfigRepository.findByProvider(provider).map(AiProviderConfigMapper::toDomain);
+    }
+
+    @Override
+    public Optional<AiProviderConfig> findActiveProviderConfig() {
+        return providerConfigRepository.findByActiveTrue().map(AiProviderConfigMapper::toDomain);
+    }
+
+    @Override
+    public AiProviderConfig saveProviderConfig(AiProviderConfig config) {
+        return AiProviderConfigMapper.toDomain(
+                providerConfigRepository.save(AiProviderConfigMapper.toJpa(config)));
+    }
+
+    @Override
+    public void deactivateAllProviderConfigs() {
+        providerConfigRepository.deactivateAll();
     }
 
     // ------------------------- Prompts -------------------------
@@ -112,5 +145,10 @@ public class AiRepositoryAdapter implements AiRepository {
             logs = generationLogRepository.findAllByOrderByCreatedAtDesc();
         }
         return logs.stream().map(GenerationLogMapper::toDomain).toList();
+    }
+
+    @Override
+    public GenerationLog saveGenerationLog(GenerationLog log) {
+        return GenerationLogMapper.toDomain(generationLogRepository.save(GenerationLogMapper.toJpa(log)));
     }
 }

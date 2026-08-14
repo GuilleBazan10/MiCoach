@@ -78,6 +78,10 @@ public final class NutritionDtos {
         }
     }
 
+    /** {@code reason}: allergy|intolerance|unavailable|preference. */
+    public record SubstitutionGenerateRequest(@NotBlank String reason, @Size(max = 300) String notes) {
+    }
+
     // ------------------------- Planes de alimentación -------------------------
 
     public record MealPlanMealResponse(Long id, Long recipeId, String mealType, Integer orderIndex,
@@ -121,6 +125,9 @@ public final class NutritionDtos {
                                   @NotNull LocalDate startDate, @NotNull LocalDate endDate,
                                   Integer targetCalories, BigDecimal targetProteinG, BigDecimal targetCarbsG,
                                   BigDecimal targetFatG, @NotEmpty @Valid List<MealPlanDayRequest> days) {
+    }
+
+    public record GenerateMealPlanRequest(@NotBlank @Size(max = 1000) String goal) {
     }
 
     // ------------------------- Diario alimentario -------------------------

@@ -42,7 +42,7 @@ public class UserGoal {
                                   String targetUnit, LocalDate targetDate, Integer priority) {
         Instant now = Instant.now();
         return new UserGoal(null, profileId, goalType, targetValue, targetUnit, targetDate,
-                priority, true, now, now);
+                priority != null ? priority : 1, true, now, now);
     }
 
     public static UserGoal restore(Long id, Long profileId, String goalType, BigDecimal targetValue,

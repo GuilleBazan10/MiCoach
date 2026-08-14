@@ -46,13 +46,13 @@ public final class WorkoutDtos {
 
     public record ExerciseResponse(Long id, String name, String description, String category,
                                    List<String> equipment, String difficulty, String instructions,
-                                   String videoUrl, String imageUrl, boolean aiGenerated,
-                                   List<ExerciseMuscleResponse> muscles) {
+                                   String videoUrl, String imageUrl, String measurementType,
+                                   boolean aiGenerated, List<ExerciseMuscleResponse> muscles) {
 
         static ExerciseResponse from(Exercise e) {
             return new ExerciseResponse(e.getId(), e.getName(), e.getDescription(), e.getCategory(),
                     e.getEquipment(), e.getDifficulty(), e.getInstructions(), e.getVideoUrl(),
-                    e.getImageUrl(), e.isAiGenerated(),
+                    e.getImageUrl(), e.getMeasurementType(), e.isAiGenerated(),
                     e.getMuscles().stream().map(ExerciseMuscleResponse::from).toList());
         }
     }
@@ -108,6 +108,9 @@ public final class WorkoutDtos {
                                  @Size(max = 30) String objective, @Size(max = 15) String level,
                                  Integer durationWeeks,
                                  @NotEmpty @Valid List<WorkoutDayRequest> days) {
+    }
+
+    public record GenerateWorkoutRequest(@NotBlank @Size(max = 1000) String goal) {
     }
 
     // ------------------------- Sesiones -------------------------

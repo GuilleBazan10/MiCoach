@@ -10,8 +10,10 @@ import com.kineticos.nutrition.application.port.in.NutritionUseCase.MealPlanMeal
 import com.kineticos.nutrition.application.port.in.NutritionUseCase.RecipeFilter;
 import com.kineticos.nutrition.application.port.in.NutritionUseCase.ShoppingListData;
 import com.kineticos.nutrition.application.port.in.NutritionUseCase.ShoppingListItemData;
+import com.kineticos.nutrition.application.port.in.NutritionUseCase.SubstitutionRequestData;
 import com.kineticos.nutrition.presentation.NutritionDtos.IngredientResponse;
 import com.kineticos.nutrition.presentation.NutritionDtos.IntakeRequest;
+import com.kineticos.nutrition.presentation.NutritionDtos.GenerateMealPlanRequest;
 import com.kineticos.nutrition.presentation.NutritionDtos.IntakeResponse;
 import com.kineticos.nutrition.presentation.NutritionDtos.MealPlanDayRequest;
 import com.kineticos.nutrition.presentation.NutritionDtos.MealPlanMealRequest;
@@ -23,6 +25,7 @@ import com.kineticos.nutrition.presentation.NutritionDtos.ShoppingListItemReques
 import com.kineticos.nutrition.presentation.NutritionDtos.ShoppingListItemResponse;
 import com.kineticos.nutrition.presentation.NutritionDtos.ShoppingListRequest;
 import com.kineticos.nutrition.presentation.NutritionDtos.ShoppingListResponse;
+import com.kineticos.nutrition.presentation.NutritionDtos.SubstitutionGenerateRequest;
 import com.kineticos.nutrition.presentation.NutritionDtos.SubstitutionResponse;
 import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -75,6 +78,15 @@ public class NutritionController {
         return useCase.listSubstitutions(ingredientId).stream().map(SubstitutionResponse::from).toList();
     }
 
+    @PostMapping("/ingredients/{ingredientId}/substitutions/generate")
+    @ResponseStatus(HttpStatus.CREATED)
+    public SubstitutionResponse generateSubstitution(@AuthenticationPrincipal AuthenticatedUser user,
+                                                      @PathVariable Long ingredientId,
+                                                      @Valid @RequestBody SubstitutionGenerateRequest request) {
+        SubstitutionRequestData data = new SubstitutionRequestData(request.reason(), request.notes());
+        return SubstitutionResponse.from(useCase.generateSubstitution(user.id(), ingredientId, data));
+    }
+
     @GetMapping("/recipes")
     public List<RecipeResponse> listRecipes(@RequestParam(required = false) String mealCategory,
                                             @RequestParam(required = false) String difficulty,
@@ -108,11 +120,24 @@ public class NutritionController {
         return MealPlanResponse.from(useCase.createMealPlan(user.id(), toMealPlanData(request)));
     }
 
+    @PostMapping("/meal-plans/generate")
+    @ResponseStatus(HttpStatus.CREATED)
+    public MealPlanResponse generateMealPlan(@AuthenticationPrincipal AuthenticatedUser user,
+                                             @Valid @RequestBody GenerateMealPlanRequest request) {
+        return MealPlanResponse.from(useCase.generateMealPlan(user.id(), request.goal()));
+    }
+
     @PutMapping("/meal-plans/{mealPlanId}")
     public MealPlanResponse updateMealPlan(@AuthenticationPrincipal AuthenticatedUser user,
                                            @PathVariable Long mealPlanId,
                                            @Valid @RequestBody MealPlanRequest request) {
         return MealPlanResponse.from(useCase.updateMealPlan(user.id(), mealPlanId, toMealPlanData(request)));
+    }
+
+    @PostMapping("/meal-plans/{mealPlanId}/adjust-calories")
+    public MealPlanResponse adjustMealPlanCalories(@AuthenticationPrincipal AuthenticatedUser user,
+                                                    @PathVariable Long mealPlanId) {
+        return MealPlanResponse.from(useCase.adjustMealPlanCalories(user.id(), mealPlanId));
     }
 
     @DeleteMapping("/meal-plans/{mealPlanId}")

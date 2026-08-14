@@ -30,6 +30,13 @@ public interface WorkoutUseCase {
 
     Workout createWorkout(Long userId, WorkoutData data);
 
+    /**
+     * Genera una rutina con IA (LangChain4j + Ollama, ver módulo {@code ai}) a partir de
+     * un pedido en lenguaje natural, la crea como propia del usuario ({@code aiGenerated
+     * = true}) y la devuelve ya persistida.
+     */
+    Workout generateWorkout(Long userId, String goal);
+
     Workout updateWorkout(Long userId, Long workoutId, WorkoutData data);
 
     void deleteWorkout(Long userId, Long workoutId);

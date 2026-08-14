@@ -29,6 +29,14 @@ public interface NutritionUseCase {
 
     List<Substitution> listSubstitutions(Long ingredientId);
 
+    /**
+     * Genera con IA una sustitución para un ingrediente (alergia/intolerancia/no
+     * disponible/preferencia), la resuelve contra el catálogo real y la persiste en
+     * {@code nutrition_substitutions} para reutilizarla después vía
+     * {@link #listSubstitutions}.
+     */
+    Substitution generateSubstitution(Long userId, Long ingredientId, SubstitutionRequestData data);
+
     // ------------------------- Planes de alimentación -------------------------
 
     List<MealPlan> listMealPlans(Long userId);
@@ -37,7 +45,22 @@ public interface NutritionUseCase {
 
     MealPlan createMealPlan(Long userId, MealPlanData data);
 
+    /**
+     * Genera un plan de alimentación con IA (LangChain4j + Ollama, ver módulo
+     * {@code ai}) a partir de un pedido en lenguaje natural y del perfil real del
+     * usuario, lo crea como propio ({@code aiGenerated = true}) y lo devuelve ya
+     * persistido.
+     */
+    MealPlan generateMealPlan(Long userId, String goal);
+
     MealPlan updateMealPlan(Long userId, Long mealPlanId, MealPlanData data);
+
+    /**
+     * Recalcula el objetivo calórico de un plan existente según la tendencia de peso
+     * reciente del usuario vs. su objetivo dietario, y regenera las comidas con IA
+     * dentro de ese nuevo presupuesto (mismo rango de días que el plan original).
+     */
+    MealPlan adjustMealPlanCalories(Long userId, Long mealPlanId);
 
     void deleteMealPlan(Long userId, Long mealPlanId);
 
@@ -66,6 +89,10 @@ public interface NutritionUseCase {
     void deleteShoppingListItem(Long userId, Long shoppingListId, Long itemId);
 
     record IngredientFilter(String category, String search) {
+    }
+
+    /** {@code reason}: allergy|intolerance|unavailable|preference (CHECK de nutrition_substitutions). */
+    record SubstitutionRequestData(String reason, String notes) {
     }
 
     record RecipeFilter(String mealCategory, String difficulty, String search) {

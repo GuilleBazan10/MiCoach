@@ -2,19 +2,21 @@
 // KineticOs — Home del módulo workout: mis rutinas / plantillas / historial.
 // =====================================================================
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'widgets/generate_workout_dialog.dart';
 import 'widgets/session_history_list.dart';
 import 'widgets/workout_list_view.dart';
 
-class WorkoutHomeScreen extends StatefulWidget {
+class WorkoutHomeScreen extends ConsumerStatefulWidget {
   const WorkoutHomeScreen({super.key});
 
   @override
-  State<WorkoutHomeScreen> createState() => _WorkoutHomeScreenState();
+  ConsumerState<WorkoutHomeScreen> createState() => _WorkoutHomeScreenState();
 }
 
-class _WorkoutHomeScreenState extends State<WorkoutHomeScreen> with SingleTickerProviderStateMixin {
+class _WorkoutHomeScreenState extends ConsumerState<WorkoutHomeScreen> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
@@ -34,6 +36,18 @@ class _WorkoutHomeScreenState extends State<WorkoutHomeScreen> with SingleTicker
     return Scaffold(
       appBar: AppBar(
         title: const Text('Rutinas'),
+        actions: [
+          AnimatedBuilder(
+            animation: _tabController,
+            builder: (context, _) => _tabController.index == 0
+                ? IconButton(
+                    icon: const Icon(Icons.auto_awesome),
+                    tooltip: 'Generar con IA',
+                    onPressed: () => showGenerateWorkoutDialog(context, ref),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
         bottom: TabBar(controller: _tabController, tabs: const [
           Tab(text: 'Mis rutinas'),
           Tab(text: 'Plantillas'),

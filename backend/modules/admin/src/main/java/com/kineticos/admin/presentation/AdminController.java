@@ -12,6 +12,7 @@ import com.kineticos.admin.presentation.AdminDtos.RoleResponse;
 import com.kineticos.admin.presentation.AdminDtos.UserRoleResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -26,12 +27,12 @@ import java.util.List;
 
 /**
  * Contratos REST del módulo admin (base path /api/v1/admin). Gobernanza interna: roles,
- * permisos, asignaciones y auditoría. Requiere JWT como el resto de la API; el filtro
- * por rol (ROLE_ADMIN) queda pendiente de una entrega futura que conecte los roles de
- * este módulo con los claims del JWT emitido por auth (ver docs/00-progress.md).
+ * permisos, asignaciones y auditoría. Requiere JWT + rol ROLE_ADMIN (los roles del token
+ * ahora vienen de {@code admin_user_roles}, ver {@code AdminUserRoleProvider}).
  */
 @RestController
 @RequestMapping("/api/v1/admin")
+@PreAuthorize("hasAuthority('ROLE_ADMIN')")
 public class AdminController {
 
     private final AdminUseCase useCase;

@@ -56,6 +56,17 @@ class WorkoutApi {
 
   Future<void> deleteWorkout(int id) => _dio.delete('/workouts/$id');
 
+  /// Genera una rutina con IA a partir de un pedido en lenguaje natural. Puede tardar
+  /// hasta un par de minutos (proveedor local por CPU) — timeout largo a propósito.
+  Future<Workout> generateWorkout(String goal) async {
+    final response = await _dio.post(
+      '/workouts/generate',
+      data: {'goal': goal},
+      options: Options(sendTimeout: const Duration(seconds: 10), receiveTimeout: const Duration(seconds: 180)),
+    );
+    return Workout.fromJson(response.data as Map<String, dynamic>);
+  }
+
   // ------------------------- Sesiones -------------------------
 
   Future<List<WorkoutSession>> listSessions() async {

@@ -85,6 +85,12 @@ class NutritionActions {
     _ref.invalidate(mealPlanListProvider);
   }
 
+  Future<MealPlan> generateMealPlan(String goal) async {
+    final generated = await _api.generateMealPlan(goal);
+    _ref.invalidate(mealPlanListProvider);
+    return generated;
+  }
+
   Future<void> logIntake({
     int? recipeId,
     required DateTime foodDate,

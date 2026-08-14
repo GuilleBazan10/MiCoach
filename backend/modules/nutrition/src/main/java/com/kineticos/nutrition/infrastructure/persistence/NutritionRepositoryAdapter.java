@@ -138,6 +138,14 @@ public class NutritionRepositoryAdapter implements NutritionRepository {
                 .toList();
     }
 
+    @Override
+    public Substitution saveSubstitution(Substitution substitution) {
+        SubstitutionJpa saved = substitutionRepository.save(SubstitutionMapper.toJpa(substitution));
+        String substituteName = ingredientRepository.findById(saved.getSubstituteIngredientId())
+                .map(IngredientJpa::getName).orElse("");
+        return SubstitutionMapper.toDomain(saved, substituteName);
+    }
+
     // ------------------------- Planes de alimentación -------------------------
 
     @Override

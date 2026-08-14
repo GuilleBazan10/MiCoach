@@ -117,6 +117,7 @@ igual que el resto de la API salvo auth).
 | `GET /workouts?templates=false\|true` | `false` (default) = rutinas propias del usuario. `true` = plantillas globales (`user_id` nulo). |
 | `GET /workouts/{workoutId}` | Rutina con sus días y ejercicios prescritos. `404` si no existe o no es propia ni plantilla. |
 | `POST /workouts` | Crea una rutina propia con días y ejercicios anidados. `201`. |
+| `POST /workouts/generate` | **(Fase 4)** Genera una rutina con IA a partir de un pedido en lenguaje natural (`{"goal": "..."}`). Usa el catálogo real de ejercicios (el nombre que devuelve la IA se resuelve contra `workout_exercises`; lo que no matchea se descarta). Crea la rutina con `aiGenerated: true`. `201` — mismo `WorkoutResponse` que `POST /workouts`. `502 INTERNAL_ERROR` si el proveedor de IA falla o devuelve algo no interpretable (ver `docs/00-progress.md` § Fase 4). |
 | `PUT /workouts/{workoutId}` | Reemplaza nombre/objetivo/nivel y **todos** los días/ejercicios (estrategia replace). Solo el dueño. `200` / `404` si no es propia. |
 | `DELETE /workouts/{workoutId}` | Borra la rutina (cascada a días y ejercicios). `204` / `404` si no es propia. |
 
@@ -170,6 +171,7 @@ Base path: `/api/v1/nutrition` (todos los endpoints requieren `Authorization: Be
 | `GET /nutrition/meal-plans` | Planes propios del usuario. |
 | `GET /nutrition/meal-plans/{mealPlanId}` | Plan con sus días y comidas. `404` si no es propio. |
 | `POST /nutrition/meal-plans` | Crea un plan con días/comidas anidados. `201`. |
+| `POST /nutrition/meal-plans/generate` | **(Fase 4)** Genera un plan con IA a partir de un pedido en lenguaje natural (`{"goal": "..."}`) y del perfil real del usuario (objetivo dietario, peso, TDEE, patologías). Usa el catálogo real de recetas. Crea el plan con `aiGenerated: true`. `201` — mismo `MealPlanResponse` que `POST /nutrition/meal-plans`. `502 INTERNAL_ERROR` si el proveedor de IA falla o devuelve algo no interpretable. |
 | `PUT /nutrition/meal-plans/{mealPlanId}` | Reemplaza datos y **todos** los días/comidas (estrategia replace, igual que rutinas). `200`. |
 | `DELETE /nutrition/meal-plans/{mealPlanId}` | Borra el plan (cascada a días y comidas). `204`. |
 
@@ -272,11 +274,18 @@ propia en ningún frontend (ni mobile ni web).
 Errores: `404 NOT_FOUND` (rol/permiso inexistente), `409 CONFLICT` (borrar rol del
 sistema), `401 UNAUTHORIZED` sin JWT.
 
-## Módulo ai (implementado — base técnica, sin proveedor real todavía)
+## Módulo ai (implementado — persistencia + generación real vía Ollama)
 
-Base path: `/api/v1/ai` (JWT requerido). **No hay integración real con LangChain4j ni
-Ollama en esta fase** — eso es la Fase 4 completa. Acá solo vive la persistencia y la
-API para prompts versionados, historial de chat y auditoría de generación.
+Base path: `/api/v1/ai` (JWT requerido). Desde la Fase 4 hay integración real con
+LangChain4j (Strategy Pattern, `AiProviderStrategy` — `ollama`, `groq`, `openrouter` y
+`gemini`; agregar otro proveedor cloud es implementar la interfaz sin tocar el resto).
+No expone un endpoint genérico de "generar" — cada módulo consumidor (`workout` y
+`nutrition`; sustituciones y ajuste de calorías pendientes) expone su propio endpoint
+específico (ver `POST /workouts/generate` y `POST /nutrition/meal-plans/generate`
+arriba) que internamente llama al caso de uso `AiUseCase.generate(userId, promptSlug,
+variables)` de este módulo, que resuelve el prompt activo, llama al **proveedor
+activo** (tabla `ai_provider_configs`, editable desde el panel admin sin redeploy — ver
+más abajo) y audita en `ai_generation_logs`.
 
 | Endpoint | Descripción |
 |---|---|
@@ -289,7 +298,18 @@ API para prompts versionados, historial de chat y auditoría de generación.
 | `POST /ai/conversations` | Crea una conversación (`topic` opcional: nutrition/workout/general). `201`. |
 | `PUT /ai/conversations/{conversationId}/archive` | Marca la conversación como archivada. |
 | `POST /ai/conversations/{conversationId}/messages` | Agrega un mensaje (`role`: user/assistant/system/tool, `content`, `provider`/`model`/`tokenUsage` opcionales). `201`. |
-| `GET /ai/generation-logs` | Auditoría de generaciones. Filtros opcionales `userId`/`promptSlug`. Solo lectura: vacío hasta que algún módulo genere contenido con IA de verdad. |
+| `GET /ai/generation-logs` | Auditoría de generaciones (contexto de entrada, salida cruda, `durationMs`, `status`). Filtros opcionales `userId`/`promptSlug`. Se escribe una fila por cada intento de `POST /workouts/generate`, éxito o error. |
+
+**Panel admin de proveedores** — base path `/api/v1/admin/ai/providers`, requiere
+`ROLE_ADMIN` (`403 FORBIDDEN` si no). Los 4 proveedores son filas fijas sembradas por
+migración (V11), no se crean por API, solo se editan/activan:
+
+| Endpoint | Descripción |
+|---|---|
+| `GET /admin/ai/providers` | Lista los 4 proveedores con su config. `apiKey` nunca se devuelve, solo `hasApiKey: boolean`. |
+| `PUT /admin/ai/providers/{provider}` | Edita `displayName`/`baseUrl`/`model`/`enabled`. `apiKey` opcional: vacío/ausente = mantiene la key ya guardada (se cifra con AES/GCM antes de persistir). |
+| `POST /admin/ai/providers/{provider}/activate` | Lo activa (desactiva cualquier otro). `409 CONFLICT` si el proveedor está `enabled: false`. |
+| `POST /admin/ai/providers/{provider}/test` | Llama al proveedor con un prompt corto sin tocar la config activa. `200` siempre — el resultado real va en el body (`{"ok": boolean, "message": string}`). |
 
 Errores: `404 NOT_FOUND` (prompt/conversación inexistente o de otro usuario),
 `400 VALIDATION_ERROR`, `401 UNAUTHORIZED` sin JWT.

@@ -2,20 +2,22 @@
 // KineticOs — Home del módulo nutrition: planes / diario / compras.
 // =====================================================================
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import 'widgets/daily_intake_view.dart';
+import 'widgets/generate_meal_plan_dialog.dart';
 import 'widgets/meal_plan_list_view.dart';
 import 'widgets/shopping_list_list_view.dart';
 
-class NutritionHomeScreen extends StatefulWidget {
+class NutritionHomeScreen extends ConsumerStatefulWidget {
   const NutritionHomeScreen({super.key});
 
   @override
-  State<NutritionHomeScreen> createState() => _NutritionHomeScreenState();
+  ConsumerState<NutritionHomeScreen> createState() => _NutritionHomeScreenState();
 }
 
-class _NutritionHomeScreenState extends State<NutritionHomeScreen> with SingleTickerProviderStateMixin {
+class _NutritionHomeScreenState extends ConsumerState<NutritionHomeScreen> with SingleTickerProviderStateMixin {
   late final TabController _tabController;
 
   @override
@@ -35,6 +37,18 @@ class _NutritionHomeScreenState extends State<NutritionHomeScreen> with SingleTi
     return Scaffold(
       appBar: AppBar(
         title: const Text('Nutrición'),
+        actions: [
+          AnimatedBuilder(
+            animation: _tabController,
+            builder: (context, _) => _tabController.index == 0
+                ? IconButton(
+                    icon: const Icon(Icons.auto_awesome),
+                    tooltip: 'Generar con IA',
+                    onPressed: () => showGenerateMealPlanDialog(context, ref),
+                  )
+                : const SizedBox.shrink(),
+          ),
+        ],
         bottom: TabBar(controller: _tabController, tabs: const [
           Tab(text: 'Planes'),
           Tab(text: 'Diario'),
