@@ -1,18 +1,18 @@
 # =====================================================================
-# KineticOs — Configuración de la aplicación Spring Boot
+# MiCoach — Configuración de la aplicación Spring Boot
 # Todos los valores vienen de variables de entorno (.env) con defaults
 # para desarrollo local. NUNCA pongas secretos en este archivo.
 # =====================================================================
 spring:
   application:
-    name: kineticos
+    name: micoach
 
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:kineticos}
-    username: ${POSTGRES_USER:kineticos}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:micoach}?sslmode=${POSTGRES_SSLMODE:prefer}
+    username: ${POSTGRES_USER:micoach}
     password: ${POSTGRES_PASSWORD:change_me_strong_password}
     hikari:
       maximum-pool-size: 10
@@ -55,16 +55,25 @@ management:
       probes:
         enabled: true
       show-details: always
+  health:
+    # Redis y RabbitMQ están declarados (starters) para features futuras pero
+    # todavía no los usa ningún flujo real. Sin esto, /actuator/health devuelve
+    # 503 apenas no estén disponibles (p. ej. en Render, que no los provisiona),
+    # tumbando el health check de la plataforma por un servicio que nadie usa.
+    redis:
+      enabled: false
+    rabbit:
+      enabled: false
 
 # ================== Configuración de la app ==================
-kineticos:
+micoach:
   security:
     jwt:
       secret: ${JWT_SECRET:}
       expiration-ms: ${JWT_EXPIRATION_MS:900000}
       refresh-expiration-ms: ${REFRESH_TOKEN_EXPIRATION_MS:604800000}
     totp:
-      issuer: ${TOTP_ISSUER:KineticOs}
+      issuer: ${TOTP_ISSUER:MiCoach}
     encryption-key: ${AES_SECRET:}
   # El proveedor de IA activo y sus credenciales ya no viven acá: se leen de la tabla
   # ai_provider_configs (sembrada en V11, editable desde /admin sin reiniciar el backend).

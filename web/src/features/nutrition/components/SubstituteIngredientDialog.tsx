@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Diálogo para pedirle a la IA un sustituto de un ingrediente
+// MiCoach — Diálogo para pedirle a la IA un sustituto de un ingrediente
 // (alergia/intolerancia/no disponible/preferencia). Se abre desde el detalle
 // de una receta, por ingrediente.
 // =====================================================================

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Lista de compras (mirror de NutritionDtos en backend).
+// MiCoach — Lista de compras (mirror de NutritionDtos en backend).
 // =====================================================================
 class ShoppingListItem {
   final int id;

@@ -1,7 +1,7 @@
-# KineticOs — App Flutter
-# Paquete raíz: com.kineticos  (org del comando flutter create)
-name: kineticos_mobile
-description: "KineticOs - Plataforma de salud y bienestar con IA."
+# MiCoach — App Flutter
+# Paquete raíz: com.micoach  (org del comando flutter create)
+name: micoach_mobile
+description: "MiCoach - Plataforma de salud y bienestar con IA."
 publish_to: "none"
 version: 0.1.0+1
 
@@ -61,5 +61,5 @@ flutter:
 # NOTA para quien continúe:
 # - Las versiones son caret (^): al hacer `flutter pub get`, Dart resuelve la última
 #   compatible. Si alguna versión dejó de existir, ajusta con `flutter pub upgrade`.
-# - Ejecuta ANTES:  flutter create . --org com.kineticos --project-name kineticos_mobile
+# - Ejecuta ANTES:  flutter create . --org com.micoach --project-name micoach_mobile
 #   para generar las carpetas de plataforma (android/ios/web/).

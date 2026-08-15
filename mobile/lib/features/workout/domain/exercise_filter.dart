@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Filtro de búsqueda del catálogo de ejercicios. Value type
+// MiCoach — Filtro de búsqueda del catálogo de ejercicios. Value type
 // (equality manual) para poder usarse como key de un FutureProvider.family.
 // =====================================================================
 class ExerciseFilter {

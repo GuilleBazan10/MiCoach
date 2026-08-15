@@ -1,4 +1,4 @@
-// KineticOs — Módulo shared
+// MiCoach — Módulo shared
 // Único módulo del que dependen todos. Utilidades, DTOs base, eventos base,
 // errores y seguridad base. Nada de lógica de negocio específica.
 dependencies {

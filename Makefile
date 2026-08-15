@@ -1,5 +1,5 @@
 # =====================================================================
-# KineticOs — Atajos de comandos
+# MiCoach — Atajos de comandos
 # En Windows usa los scripts de ./scripts (init-dev.ps1) o el wrapper.
 # =====================================================================
 .PHONY: help up down full-up full-down logs ps backend mobile migrate ai-seed clean

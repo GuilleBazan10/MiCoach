@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Cliente HTTP (Dio) centralizado.
+// MiCoach — Cliente HTTP (Dio) centralizado.
 // - Adjunta el JWT de acceso a cada request (salvo endpoints públicos de auth).
 // - Si una respuesta es 401, intenta refrescar el token una vez y reintenta.
 // - Si el refresh falla, limpia la sesión y notifica via [onSessionExpired]

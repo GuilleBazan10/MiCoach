@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Sección "Objetivos" del perfil.
+// MiCoach — Sección "Objetivos" del perfil.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

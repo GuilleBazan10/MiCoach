@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Diálogo para generar una rutina con IA a partir de un pedido en
+// MiCoach — Diálogo para generar una rutina con IA a partir de un pedido en
 // lenguaje natural. Equivalente a web/src/features/workout/components/GenerateWorkoutDialog.tsx.
 // ¡Puede tardar bastante! (llega hasta minutos con Ollama corriendo por CPU).
 // =====================================================================

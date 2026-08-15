@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Banner de cabecera con gradiente de marca para las pantallas
+// MiCoach — Banner de cabecera con gradiente de marca para las pantallas
 // home (Rutinas/Nutrición/Progreso). Reemplaza el <h1> plano por algo con
 // más presencia visual + chips de stats rápidas opcionales.
 // =====================================================================

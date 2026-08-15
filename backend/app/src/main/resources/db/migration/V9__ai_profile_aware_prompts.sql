@@ -1,5 +1,5 @@
 -- =====================================================================
--- KineticOs — V9: prompts de IA con perfil real del usuario + modelo más
+-- MiCoach — V9: prompts de IA con perfil real del usuario + modelo más
 -- rápido (llama3.2:1b en vez de llama3.2 3B — corre en CPU, sin GPU
 -- disponible, la diferencia de velocidad es significativa). También
 -- acota mucho más fuerte la cantidad de días: el primer intento real con

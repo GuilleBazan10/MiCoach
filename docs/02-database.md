@@ -1,4 +1,4 @@
-# KineticOs — Modelo de base de datos
+# MiCoach — Modelo de base de datos
 
 > **Estado: FASE 1 — Sub-entrega 1 COMPLETADA.** Diseño del modelo definido.
 > Falta (sub-entregas 2 y 3): migraciones Flyway + seed + verificación.

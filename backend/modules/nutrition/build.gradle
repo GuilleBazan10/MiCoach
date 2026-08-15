@@ -1,4 +1,4 @@
-// KineticOs — Módulo nutrition
+// MiCoach — Módulo nutrition
 // Recetas, planes, macros, sustituciones, lista de compra. Media en MinIO.
 dependencies {
     api project(':modules:shared')

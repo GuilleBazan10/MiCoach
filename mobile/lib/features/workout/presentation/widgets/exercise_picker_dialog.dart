@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Diálogo para buscar y elegir un ejercicio del catálogo.
+// MiCoach — Diálogo para buscar y elegir un ejercicio del catálogo.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

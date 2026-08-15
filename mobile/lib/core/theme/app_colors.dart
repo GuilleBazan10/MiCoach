@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Paleta de colores centralizada
+// MiCoach — Paleta de colores centralizada
 //
 // >>> CAMBIA AQUÍ EL DISEÑO <<<
 // Ej: el verde salud por el color de tu marca. Claro y oscuro por separado.

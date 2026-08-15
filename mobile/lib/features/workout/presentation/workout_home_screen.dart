@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Home del módulo workout: mis rutinas / plantillas / historial.
+// MiCoach — Home del módulo workout: mis rutinas / plantillas / historial.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

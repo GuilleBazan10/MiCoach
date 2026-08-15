@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Llamadas HTTP del módulo auth (/api/v1/auth).
+// MiCoach — Llamadas HTTP del módulo auth (/api/v1/auth).
 // =====================================================================
 import { apiClient } from '@/core/api/client';
 import type { AuthResponse, AuthUser } from '../domain/authTypes';

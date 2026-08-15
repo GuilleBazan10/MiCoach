@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Diálogo para registrar una métrica de seguimiento.
+// MiCoach — Diálogo para registrar una métrica de seguimiento.
 // =====================================================================
 import 'package:flutter/material.dart';
 

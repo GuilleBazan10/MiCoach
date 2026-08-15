@@ -1,4 +1,4 @@
-// KineticOs — Módulo workout
+// MiCoach — Módulo workout
 // Ejercicios, músculos, rutinas, generación de entrenamientos. Media en MinIO.
 dependencies {
     api project(':modules:shared')

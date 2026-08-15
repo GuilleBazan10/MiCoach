@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Medidas y espaciados centralizados
+// MiCoach — Medidas y espaciados centralizados
 // =====================================================================
 
 /// Escala de espaciado y radios de la app.

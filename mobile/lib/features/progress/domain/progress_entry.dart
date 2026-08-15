@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Métrica de seguimiento (mirror de ProgressDtos en backend).
+// MiCoach — Métrica de seguimiento (mirror de ProgressDtos en backend).
 // =====================================================================
 class ProgressEntry {
   final int id;

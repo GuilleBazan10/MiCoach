@@ -1,5 +1,5 @@
 -- =====================================================================
--- KineticOs — V4: Schema progress + notification
+-- MiCoach — V4: Schema progress + notification
 -- Módulos: progress (seguimiento) y notification (avisos)
 -- Documentación: docs/02-database.md
 -- =====================================================================

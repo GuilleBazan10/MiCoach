@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Cliente REST del módulo nutrition (/api/v1/nutrition).
+// MiCoach — Cliente REST del módulo nutrition (/api/v1/nutrition).
 // Paridad con mobile/lib/features/nutrition/infrastructure/nutrition_api.dart.
 // =====================================================================
 import { apiClient } from '@/core/api/client';

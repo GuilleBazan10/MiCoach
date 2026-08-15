@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Home del módulo nutrition: planes / diario / compras.
+// MiCoach — Home del módulo nutrition: planes / diario / compras.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

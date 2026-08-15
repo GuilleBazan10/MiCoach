@@ -1,4 +1,4 @@
-// KineticOs — Módulo ai
+// MiCoach — Módulo ai
 // Estrategias de IA (LangChain4j + Strategy Pattern), prompts versionados, chat.
 // Se completa en la Fase 4.
 dependencies {

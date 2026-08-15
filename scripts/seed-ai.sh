@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # =====================================================================
-# KineticOs — Descarga los modelos de IA locales (Ollama)
+# MiCoach — Descarga los modelos de IA locales (Ollama)
 # El modelo por defecto es llama3.2. Cámbialo en .env (OLLAMA_MODEL).
 # =====================================================================
 set -e

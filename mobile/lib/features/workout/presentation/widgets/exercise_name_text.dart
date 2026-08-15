@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Resuelve y muestra el nombre de un ejercicio por id
+// MiCoach — Resuelve y muestra el nombre de un ejercicio por id
 // (los planned exercises del backend solo traen exerciseId).
 // Tappable: abre el detalle (imagen/video/instrucciones) del ejercicio.
 // =====================================================================

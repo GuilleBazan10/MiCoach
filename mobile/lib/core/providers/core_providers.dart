@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Providers transversales (Riverpod): storage + cliente HTTP.
+// MiCoach — Providers transversales (Riverpod): storage + cliente HTTP.
 // Los providers de cada feature dependen de estos para construir sus
 // repositorios (ver features/*/infrastructure).
 // =====================================================================

@@ -1,4 +1,4 @@
-# KineticOs — Registro de progreso
+# MiCoach — Registro de progreso
 
 > **LEER PRIMERO.** Este archivo es el "termómetro" del proyecto. Cualquier IA (o persona)
 > que continúe el desarrollo debe empezar leyendo este documento para saber exactamente qué
@@ -33,7 +33,7 @@
 ### Verificaciones realizadas (2026-08-11)
 - `docker compose config` (core y full) → sin errores.
 - Backend **compila**: `./gradlew build -x test` → BUILD SUCCESSFUL. Se generó
-  `backend/app/build/libs/kineticos.jar` (~91 MB). Gradle descargó el JDK 21
+  `backend/app/build/libs/micoach.jar` (~91 MB). Gradle descargó el JDK 21
   automáticamente (toolchain + plugin foojay).
 - Git inicializado (commit pendiente de hacer).
 
@@ -44,14 +44,14 @@
   En Windows, el fix es `setx JAVA_HOME "C:\Program Files\Eclipse Adoptium\jdk-21..."`.
 - **Gradle** no instalado → se usa el wrapper (funciona, ya descargó 8.10.2).
 - **PostgreSQL** se levanta con `docker compose up -d postgres` (puerto 5432, user/db
-  `kineticos`). Las credenciales de Flyway salen del `.env` de la raíz.
+  `micoach`). Las credenciales de Flyway salen del `.env` de la raíz.
 - **Flutter** no instalado. Antes de correr la app:
-  `cd mobile && flutter create . --org com.kineticos --project-name kineticos_mobile`
+  `cd mobile && flutter create . --org com.micoach --project-name micoach_mobile`
   (genera las carpetas android/ios/web/).
 
 ### Acción recomendada antes de Fase 1
 Ejecutar una vez (consulta `docs/01-architecture.md` sección "Renombrar el proyecto"
-si el nombre KineticOs va a cambiar, y hazlo ANTES de la Fase 1 para no renombrar
+si el nombre MiCoach va a cambiar, y hazlo ANTES de la Fase 1 para no renombrar
 migraciones/paquetes con código ya escrito).
 
 ## Fase 1 — Base de datos (EN CURSO)
@@ -326,8 +326,8 @@ backend (Fase 2).
 
 - Flutter no estaba instalado en la máquina de desarrollo. Se instaló manualmente (sin
   sudo) descargando el SDK estable 3.44.9 y extrayéndolo en `~/development/flutter`
-  (agregar `~/development/flutter/bin` al `PATH`). `flutter create . --org com.kineticos
-  --project-name kineticos_mobile --platforms=web,linux,android` generó las carpetas de
+  (agregar `~/development/flutter/bin` al `PATH`). `flutter create . --org com.micoach
+  --project-name micoach_mobile --platforms=web,linux,android` generó las carpetas de
   plataforma (aditivo, no tocó `lib/` ni `pubspec.yaml`).
 - **`pubspec.yaml` actualizado** con `flutter pub upgrade --major-versions`: las versiones
   originales (Riverpod 2.x, go_router 14.x, freezed 2.x, etc.) no resolvían contra el SDK
@@ -668,7 +668,7 @@ del proyecto — empieza por rutinas (la más directa de verificar end-to-end).
       `OllamaProviderStrategy` (infraestructura, LangChain4j `OllamaChatModel`). Agregar
       un proveedor cloud (OpenAI/Claude/Gemini/Mistral/DeepSeek) es implementar esa
       interfaz y no toca nada más — `AiService` resuelve la estrategia activa por
-      `kineticos.ai.provider` (`AI_PROVIDER` en `.env`) entre todas las que Spring
+      `micoach.ai.provider` (`AI_PROVIDER` en `.env`) entre todas las que Spring
       inyecta como `List<AiProviderStrategy>`.
 - [x] **`AiUseCase.generate(userId, promptSlug, variables)`**: caso de uso genérico y
       reutilizable — busca el prompt activo de ese slug, reemplaza `{{variable}}` por
@@ -823,7 +823,7 @@ directa es un modelo más grande (ida y vuelta velocidad/calidad) o un proveedor
 ### Panel de admin: múltiples proveedores de IA (Groq, OpenRouter, Gemini además de Ollama)
 
 Se usó exactamente la puerta que dejó abierta el Strategy Pattern: la selección de
-proveedor pasó de ser una property estática (`kineticos.ai.provider` en `application.yml`,
+proveedor pasó de ser una property estática (`micoach.ai.provider` en `application.yml`,
 requería reiniciar el backend) a una tabla `ai_provider_configs` (migración V11)
 editable en runtime desde `/admin/ai` — sin redeploy.
 
@@ -1013,6 +1013,6 @@ Revisar y completar todos los ADRs.
 1. **Arquitectura:** Monolito modular (Gradle multi-módulo), NO microservicios por ahora.
    Cada módulo es un bounded context extraíble a microservicio. Ver ADR-001.
 2. **Regla de oro:** sin secretos en código, todo vía `.env` (ver `.env.example`).
-3. **Convención de paquete:** `com.kineticos` + nombre de módulo.
+3. **Convención de paquete:** `com.micoach` + nombre de módulo.
 4. **Renombrar el proyecto:** ver sección "Renombrar el proyecto" en `docs/01-architecture.md`.
 5. **Continuar con otra IA:** entregarle este archivo + `docs/01-architecture.md` + ADRs.

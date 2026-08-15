@@ -1,32 +1,32 @@
 # =====================================================================
-# KineticOs — Infraestructura CORE (desarrollo local)
+# MiCoach — Infraestructura CORE (desarrollo local)
 # Levantar:   docker compose up -d
 # Detener:    docker compose down
 # =====================================================================
-name: kineticos
+name: micoach
 
 services:
   postgres:
     image: postgres:16-alpine
-    container_name: kineticos-postgres
+    container_name: micoach-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${POSTGRES_DB:-kineticos}
-      POSTGRES_USER: ${POSTGRES_USER:-kineticos}
+      POSTGRES_DB: ${POSTGRES_DB:-micoach}
+      POSTGRES_USER: ${POSTGRES_USER:-micoach}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me_strong_password}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kineticos} -d ${POSTGRES_DB:-kineticos}"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-micoach} -d ${POSTGRES_DB:-micoach}"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   redis:
     image: redis:7-alpine
-    container_name: kineticos-redis
+    container_name: micoach-redis
     restart: unless-stopped
     command: ["redis-server", "--appendonly", "yes"]
     ports:
@@ -41,7 +41,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3.13-management-alpine
-    container_name: kineticos-rabbitmq
+    container_name: micoach-rabbitmq
     restart: unless-stopped
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-guest}
@@ -59,7 +59,7 @@ services:
 
   minio:
     image: minio/minio:latest
-    container_name: kineticos-minio
+    container_name: micoach-minio
     restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
@@ -78,7 +78,7 @@ services:
 
   minio-init:
     image: minio/mc:latest
-    container_name: kineticos-minio-init
+    container_name: micoach-minio-init
     depends_on:
       minio:
         condition: service_healthy
@@ -92,7 +92,7 @@ services:
 
   ollama:
     image: ollama/ollama:latest
-    container_name: kineticos-ollama
+    container_name: micoach-ollama
     restart: unless-stopped
     ports:
       - "11434:11434"

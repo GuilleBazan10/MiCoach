@@ -1,11 +1,11 @@
 // =====================================================================
-// KineticOs — Almacenamiento seguro de tokens JWT (access + refresh).
+// MiCoach — Almacenamiento seguro de tokens JWT (access + refresh).
 // =====================================================================
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class TokenStorage {
-  static const _accessTokenKey = 'kineticos_access_token';
-  static const _refreshTokenKey = 'kineticos_refresh_token';
+  static const _accessTokenKey = 'micoach_access_token';
+  static const _refreshTokenKey = 'micoach_refresh_token';
 
   final FlutterSecureStorage _storage;
 

@@ -1,11 +1,11 @@
-# KineticOs — Prompt v2 para IA generadora de código
+# MiCoach — Prompt v2 para IA generadora de código
 
 > Este prompt se usa para que otro modelo continúe/implemente el proyecto por fases.
 > **Estado del proyecto:** leer `docs/00-progress.md` ANTES de ejecutar nada.
 > La Fase 0 ya está completa: la estructura, infra y docs base ya existen.
 
 ```markdown
-# PROMPT v2 — KineticOs: Plataforma de Salud y Bienestar con IA
+# PROMPT v2 — MiCoach: Plataforma de Salud y Bienestar con IA
 
 ## ROL
 Actúa como Arquitecto de Software Senior Y Desarrollador Full-Stack senior.
@@ -71,7 +71,7 @@ re-abres sin una razón sólida.
 
 ## ESTRUCTURA EXACTA DEL REPOSITORIO (ya creada — RESPETAR)
 ```
-KineticOs/
+MiCoach/
 ├── README.md  .env.example  .gitignore  .editorconfig
 ├── docker-compose.yml         # infra core
 ├── docker-compose.full.yml    # infra opcional
@@ -98,7 +98,7 @@ KineticOs/
 ├── infra/docker/ (nginx, minio, prometheus)  +  infra/k8s/ (solo plan)
 └── scripts/ (init-dev.ps1, init-dev.sh, seed-ai.sh)
 ```
-Paquete base Java: `com.kineticos`. Cada módulo: presentation / application / domain /
+Paquete base Java: `com.micoach`. Cada módulo: presentation / application / domain /
 infrastructure (+ <Modulo>Config.java). Un módulo NO accede a tablas de otro.
 
 ## .env.example

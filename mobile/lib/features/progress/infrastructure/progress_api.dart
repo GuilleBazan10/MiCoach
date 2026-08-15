@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Cliente REST del módulo progress (/api/v1/progress).
+// MiCoach — Cliente REST del módulo progress (/api/v1/progress).
 // =====================================================================
 import 'package:dio/dio.dart';
 

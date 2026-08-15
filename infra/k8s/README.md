@@ -1,4 +1,4 @@
-# KineticOs — Kubernetes (PLAN)
+# MiCoach — Kubernetes (PLAN)
 
 > **Estado: documentación únicamente.** En esta etapa NO se implementa Kubernetes.
 > Justificación: complejidad operativa sin necesidad para un proyecto de curso; el
@@ -15,7 +15,7 @@ Cuando haya (al menos) un despliegue estable y la carga lo justifique:
 
 ```
 infra/k8s/
-├── namespace.yaml          # namespace "kineticos"
+├── namespace.yaml          # namespace "micoach"
 ├── backend-deployment.yaml # Deployment + Service + ConfigMap + Secret
 ├── infra-deployments/      # postgres, redis, rabbitmq, minio (o usar operadores/managed)
 ├── ingress.yaml            # nginx-ingress
@@ -26,9 +26,9 @@ infra/k8s/
 
 ```bash
 # con kind o k3s
-kind create cluster --name kineticos
+kind create cluster --name micoach
 kubectl apply -f infra/k8s/
-kubectl get pods -n kineticos
+kubectl get pods -n micoach
 ```
 
 ## Alternativas de despliegue en producción (gratuitas)

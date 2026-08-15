@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — PUNTO ÚNICO DEL DISEÑO
+// MiCoach — PUNTO ÚNICO DEL DISEÑO
 //
 // Si quieres cambiar el diseño de la app, edita estos tres archivos:
 //   - app_colors.dart     → paleta de colores (claro/oscuro)

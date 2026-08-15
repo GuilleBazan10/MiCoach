@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Detalle de un plan de alimentación: días y comidas.
+// MiCoach — Detalle de un plan de alimentación: días y comidas.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

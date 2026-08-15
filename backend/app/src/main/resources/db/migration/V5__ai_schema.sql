@@ -1,5 +1,5 @@
 -- =====================================================================
--- KineticOs — V5: Schema ai
+-- MiCoach — V5: Schema ai
 -- Módulo: ai (prompts versionados, chat, auditoría de generaciones)
 -- Documentación: docs/02-database.md
 -- =====================================================================

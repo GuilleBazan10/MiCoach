@@ -1,4 +1,4 @@
-// KineticOs — Módulo user
+// MiCoach — Módulo user
 // Perfil completo: patologías, lesiones, medicación, restricciones, preferencias.
 dependencies {
     api project(':modules:shared')

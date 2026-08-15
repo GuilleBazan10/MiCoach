@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Cliente REST del panel admin de IA (/api/v1/admin/ai/providers).
+// MiCoach — Cliente REST del panel admin de IA (/api/v1/admin/ai/providers).
 // =====================================================================
 import { apiClient } from '@/core/api/client';
 import type { AiProviderConfig, AiProviderConfigDraft, AiProviderTestResult } from '../domain/aiProviderTypes';

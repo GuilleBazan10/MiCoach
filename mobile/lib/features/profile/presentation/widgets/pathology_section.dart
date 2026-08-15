@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Sección "Patologías" del perfil.
+// MiCoach — Sección "Patologías" del perfil.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Estado de autenticación.
+// MiCoach — Estado de autenticación.
 // =====================================================================
 import '../domain/auth_user.dart';
 

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Diálogo para generar un plan de alimentación con IA a partir de
+// MiCoach — Diálogo para generar un plan de alimentación con IA a partir de
 // un pedido en lenguaje natural. Equivalente a
 // web/src/features/nutrition/components/GenerateMealPlanDialog.tsx.
 // =====================================================================

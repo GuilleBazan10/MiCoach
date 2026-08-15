@@ -39,7 +39,7 @@ export function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">Iniciar sesión</CardTitle>
-          <CardDescription>Entrá a tu cuenta de KineticOs.</CardDescription>
+          <CardDescription>Entrá a tu cuenta de MiCoach.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>

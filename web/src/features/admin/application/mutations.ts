@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Escrituras del panel admin (TanStack Query).
+// MiCoach — Escrituras del panel admin (TanStack Query).
 // =====================================================================
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { aiProviderApi } from '../api/aiProviderApi';

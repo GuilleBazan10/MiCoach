@@ -1,4 +1,4 @@
-# KineticOs
+# MiCoach
 
 Plataforma de salud y bienestar impulsada por IA: planes personalizados de entrenamiento
 y alimentación, adaptados al perfil completo de cada usuario.
@@ -43,7 +43,7 @@ recomendaciones.
 ## Estructura del repositorio
 
 ```
-KineticOs/
+MiCoach/
 ├── backend/    → Java 21 + Spring Boot (módulos por dominio + app que compone)
 ├── mobile/     → Flutter, mobile-only Android/iOS (Feature First, core tematizable)
 ├── web/        → React (misma funcionalidad que mobile, responsive)
@@ -91,7 +91,7 @@ npm run dev   # abre http://localhost:5173 — entrar por localhost, no 127.0.0.
 
 ## Personalización del nombre y diseño
 
-El nombre **KineticOs** y el diseño son **fáciles de cambiar** — en ambos frontends:
+El nombre **MiCoach** y el diseño son **fáciles de cambiar** — en ambos frontends:
 
 - **Diseño (tema) mobile:** centralizado en
   `mobile/lib/core/theme/` (`app_theme.dart`, `app_colors.dart`, `app_text_styles.dart`).

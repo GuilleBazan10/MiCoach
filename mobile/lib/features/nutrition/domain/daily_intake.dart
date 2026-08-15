@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Diario alimentario (mirror de NutritionDtos en backend).
+// MiCoach — Diario alimentario (mirror de NutritionDtos en backend).
 // =====================================================================
 class DailyIntakeEntry {
   final int id;

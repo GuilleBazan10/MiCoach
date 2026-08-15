@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Crear / editar un plan de alimentación.
+// MiCoach — Crear / editar un plan de alimentación.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

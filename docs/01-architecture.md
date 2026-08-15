@@ -1,11 +1,11 @@
-# KineticOs — Arquitectura
+# MiCoach — Arquitectura
 
 > Documento vivo. Se actualiza cuando cambian decisiones importantes.
 > Las decisiones individuales se registran en `docs/04-adr/`.
 
 ## 1. Resumen
 
-KineticOs es una plataforma de salud y bienestar con IA. Arquitectura elegida:
+MiCoach es una plataforma de salud y bienestar con IA. Arquitectura elegida:
 **Monolito Modular** con **Clean Architecture / Hexagonal** por módulo, comunicación
 asíncrona con **eventos** y preparada para extraer microservicios en el futuro sin
 reescribir código.
@@ -91,7 +91,7 @@ flowchart TB
 
 ```
 modules/<modulo>/
-└── src/main/java/com/kineticos/<modulo>/
+└── src/main/java/com/micoach/<modulo>/
     ├── <Modulo>Config.java          # wiring (beans, listeners)
     ├── application/                 # casos de uso + puertos (interfaces)
     │   ├── service/                 # implementaciones de casos de uso
@@ -188,18 +188,18 @@ separación y stack completo: **ADR-003**.
 
 ## 11. Renombrar el proyecto
 
-El nombre actual es **KineticOs** (paquete `com.kineticos`). Para cambiarlo:
+El nombre actual es **MiCoach** (paquete `com.micoach`). Para cambiarlo:
 
 **Backend (Gradle/Java):**
 1. `backend/settings.gradle` → `rootProject.name`.
-2. Paquetes `com.kineticos.*` → renombrar con IDE (refactor) en `backend/app` y
+2. Paquetes `com.micoach.*` → renombrar con IDE (refactor) en `backend/app` y
    `backend/modules/*` (todavía no hay código, es rápido).
 3. `backend/app/src/main/resources/application.yml` → `spring.application.name`.
 
 **Frontend Mobile (Flutter):**
 1. `mobile/pubspec.yaml` → `name:` y `description:`.
-2. `mobile/lib/` → paquete import (ej: `package:kineticos_mobile/...`).
-3. Tras `flutter create . --org com.kineticos --project-name <nuevo>`, los archivos
+2. `mobile/lib/` → paquete import (ej: `package:micoach_mobile/...`).
+3. Tras `flutter create . --org com.micoach --project-name <nuevo>`, los archivos
    android/ios se regeneran con el nuevo nombre (ya no incluye `web/`, ver ADR-003).
 
 **Frontend Web (React) — cuando exista (Fase 3.2):**
@@ -211,7 +211,7 @@ El nombre actual es **KineticOs** (paquete `com.kineticos`). Para cambiarlo:
 1. `docker-compose.yml` y `docker-compose.full.yml` → `name:` y nombres de servicio.
 2. `.env.example` → variables `*_DB`, `TOTP_ISSUER`, `MAIL_FROM`.
 
-**Docs:** buscar `KineticOs` / `kineticos` en `docs/` y `README.md`.
+**Docs:** buscar `MiCoach` / `micoach` en `docs/` y `README.md`.
 
 > Si el nuevo nombre cambia también el paquete Java (ej: `com.miempresa.app`), actualiza
 > también `--org` en el comando `flutter create` y el `groupId` de Gradle.

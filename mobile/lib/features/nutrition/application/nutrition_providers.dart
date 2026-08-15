@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Providers del módulo nutrition (DI + lecturas + acciones).
+// MiCoach — Providers del módulo nutrition (DI + lecturas + acciones).
 // =====================================================================
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

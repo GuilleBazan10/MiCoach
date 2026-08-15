@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:kineticos_mobile/app/app.dart';
+import 'package:micoach_mobile/app/app.dart';
 
 void main() {
   // flutter_secure_storage usa un MethodChannel que no existe en el entorno
@@ -23,14 +23,14 @@ void main() {
   });
 
   testWidgets('arranca y muestra la pantalla de login sin sesión guardada', (WidgetTester tester) async {
-    await tester.pumpWidget(const ProviderScope(child: KineticOsApp()));
+    await tester.pumpWidget(const ProviderScope(child: MiCoachApp()));
     // La restauración de sesión resuelve en un microtask; unos pumps alcanzan
     // (pumpAndSettle no sirve acá: el splash tiene un spinner indeterminado).
     for (var i = 0; i < 10; i++) {
       await tester.pump(const Duration(milliseconds: 50));
     }
 
-    expect(find.text('KineticOs'), findsOneWidget);
+    expect(find.text('MiCoach'), findsOneWidget);
     expect(find.widgetWithText(FilledButton, 'Entrar'), findsOneWidget);
   });
 }

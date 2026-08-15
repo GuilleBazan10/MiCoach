@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Dominio del módulo workout (mirror de WorkoutDtos en backend).
+// MiCoach — Dominio del módulo workout (mirror de WorkoutDtos en backend).
 // Paridad con mobile/lib/features/workout/domain/*.dart.
 // =====================================================================
 export interface Muscle {

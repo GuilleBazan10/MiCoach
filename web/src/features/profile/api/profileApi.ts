@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Cliente REST del módulo user (/api/v1/users/me).
+// MiCoach — Cliente REST del módulo user (/api/v1/users/me).
 // Paridad con mobile/lib/features/profile/infrastructure/profile_api.dart.
 // =====================================================================
 import { apiClient } from '@/core/api/client';

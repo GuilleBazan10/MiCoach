@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Build raíz
+// MiCoach — Build raíz
 // Configuración común para todos los subproyectos. Cada módulo declara
 // su propio build.gradle con sus dependencias (fronteras de dominio).
 // =====================================================================
@@ -9,7 +9,7 @@ plugins {
 }
 
 allprojects {
-    group = 'com.kineticos'
+    group = 'com.micoach'
     version = '0.0.1-SNAPSHOT'
 }
 

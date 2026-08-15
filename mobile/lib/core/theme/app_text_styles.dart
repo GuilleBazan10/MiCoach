@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Tipografías centralizadas
+// MiCoach — Tipografías centralizadas
 //
 // >>> CAMBIA AQUÍ LA TIPOGRAFÍA DEL DISEÑO <<<
 // Si usas google_fonts, sustituye las constancias TextStyle por

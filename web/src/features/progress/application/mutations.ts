@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Mutaciones del módulo progress (TanStack Query).
+// MiCoach — Mutaciones del módulo progress (TanStack Query).
 // =====================================================================
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { progressApi } from '../api/progressApi';

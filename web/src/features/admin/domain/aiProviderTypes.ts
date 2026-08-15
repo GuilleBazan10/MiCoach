@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Tipos del panel admin de proveedores de IA
+// MiCoach — Tipos del panel admin de proveedores de IA
 // (docs/03-api-contracts.md § Módulo ai, /admin/ai/providers).
 // =====================================================================
 export interface AiProviderConfig {

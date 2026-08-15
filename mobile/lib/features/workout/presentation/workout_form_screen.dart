@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Crear / editar una rutina propia.
+// MiCoach — Crear / editar una rutina propia.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

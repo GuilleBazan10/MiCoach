@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Pantalla mostrada mientras se restaura la sesión guardada.
+// MiCoach — Pantalla mostrada mientras se restaura la sesión guardada.
 // =====================================================================
 import 'package:flutter/material.dart';
 

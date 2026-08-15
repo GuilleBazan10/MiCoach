@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Forma unificada de error de la API (docs/03-api-contracts.md
+// MiCoach — Forma unificada de error de la API (docs/03-api-contracts.md
 // § Convenciones ya definidas).
 // =====================================================================
 import { isAxiosError } from 'axios';
@@ -21,7 +21,7 @@ export function isApiError(value: unknown): value is ApiError {
   );
 }
 
-/** Extrae un mensaje legible de un error de Axios contra la API de KineticOs. */
+/** Extrae un mensaje legible de un error de Axios contra la API de MiCoach. */
 export function extractErrorMessage(error: unknown, fallback = 'Ocurrió un error inesperado.'): string {
   if (isAxiosError(error) && isApiError(error.response?.data)) {
     return error.response.data.message;

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Cliente REST del módulo workout (/api/v1/workouts).
+// MiCoach — Cliente REST del módulo workout (/api/v1/workouts).
 // Paridad con mobile/lib/features/workout/infrastructure/workout_api.dart.
 // =====================================================================
 import { apiClient } from '@/core/api/client';

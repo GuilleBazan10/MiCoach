@@ -37,7 +37,7 @@ export function RegisterPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">Crear cuenta</CardTitle>
-          <CardDescription>Empezá a usar KineticOs.</CardDescription>
+          <CardDescription>Empezá a usar MiCoach.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>

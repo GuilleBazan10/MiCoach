@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Mutaciones del módulo nutrition (TanStack Query).
+// MiCoach — Mutaciones del módulo nutrition (TanStack Query).
 // =====================================================================
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { nutritionApi } from '../api/nutritionApi';

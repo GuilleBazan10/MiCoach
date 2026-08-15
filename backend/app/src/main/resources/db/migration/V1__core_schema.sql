@@ -1,5 +1,5 @@
 -- =====================================================================
--- KineticOs — V1: Schema core
+-- MiCoach — V1: Schema core
 -- Módulos: auth + user + admin + catálogos transversales (alérgenos y dietas)
 -- Documentación: docs/02-database.md
 -- Enums: VARCHAR + CHECK (fácil de evolucionar en Flyway).

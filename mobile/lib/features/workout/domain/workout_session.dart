@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Sesión de entrenamiento (historial), mirror de WorkoutDtos.
+// MiCoach — Sesión de entrenamiento (historial), mirror de WorkoutDtos.
 // =====================================================================
 class SessionExercise {
   final int id;

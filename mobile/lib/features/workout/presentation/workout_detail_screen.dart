@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Detalle de una rutina: días, ejercicios prescritos y
+// MiCoach — Detalle de una rutina: días, ejercicios prescritos y
 // acceso para iniciar una sesión de entrenamiento por día.
 // =====================================================================
 import 'package:flutter/material.dart';

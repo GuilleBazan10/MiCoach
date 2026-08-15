@@ -1,5 +1,5 @@
 -- =====================================================================
--- KineticOs — V10: amplía el catálogo de ejercicios y recetas (Fase 4:
+-- MiCoach — V10: amplía el catálogo de ejercicios y recetas (Fase 4:
 -- más variedad real para que la generación con IA no elija siempre entre
 -- los mismos ~30 ejercicios / 12 recetas). Reutiliza los 60 ingredientes
 -- ya sembrados en V6 — no hace falta agregar ingredientes nuevos.

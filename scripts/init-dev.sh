@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 # =====================================================================
-# KineticOs — Arranque inicial en Linux/macOS
+# MiCoach — Arranque inicial en Linux/macOS
 # Uso:   bash scripts/init-dev.sh
 # =====================================================================
 set -e
 
-echo "== KineticOs - Inicializacion =="
+echo "== MiCoach - Inicializacion =="
 
 # 1. .env
 if [ ! -f .env ]; then
@@ -39,7 +39,7 @@ echo ""
 echo "Siguientes pasos (manuales):"
 echo "  JDK 21   : si tu JAVA_HOME es < 17, instala Adoptium JDK 21 y exporta JAVA_HOME"
 echo "  Backend : cd backend && ./gradlew bootRun"
-echo "  Flutter : cd mobile && flutter create . --org com.kineticos --project-name kineticos_mobile"
+echo "  Flutter : cd mobile && flutter create . --org com.micoach --project-name micoach_mobile"
 echo "            flutter run"
 echo ""
 echo "Servicios disponibles:"

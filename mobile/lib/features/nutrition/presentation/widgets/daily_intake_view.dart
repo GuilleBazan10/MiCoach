@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Pestaña "Diario": comidas registradas hoy + totales.
+// MiCoach — Pestaña "Diario": comidas registradas hoy + totales.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Dominio del módulo nutrition (mirror de NutritionDtos backend).
+// MiCoach — Dominio del módulo nutrition (mirror de NutritionDtos backend).
 // Paridad con mobile/lib/features/nutrition/domain/*.dart.
 // =====================================================================
 export interface Ingredient {
