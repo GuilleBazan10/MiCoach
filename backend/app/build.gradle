@@ -32,7 +32,8 @@ dependencies {
 
 
     // Flyway se aplica al arrancar la app (spring.flyway.enabled=true)
-    runtimeOnly libs.flyway.core
+    // implementation (no runtimeOnly): FlywayConfig referencia Flyway/FlywayMigrationStrategy en compile-time
+    implementation libs.flyway.core
     runtimeOnly libs.flyway.database.postgresql
     runtimeOnly libs.postgresql
 
