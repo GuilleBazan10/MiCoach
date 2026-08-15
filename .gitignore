@@ -15,7 +15,6 @@ backend/app/build/
 backend/modules/*/build/
 **/build/
 *.class
-out/
 
 # ===== Flutter / Dart =====
 mobile/.dart_tool/

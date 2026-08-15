@@ -13,6 +13,8 @@ lombok = "1.18.34"
 mapstruct = "1.6.2"
 jjwt = "0.12.6"
 flyway = "10.10.0"
+springdoc = "2.6.0"
+
 
 [libraries]
 # --- Spring Boot (versiones vía BOM) ---
@@ -52,6 +54,8 @@ langchain4j-ollama = { module = "dev.langchain4j:langchain4j-ollama", version = 
 # API compatible con OpenAI: sirve para Groq y OpenRouter (solo cambia la baseUrl).
 langchain4j-open-ai = { module = "dev.langchain4j:langchain4j-open-ai", version = "0.35.0" }
 langchain4j-google-ai-gemini = { module = "dev.langchain4j:langchain4j-google-ai-gemini", version = "0.35.0" }
+springdoc-openapi = { module = "org.springdoc:springdoc-openapi-starter-webmvc-ui", version.ref = "springdoc" }
+
 
 # --- Testing ---
 testcontainers-postgresql = { module = "org.testcontainers:postgresql" }
