@@ -11,7 +11,7 @@ spring:
     active: ${SPRING_PROFILES_ACTIVE:dev}
 
   datasource:
-    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:kineticos}
+    url: jdbc:postgresql://${POSTGRES_HOST:localhost}:${POSTGRES_PORT:5432}/${POSTGRES_DB:kineticos}?sslmode=${POSTGRES_SSLMODE:prefer}
     username: ${POSTGRES_USER:kineticos}
     password: ${POSTGRES_PASSWORD:change_me_strong_password}
     hikari:
@@ -55,6 +55,15 @@ management:
       probes:
         enabled: true
       show-details: always
+  health:
+    # Redis y RabbitMQ están declarados (starters) para features futuras pero
+    # todavía no los usa ningún flujo real. Sin esto, /actuator/health devuelve
+    # 503 apenas no estén disponibles (p. ej. en Render, que no los provisiona),
+    # tumbando el health check de la plataforma por un servicio que nadie usa.
+    redis:
+      enabled: false
+    rabbit:
+      enabled: false
 
 # ================== Configuración de la app ==================
 kineticos:
