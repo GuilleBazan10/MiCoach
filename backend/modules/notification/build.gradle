@@ -1,4 +1,4 @@
-// KineticOs — Módulo notification
+// MiCoach — Módulo notification
 // Recordatorios y push (FCM se integra en Fase 4). Consume eventos de dominio.
 dependencies {
     api project(':modules:shared')

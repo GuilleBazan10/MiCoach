@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Providers del módulo progress (DI + lecturas + acciones).
+// MiCoach — Providers del módulo progress (DI + lecturas + acciones).
 // =====================================================================
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

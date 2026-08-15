@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Estado del perfil (TanStack Query). Paridad con
+// MiCoach — Estado del perfil (TanStack Query). Paridad con
 // mobile/lib/features/profile/application/profile_providers.dart
 // (ProfileController: carga combinada + refresh tras cada mutación).
 // =====================================================================

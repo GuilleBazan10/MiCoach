@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Lecturas del módulo workout (TanStack Query).
+// MiCoach — Lecturas del módulo workout (TanStack Query).
 // =====================================================================
 import { useQuery } from '@tanstack/react-query';
 import { workoutApi } from '../api/workoutApi';

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Pantalla de login.
+// MiCoach — Pantalla de login.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -53,7 +53,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     Icon(Icons.fitness_center, size: 56, color: Theme.of(context).colorScheme.primary),
                     const SizedBox(height: AppSpacing.md),
-                    Text('KineticOs', style: Theme.of(context).textTheme.headlineMedium, textAlign: TextAlign.center),
+                    Text('MiCoach', style: Theme.of(context).textTheme.headlineMedium, textAlign: TextAlign.center),
                     const SizedBox(height: AppSpacing.xs),
                     Text('Entrená y comé mejor, con IA.',
                         style: Theme.of(context).textTheme.bodyMedium, textAlign: TextAlign.center),

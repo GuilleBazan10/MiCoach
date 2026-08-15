@@ -1,5 +1,5 @@
 -- =====================================================================
--- KineticOs — V7: Fix de secuencias tras el seed de catálogos (V6)
+-- MiCoach — V7: Fix de secuencias tras el seed de catálogos (V6)
 -- Bug: V6 insertó filas con id explícito (ej: admin_roles id=1..4) sin
 -- avanzar la secuencia SERIAL asociada. Postgres no sincroniza la secuencia
 -- automáticamente cuando se inserta un id a mano, así que el próximo INSERT

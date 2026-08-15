@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Dominio del módulo progress (mirror de ProgressDtos backend).
+// MiCoach — Dominio del módulo progress (mirror de ProgressDtos backend).
 // Paridad con mobile/lib/features/progress/domain/*.dart.
 // =====================================================================
 export interface ProgressEntry {

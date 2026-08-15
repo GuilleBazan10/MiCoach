@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Providers del módulo auth (DI + controller de sesión).
+// MiCoach — Providers del módulo auth (DI + controller de sesión).
 // =====================================================================
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

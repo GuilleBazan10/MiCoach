@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Estado de sesión global (Context + reducer).
+// MiCoach — Estado de sesión global (Context + reducer).
 // Equivalente a mobile/lib/features/auth/application/{auth_providers,auth_state}.dart:
 // - status 'unknown' mientras se restaura la sesión guardada (splash).
 // - login/register guardan tokens y pasan a 'authenticated'.

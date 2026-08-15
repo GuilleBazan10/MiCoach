@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Editor de un día de rutina (nombre, descanso, ejercicios).
+// MiCoach — Editor de un día de rutina (nombre, descanso, ejercicios).
 // =====================================================================
 import 'package:flutter/material.dart';
 

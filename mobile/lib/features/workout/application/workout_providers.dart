@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Providers del módulo workout (DI + lecturas + acciones).
+// MiCoach — Providers del módulo workout (DI + lecturas + acciones).
 // =====================================================================
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

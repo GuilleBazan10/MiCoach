@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Tarjeta de un ejercicio registrado en una sesión: miniatura +
+// MiCoach — Tarjeta de un ejercicio registrado en una sesión: miniatura +
 // nombre (clickeable, ver detalle) + stats logueadas.
 // =====================================================================
 import { Card, CardContent } from '@/components/ui/card';

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Cliente REST del módulo user (/api/v1/users/me).
+// MiCoach — Cliente REST del módulo user (/api/v1/users/me).
 // =====================================================================
 import 'package:dio/dio.dart';
 

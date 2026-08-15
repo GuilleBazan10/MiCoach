@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Sección "Medicación" del perfil.
+// MiCoach — Sección "Medicación" del perfil.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

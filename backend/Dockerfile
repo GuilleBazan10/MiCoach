@@ -1,6 +1,6 @@
 # =====================================================================
-# KineticOs — Backend (Spring Boot, monolito modular Gradle)
-# Build: docker build -t kineticos-backend -f backend/Dockerfile backend
+# MiCoach — Backend (Spring Boot, monolito modular Gradle)
+# Build: docker build -t micoach-backend -f backend/Dockerfile backend
 # =====================================================================
 
 FROM eclipse-temurin:21-jdk-alpine AS build
@@ -18,9 +18,9 @@ RUN ./gradlew --no-daemon :app:bootJar -x test
 
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
-RUN addgroup -S kineticos && adduser -S kineticos -G kineticos
-COPY --from=build /workspace/app/build/libs/kineticos.jar app.jar
-USER kineticos
+RUN addgroup -S micoach && adduser -S micoach -G micoach
+COPY --from=build /workspace/app/build/libs/micoach.jar app.jar
+USER micoach
 
 EXPOSE 8080
 ENTRYPOINT ["sh", "-c", "java -jar app.jar --server.port=${PORT:-8080}"]

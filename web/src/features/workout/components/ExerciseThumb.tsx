@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Miniatura de ejercicio: foto real si existe (ver
+// MiCoach — Miniatura de ejercicio: foto real si existe (ver
 // docs/00-progress.md § catálogo ampliado con free-exercise-db), si no un
 // ícono de color por categoría en vez de un espacio vacío.
 // =====================================================================

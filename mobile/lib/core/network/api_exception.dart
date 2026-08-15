@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Excepción tipada para errores de API.
+// MiCoach — Excepción tipada para errores de API.
 // Mapea el formato unificado de error del backend (docs/03-api-contracts.md):
 // {timestamp, status, code, message, path}
 // =====================================================================

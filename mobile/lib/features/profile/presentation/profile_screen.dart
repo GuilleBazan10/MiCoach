@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Pantalla de perfil de salud: datos + objetivos/patologías/
+// MiCoach — Pantalla de perfil de salud: datos + objetivos/patologías/
 // lesiones/medicación (sub-recursos del módulo user).
 // =====================================================================
 import 'package:flutter/material.dart';

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Mutaciones del módulo workout (TanStack Query).
+// MiCoach — Mutaciones del módulo workout (TanStack Query).
 // =====================================================================
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { workoutApi } from '../api/workoutApi';

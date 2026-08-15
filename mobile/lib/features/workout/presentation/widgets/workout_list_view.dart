@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Lista de rutinas (propias o plantillas).
+// MiCoach — Lista de rutinas (propias o plantillas).
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

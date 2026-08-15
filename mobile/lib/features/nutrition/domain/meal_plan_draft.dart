@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Modelos mutables para crear/editar un plan de alimentación.
+// MiCoach — Modelos mutables para crear/editar un plan de alimentación.
 // Se serializan al formato de MealPlanRequest esperado por el backend.
 // =====================================================================
 import 'meal_plan.dart';

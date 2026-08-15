@@ -1,4 +1,4 @@
-// KineticOs — Módulo progress
+// MiCoach — Módulo progress
 // Peso, IMC, medidas, fotos, histórico, gráficos.
 dependencies {
     api project(':modules:shared')

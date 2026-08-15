@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Pestaña "Métricas": lista filtrable + registrar nueva.
+// MiCoach — Pestaña "Métricas": lista filtrable + registrar nueva.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

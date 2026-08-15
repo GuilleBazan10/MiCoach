@@ -1,5 +1,5 @@
 -- =====================================================================
--- KineticOs — V6: Seed de catálogos
+-- MiCoach — V6: Seed de catálogos
 -- Roles/perisos, alérgenos, dietas, músculos, ejercicios base, alimentos,
 -- recetas base. IDs explícitos para referenciar las tablas puente.
 -- Documentación: docs/02-database.md

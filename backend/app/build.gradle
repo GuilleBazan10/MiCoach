@@ -1,4 +1,4 @@
-// KineticOs — Módulo app
+// MiCoach — Módulo app
 // Composición y arranque de todos los módulos (monolito modular).
 // Aquí se configuran: datasource, Flyway, RabbitMQ, Redis, seguridad del gateway.
 plugins {
@@ -48,14 +48,14 @@ dependencies {
 }
 
 tasks.named('bootJar') {
-    archiveFileName = 'kineticos.jar'
+    archiveFileName = 'micoach.jar'
     manifest {
-        attributes 'Implementation-Title': 'KineticOs', 'Implementation-Version': project.version
+        attributes 'Implementation-Title': 'MiCoach', 'Implementation-Version': project.version
     }
 }
 
 // =====================================================================
-// Integración con .env (raíz del repo: /KineticOs/.env)
+// Integración con .env (raíz del repo: /MiCoach/.env)
 // Un único lugar para las keys de BD. Sin .env se usan los defaults de
 // .env.example. La variable real del sistema (exportada) tiene prioridad.
 // =====================================================================
@@ -96,8 +96,8 @@ tasks.register('flywayMigrate', JavaExec) {
     description = 'Aplica las migraciones Flyway (V1__...) a la base de datos configurada.'
     classpath = configurations.flywayCli
     mainClass = 'org.flywaydb.commandline.Main'
-    environment 'FLYWAY_URL', "jdbc:postgresql://${envOr('POSTGRES_HOST', 'localhost')}:${envOr('POSTGRES_PORT', '5432')}/${envOr('POSTGRES_DB', 'kineticos')}"
-    environment 'FLYWAY_USER', envOr('POSTGRES_USER', 'kineticos')
+    environment 'FLYWAY_URL', "jdbc:postgresql://${envOr('POSTGRES_HOST', 'localhost')}:${envOr('POSTGRES_PORT', '5432')}/${envOr('POSTGRES_DB', 'micoach')}"
+    environment 'FLYWAY_USER', envOr('POSTGRES_USER', 'micoach')
     environment 'FLYWAY_PASSWORD', envOr('POSTGRES_PASSWORD', 'change_me_strong_password')
     environment 'FLYWAY_LOCATIONS', 'filesystem:src/main/resources/db/migration'
     args 'migrate'

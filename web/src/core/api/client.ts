@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Cliente HTTP (Axios) centralizado.
+// MiCoach — Cliente HTTP (Axios) centralizado.
 // Equivalente a mobile/lib/core/network/api_client.dart:
 // - Adjunta el JWT de acceso a cada request (salvo endpoints públicos de auth).
 // - Si una respuesta es 401, intenta refrescar el token una vez y reintenta.

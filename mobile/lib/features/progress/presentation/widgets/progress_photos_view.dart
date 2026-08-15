@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Pestaña "Fotos": galería de progreso físico.
+// MiCoach — Pestaña "Fotos": galería de progreso físico.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

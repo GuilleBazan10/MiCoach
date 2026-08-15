@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Resuelve y muestra el nombre de una receta por id (las
+// MiCoach — Resuelve y muestra el nombre de una receta por id (las
 // comidas de un plan del backend solo traen recipeId).
 // =====================================================================
 import 'package:flutter/material.dart';

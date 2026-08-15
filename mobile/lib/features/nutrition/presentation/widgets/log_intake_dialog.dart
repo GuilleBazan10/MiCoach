@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Diálogo para registrar una comida en el diario alimentario.
+// MiCoach — Diálogo para registrar una comida en el diario alimentario.
 // Si se elige una receta, las macros se auto-completan (receta x porciones)
 // pero siguen siendo editables a mano.
 // =====================================================================

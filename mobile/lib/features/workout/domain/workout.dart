@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Rutina de entrenamiento (mirror de WorkoutDtos en backend).
+// MiCoach — Rutina de entrenamiento (mirror de WorkoutDtos en backend).
 // Modelos de solo lectura; para crear/editar ver workout_draft.dart.
 // =====================================================================
 class PlannedExercise {

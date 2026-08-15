@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Fila de un ejercicio planeado dentro de un día de rutina:
+// MiCoach — Fila de un ejercicio planeado dentro de un día de rutina:
 // nombre (tappable, ver detalle) + series/reps ya formateados según el
 // tipo de medición del ejercicio (reps vs. segundos).
 // Equivalente a web/src/features/workout/components/PlannedExerciseRow.tsx.

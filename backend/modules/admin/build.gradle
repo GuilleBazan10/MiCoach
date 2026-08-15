@@ -1,4 +1,4 @@
-// KineticOs — Módulo admin
+// MiCoach — Módulo admin
 // Gestión, roles, permisos, auditoría. Solo accesible a usuarios con rol ADMIN.
 dependencies {
     api project(':modules:shared')

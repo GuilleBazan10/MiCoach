@@ -1,5 +1,5 @@
 -- =====================================================================
--- KineticOs — V3: Schema nutrition
+-- MiCoach — V3: Schema nutrition
 -- Módulo: nutrition (ingredientes, recetas, planes, sustituciones, compra)
 -- Documentación: docs/02-database.md
 -- =====================================================================

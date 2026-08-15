@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Plan de alimentación (mirror de NutritionDtos en backend).
+// MiCoach — Plan de alimentación (mirror de NutritionDtos en backend).
 // Modelos de solo lectura; para crear/editar ver meal_plan_draft.dart.
 // =====================================================================
 class MealPlanMeal {

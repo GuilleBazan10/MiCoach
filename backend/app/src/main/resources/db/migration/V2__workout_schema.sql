@@ -1,5 +1,5 @@
 -- =====================================================================
--- KineticOs — V2: Schema workout
+-- MiCoach — V2: Schema workout
 -- Módulo: workout (ejercicios, músculos, rutinas, sesiones)
 -- Documentación: docs/02-database.md
 -- =====================================================================

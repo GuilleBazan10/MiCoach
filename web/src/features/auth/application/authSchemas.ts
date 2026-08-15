@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Validación de formularios de auth (Zod).
+// MiCoach — Validación de formularios de auth (Zod).
 // Espejo de la validación del backend (docs/03-api-contracts.md): email
 // válido, password >= 8 caracteres.
 // =====================================================================

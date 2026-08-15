@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Panel admin: qué proveedor de IA usa la app (Ollama local o
+// MiCoach — Panel admin: qué proveedor de IA usa la app (Ollama local o
 // Groq/OpenRouter/Gemini en la nube), con sus API keys y cuál está activo.
 // =====================================================================
 import { useAiProviders } from '../application/queries';

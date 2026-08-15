@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Shell de la app autenticada, con navegación entre las 4
+// MiCoach — Shell de la app autenticada, con navegación entre las 4
 // secciones de usuario final (equivalente al bottom nav de mobile:
 // mobile/lib/core/router/app_shell.dart). Mobile-first: barra fija abajo
 // en pantallas chicas, nav inline en el header a partir de `sm`.
@@ -39,7 +39,7 @@ export function AppShell() {
               >
                 <Zap className="size-4.5 fill-current" />
               </span>
-              <span className="text-lg font-bold tracking-tight text-foreground">KineticOs</span>
+              <span className="text-lg font-bold tracking-tight text-foreground">MiCoach</span>
             </div>
             <nav className="hidden items-center gap-1 sm:flex">
               {navItems.map((item) => (

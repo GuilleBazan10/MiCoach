@@ -1,10 +1,10 @@
 // =====================================================================
-// KineticOs — Forma unificada de error de la API (docs/03-api-contracts.md).
+// MiCoach — Forma unificada de error de la API (docs/03-api-contracts.md).
 // Equivalente a web/src/core/api/apiError.ts.
 // =====================================================================
 import 'package:dio/dio.dart';
 
-/// Extrae un mensaje legible de un error de Dio contra la API de KineticOs.
+/// Extrae un mensaje legible de un error de Dio contra la API de MiCoach.
 String extractErrorMessage(Object error, {String fallback = 'Ocurrió un error inesperado.'}) {
   if (error is DioException) {
     final data = error.response?.data;

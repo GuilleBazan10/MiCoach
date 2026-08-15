@@ -1,6 +1,6 @@
 {
-    "name": "kineticos_mobile",
-    "short_name": "kineticos_mobile",
+    "name": "micoach_mobile",
+    "short_name": "micoach_mobile",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Detalle de un ejercicio: cómo se hace (imagen/video/instrucciones).
+// MiCoach — Detalle de un ejercicio: cómo se hace (imagen/video/instrucciones).
 // Se abre al tocar el nombre de un ejercicio en una rutina o sesión.
 // Equivalente a web/src/features/workout/components/ExerciseDetailDialog.tsx.
 // =====================================================================

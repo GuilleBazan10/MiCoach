@@ -1,5 +1,5 @@
 -- =====================================================================
--- KineticOs — V8: Prompt activo para la generación de rutinas con IA
+-- MiCoach — V8: Prompt activo para la generación de rutinas con IA
 -- (Fase 4). Slug consumido por WorkoutAiGenerator vía AiUseCase.generate.
 --
 -- Nota: el slug 'workout_generator' ya tenía 2 versiones de prueba

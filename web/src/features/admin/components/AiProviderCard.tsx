@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Tarjeta de un proveedor de IA en el panel admin: editar
+// MiCoach — Tarjeta de un proveedor de IA en el panel admin: editar
 // baseUrl/modelo/API key, habilitar, probar conexión y activarlo.
 // =====================================================================
 import { useState } from 'react';

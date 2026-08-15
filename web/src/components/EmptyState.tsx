@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Estado vacío reutilizable: ícono en círculo de color +
+// MiCoach — Estado vacío reutilizable: ícono en círculo de color +
 // mensaje, en vez de un texto gris centrado sin nada más.
 // =====================================================================
 import type { ComponentType } from 'react';

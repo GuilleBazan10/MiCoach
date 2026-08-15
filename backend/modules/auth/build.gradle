@@ -1,4 +1,4 @@
-// KineticOs — Módulo auth
+// MiCoach — Módulo auth
 // Identidad: registro, login, 2FA TOTP, refresh token rotatorio, OAuth2 social.
 dependencies {
     api project(':modules:shared')

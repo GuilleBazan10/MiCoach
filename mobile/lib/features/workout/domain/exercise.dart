@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Catálogo de ejercicios (mirror de WorkoutDtos en backend).
+// MiCoach — Catálogo de ejercicios (mirror de WorkoutDtos en backend).
 // =====================================================================
 class ExerciseMuscle {
   final int muscleId;

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Sesión de entrenamiento: registrar ejercicios ejecutados,
+// MiCoach — Sesión de entrenamiento: registrar ejercicios ejecutados,
 // completar o abandonar la sesión.
 // =====================================================================
 import 'package:flutter/material.dart';

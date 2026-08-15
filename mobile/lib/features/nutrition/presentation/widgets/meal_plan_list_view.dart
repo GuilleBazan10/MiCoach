@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Lista de planes de alimentación del usuario.
+// MiCoach — Lista de planes de alimentación del usuario.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

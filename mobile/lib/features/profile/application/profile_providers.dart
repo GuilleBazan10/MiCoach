@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Providers del módulo profile (DI + controller de perfil).
+// MiCoach — Providers del módulo profile (DI + controller de perfil).
 // =====================================================================
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Catálogo de recetas (mirror de NutritionDtos en backend).
+// MiCoach — Catálogo de recetas (mirror de NutritionDtos en backend).
 // =====================================================================
 class RecipeIngredient {
   final int ingredientId;

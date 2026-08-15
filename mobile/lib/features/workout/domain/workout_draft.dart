@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Modelos mutables para crear/editar una rutina (formulario).
+// MiCoach — Modelos mutables para crear/editar una rutina (formulario).
 // Se serializan al formato de WorkoutRequest esperado por el backend.
 // =====================================================================
 import 'workout.dart';

@@ -1,15 +1,15 @@
 # =====================================================================
-# KineticOs — Infraestructura OPCIONAL (observabilidad + búsqueda)
+# MiCoach — Infraestructura OPCIONAL (observabilidad + búsqueda)
 # NO se necesita para desarrollar. Levantar solo cuando haga falta:
 #   docker compose -f docker-compose.full.yml up -d
 # Requiere ~4 GB de RAM adicionales.
 # =====================================================================
-name: kineticos-full
+name: micoach-full
 
 services:
   opensearch:
     image: opensearchproject/opensearch:2.15.0
-    container_name: kineticos-opensearch
+    container_name: micoach-opensearch
     restart: unless-stopped
     environment:
       discovery.type: single-node
@@ -22,7 +22,7 @@ services:
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.15.0
-    container_name: kineticos-opensearch-dashboards
+    container_name: micoach-opensearch-dashboards
     restart: unless-stopped
     environment:
       OPENSEARCH_HOSTS: '["http://opensearch:9200"]'
@@ -34,7 +34,7 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: kineticos-prometheus
+    container_name: micoach-prometheus
     restart: unless-stopped
     volumes:
       - ./infra/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -43,7 +43,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: kineticos-grafana
+    container_name: micoach-grafana
     restart: unless-stopped
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
@@ -56,7 +56,7 @@ services:
 
   jaeger:
     image: jaegertracing/all-in-one:latest
-    container_name: kineticos-jaeger
+    container_name: micoach-jaeger
     restart: unless-stopped
     environment:
       COLLECTOR_OTLP_ENABLED: "true"

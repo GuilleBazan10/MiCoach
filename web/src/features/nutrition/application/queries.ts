@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Lecturas del módulo nutrition (TanStack Query).
+// MiCoach — Lecturas del módulo nutrition (TanStack Query).
 // =====================================================================
 import { useQuery } from '@tanstack/react-query';
 import { nutritionApi } from '../api/nutritionApi';

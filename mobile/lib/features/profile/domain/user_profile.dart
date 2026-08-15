@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Perfil de salud (mirror de UserDtos.ProfileResponse en backend).
+// MiCoach — Perfil de salud (mirror de UserDtos.ProfileResponse en backend).
 // =====================================================================
 class UserProfile {
   final int? id;

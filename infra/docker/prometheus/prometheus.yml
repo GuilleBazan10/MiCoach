@@ -1,4 +1,4 @@
-# KineticOs — Prometheus (scrape de métricas del backend)
+# MiCoach — Prometheus (scrape de métricas del backend)
 # Se usa con docker-compose.full.yml. El backend expone métricas en
 # /actuator/prometheus (Spring Boot Actuator).
 global:
@@ -6,9 +6,9 @@ global:
   evaluation_interval: 15s
 
 scrape_configs:
-  - job_name: "kineticos"
+  - job_name: "micoach"
     metrics_path: "/actuator/prometheus"
     static_configs:
       - targets: ["host.docker.internal:8080"]
         labels:
-          app: "kineticos"
+          app: "micoach"

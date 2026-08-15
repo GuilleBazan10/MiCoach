@@ -1,4 +1,4 @@
-# KineticOs — App Flutter
+# MiCoach — App Flutter
 
 ## Estado
 

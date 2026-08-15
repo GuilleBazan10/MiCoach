@@ -27,5 +27,5 @@ INSERT INTO ai_provider_configs (provider, display_name, base_url, model, enable
 
 -- Le doy ROLE_ADMIN al usuario de prueba de la web para poder probar el panel.
 INSERT INTO admin_user_roles (user_id, role_id)
-SELECT id, 4 FROM auth_users WHERE email = 'web-e2e-test@kineticos.dev'
+SELECT id, 4 FROM auth_users WHERE email = 'web-e2e-test@micoach.dev'
 ON CONFLICT DO NOTHING;

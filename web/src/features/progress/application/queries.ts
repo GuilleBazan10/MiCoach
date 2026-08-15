@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Lecturas del módulo progress (TanStack Query).
+// MiCoach — Lecturas del módulo progress (TanStack Query).
 // =====================================================================
 import { useQuery } from '@tanstack/react-query';
 import { progressApi } from '../api/progressApi';

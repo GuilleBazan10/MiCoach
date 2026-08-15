@@ -1,10 +1,10 @@
 // =====================================================================
-// KineticOs — Almacenamiento de tokens JWT (access + refresh).
+// MiCoach — Almacenamiento de tokens JWT (access + refresh).
 // Equivalente a mobile/lib/core/storage/token_storage.dart. localStorage
 // (no hay guardado seguro nativo en un SPA); el access token vive 15 min.
 // =====================================================================
-const ACCESS_TOKEN_KEY = 'kineticos_access_token';
-const REFRESH_TOKEN_KEY = 'kineticos_refresh_token';
+const ACCESS_TOKEN_KEY = 'micoach_access_token';
+const REFRESH_TOKEN_KEY = 'micoach_refresh_token';
 
 export const tokenStorage = {
   readAccessToken(): string | null {

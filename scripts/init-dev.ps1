@@ -1,10 +1,10 @@
 # =====================================================================
-# KineticOs — Arranque inicial en Windows (PowerShell)
+# MiCoach — Arranque inicial en Windows (PowerShell)
 # Uso:   powershell -ExecutionPolicy Bypass -File scripts\init-dev.ps1
 # =====================================================================
 $ErrorActionPreference = "Stop"
 
-Write-Host "== KineticOs - Inicializacion (Windows) ==" -ForegroundColor Cyan
+Write-Host "== MiCoach - Inicializacion (Windows) ==" -ForegroundColor Cyan
 
 # 1. .env
 if (-not (Test-Path ".env")) {
@@ -41,7 +41,7 @@ Write-Host ""
 Write-Host "Siguientes pasos (manuales):" -ForegroundColor Yellow
 Write-Host "  JDK 21   : si tu JAVA_HOME es < 17, instala Adoptium JDK 21 y setea JAVA_HOME" -ForegroundColor Yellow
 Write-Host "  Backend : cd backend ; .\gradlew.bat bootRun"
-Write-Host "  Flutter : cd mobile  ; flutter create . --org com.kineticos --project-name kineticos_mobile"
+Write-Host "  Flutter : cd mobile  ; flutter create . --org com.micoach --project-name micoach_mobile"
 Write-Host "            flutter run"
 Write-Host ""
 Write-Host "Servicios disponibles:" -ForegroundColor Cyan

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Guarda de rutas admin: además de autenticado, exige ROLE_ADMIN.
+// MiCoach — Guarda de rutas admin: además de autenticado, exige ROLE_ADMIN.
 // Va anidado dentro de <RequireAuth /> en router.tsx.
 // =====================================================================
 import { Navigate, Outlet } from 'react-router-dom';

@@ -1,5 +1,5 @@
 # =====================================================================
-# KineticOs — Version Catalog centralizado
+# MiCoach — Version Catalog centralizado
 # Alias -> librerías/plugins. Los módulos usan: libs.xxx.yyy
 # Las versiones gestionadas por el BOM de Spring Boot NO se listan aquí.
 # Subir versiones de Spring Boot actualizando `spring-boot` y re-validando.

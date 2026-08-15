@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Home del módulo progress: métricas / fotos.
+// MiCoach — Home del módulo progress: métricas / fotos.
 // =====================================================================
 import 'package:flutter/material.dart';
 

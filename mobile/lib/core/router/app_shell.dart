@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Shell con navegación inferior (Rutinas / Nutrición / Progreso / Perfil).
+// MiCoach — Shell con navegación inferior (Rutinas / Nutrición / Progreso / Perfil).
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';

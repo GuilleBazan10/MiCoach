@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Guarda de rutas autenticadas.
+// MiCoach — Guarda de rutas autenticadas.
 // Equivalente al `redirect` de GoRouter en mobile/lib/core/router/app_router.dart.
 // =====================================================================
 import { Navigate, Outlet, useLocation } from 'react-router-dom';

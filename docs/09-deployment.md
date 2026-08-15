@@ -1,6 +1,6 @@
 # Deployment — Supabase + Render + Vercel (free tier)
 
-> Guía operativa para poner KineticOs en producción con servicios gratuitos y
+> Guía operativa para poner MiCoach en producción con servicios gratuitos y
 > auto-deploy en cada push a `main`. No requiere pipeline propio: Render y
 > Vercel escuchan al repo de GitHub directamente.
 
@@ -65,7 +65,7 @@ Ya dejé listo `backend/Dockerfile` y `render.yaml` en la raíz del repo.
 
 1. [dashboard.render.com](https://dashboard.render.com) → **New +** →
    **Blueprint** → conectá el repo de GitHub (`GuilleBazan10/MiCoach`).
-2. Render detecta `render.yaml` y arma el servicio `kineticos-backend`
+2. Render detecta `render.yaml` y arma el servicio `micoach-backend`
    (Docker, plan free, health check en `/actuator/health`, auto-deploy on).
 3. Completá a mano las env vars marcadas como secretas (Render te las va a
    pedir al aplicar el blueprint):
@@ -73,8 +73,8 @@ Ya dejé listo `backend/Dockerfile` y `render.yaml` en la raíz del repo.
    - `CORS_ALLOWED_ORIGINS` — dejalo en blanco por ahora, lo completamos en el paso 4 con la URL de Vercel.
    - `JWT_SECRET` y `AES_SECRET` los genera Render solo (`generateValue: true`).
 4. Deploy. El primer boot va a tardar (build de Gradle + Flyway corriendo
-   V1→V17 contra Supabase). Mirá los logs hasta ver `Started KineticosApplication`.
-5. Notá la URL que te da Render, algo como `https://kineticos-backend.onrender.com`.
+   V1→V17 contra Supabase). Mirá los logs hasta ver `Started MiCoachApplication`.
+5. Notá la URL que te da Render, algo como `https://micoach-backend.onrender.com`.
 
 **Free tier**: el servicio se duerme a los 15 min sin tráfico y el próximo
 request tarda ~30-50s en despertar (cold start). Para un proyecto de curso
@@ -88,9 +88,9 @@ está bien: si más adelante molesta, un cron externo pegándole a
 3. Framework preset: Vite (lo detecta solo). Build command `npm run build`,
    output `dist` (defaults, no hace falta tocarlos).
 4. Environment variable:
-   - `VITE_API_BASE_URL` = `https://kineticos-backend.onrender.com/api/v1`
+   - `VITE_API_BASE_URL` = `https://micoach-backend.onrender.com/api/v1`
      (la URL de Render del paso 2, con `/api/v1` al final).
-5. Deploy. Vercel te da una URL tipo `https://kineticos-web.vercel.app`.
+5. Deploy. Vercel te da una URL tipo `https://micoach-web.vercel.app`.
 
 Ya agregué `web/vercel.json` con el rewrite a `index.html` que necesita el
 router (usa `createBrowserRouter`, así que sin esto las rutas internas dan
@@ -102,7 +102,7 @@ En Render, editá `CORS_ALLOWED_ORIGINS` del backend y agregá la URL real de
 Vercel:
 
 ```
-CORS_ALLOWED_ORIGINS=https://kineticos-web.vercel.app
+CORS_ALLOWED_ORIGINS=https://micoach-web.vercel.app
 ```
 
 Guardar dispara un redeploy automático del backend (variable cambiada).

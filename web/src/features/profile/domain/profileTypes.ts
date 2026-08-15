@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Perfil de salud (mirror de UserDtos en el backend).
+// MiCoach — Perfil de salud (mirror de UserDtos en el backend).
 // Paridad con mobile/lib/features/profile/domain/{user_profile,user_subresources}.dart.
 // =====================================================================
 export interface UserProfile {

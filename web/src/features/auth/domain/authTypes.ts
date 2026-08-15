@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Tipos del dominio auth (docs/03-api-contracts.md § Módulo auth).
+// MiCoach — Tipos del dominio auth (docs/03-api-contracts.md § Módulo auth).
 // =====================================================================
 export interface AuthUser {
   id: number;

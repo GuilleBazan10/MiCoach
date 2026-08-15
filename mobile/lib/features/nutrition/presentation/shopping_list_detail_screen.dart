@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Detalle de una lista de compra: ítems con checkbox.
+// MiCoach — Detalle de una lista de compra: ítems con checkbox.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

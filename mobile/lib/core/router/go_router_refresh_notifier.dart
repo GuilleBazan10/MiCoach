@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Adaptador para que GoRouter reaccione a cambios de sesión.
+// MiCoach — Adaptador para que GoRouter reaccione a cambios de sesión.
 // GoRouter espera un Listenable; Riverpod no lo es nativamente, así que
 // este notifier escucha authControllerProvider y notifica al router.
 // =====================================================================

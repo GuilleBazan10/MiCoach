@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Foto de progreso (mirror de ProgressDtos en backend).
+// MiCoach — Foto de progreso (mirror de ProgressDtos en backend).
 // =====================================================================
 class ProgressPhoto {
   final int id;

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Etiquetas y unidades por defecto para las métricas de
+// MiCoach — Etiquetas y unidades por defecto para las métricas de
 // seguimiento (CHECK constraints documentados en docs/02-database.md).
 // =====================================================================
 const metricTypeLabels = {

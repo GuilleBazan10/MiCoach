@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Cliente REST del módulo nutrition (/api/v1/nutrition).
+// MiCoach — Cliente REST del módulo nutrition (/api/v1/nutrition).
 // =====================================================================
 import 'package:dio/dio.dart';
 

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Pantalla de registro.
+// MiCoach — Pantalla de registro.
 // =====================================================================
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';

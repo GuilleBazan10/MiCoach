@@ -1,4 +1,4 @@
-# KineticOs — Contratos de API
+# MiCoach — Contratos de API
 
 > **Estado: FASE 2 COMPLETADA.** Los 9 módulos backend (`shared`, **auth**, **user**
 > (2026-08-11), **workout**, **nutrition**, **progress**, **notification**, **admin**,

@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Detalle de una receta: ingredientes (con opción de sustituir
+// MiCoach — Detalle de una receta: ingredientes (con opción de sustituir
 // cada uno con IA), instrucciones y macros. Se abre al tocar el nombre de
 // una receta. Equivalente a ExerciseDetailDialog para el módulo workout.
 // =====================================================================

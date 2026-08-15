@@ -1,12 +1,12 @@
 # =====================================================================
-# KineticOs — Blueprint de Render (backend)
+# MiCoach — Blueprint de Render (backend)
 # Al conectar el repo, Render lee este archivo y crea el servicio con
 # esta configuración. Los valores marcados "sync: false" se cargan a
 # mano una sola vez desde el dashboard (son secretos: no van al repo).
 # =====================================================================
 services:
   - type: web
-    name: kineticos-backend
+    name: micoach-backend
     runtime: docker
     dockerfilePath: ./backend/Dockerfile
     dockerContext: ./backend
@@ -37,7 +37,7 @@ services:
       - key: AES_SECRET
         generateValue: true
       - key: TOTP_ISSUER
-        value: KineticOs
+        value: MiCoach
       - key: CORS_ALLOWED_ORIGINS
         sync: false
       - key: AI_PROVIDER

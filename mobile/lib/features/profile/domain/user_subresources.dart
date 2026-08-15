@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Sub-recursos del perfil de salud (mirror de UserDtos en backend).
+// MiCoach — Sub-recursos del perfil de salud (mirror de UserDtos en backend).
 // =====================================================================
 
 class UserGoal {

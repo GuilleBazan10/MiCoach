@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Repositorio de auth: combina la API con la sesión persistida.
+// MiCoach — Repositorio de auth: combina la API con la sesión persistida.
 // =====================================================================
 import '../../../core/storage/token_storage.dart';
 import '../domain/auth_user.dart';

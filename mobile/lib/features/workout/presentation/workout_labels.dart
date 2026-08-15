@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Etiquetas en español para los valores fijos del backend
+// MiCoach — Etiquetas en español para los valores fijos del backend
 // (CHECK constraints documentados en docs/02-database.md).
 // =====================================================================
 const objectiveLabels = {

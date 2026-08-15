@@ -1,5 +1,5 @@
 // =====================================================================
-// KineticOs — Usuario autenticado (respuesta de /api/v1/auth/*).
+// MiCoach — Usuario autenticado (respuesta de /api/v1/auth/*).
 // =====================================================================
 class AuthUser {
   final int id;
