@@ -29,12 +29,14 @@ export function setOnSessionExpired(handler: () => void): void {
   onSessionExpired = handler;
 }
 
+// 60s: en Render free tier, el backend puede estar dormido y tardar en
+// arrancar (cold start) más que un timeout corto habitual.
 export const apiClient: AxiosInstance = axios.create({
   baseURL: apiBaseUrl,
-  timeout: 15000,
+  timeout: 60000,
 });
 
-const refreshClient = axios.create({ baseURL: apiBaseUrl, timeout: 10000 });
+const refreshClient = axios.create({ baseURL: apiBaseUrl, timeout: 60000 });
 
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   config.headers.set('X-Correlation-Id', newCorrelationId());
