@@ -8,6 +8,7 @@ import { NavLink, Outlet } from 'react-router-dom';
 import { Dumbbell, LogOut, Settings, TrendingUp, User, Utensils, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { APP_NAME } from '@/core/config';
 import { useAuth } from '@/features/auth/application/useAuth';
 
 const NAV_ITEMS = [
@@ -39,7 +40,7 @@ export function AppShell() {
               >
                 <Zap className="size-4.5 fill-current" />
               </span>
-              <span className="text-lg font-bold tracking-tight text-foreground">MiCoach</span>
+              <span className="text-lg font-bold tracking-tight text-foreground">{APP_NAME}</span>
             </div>
             <nav className="hidden items-center gap-1 sm:flex">
               {navItems.map((item) => (

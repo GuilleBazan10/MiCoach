@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { extractErrorMessage } from '@/core/api/apiError';
+import { APP_NAME } from '@/core/config';
 import { useAuth } from '../application/useAuth';
 import { loginSchema, type LoginFormValues } from '../application/authSchemas';
 
@@ -39,7 +40,7 @@ export function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">Iniciar sesión</CardTitle>
-          <CardDescription>Entrá a tu cuenta de MiCoach.</CardDescription>
+          <CardDescription>Entrá a tu cuenta de {APP_NAME}.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>

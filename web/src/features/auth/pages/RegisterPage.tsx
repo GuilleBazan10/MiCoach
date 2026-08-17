@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { extractErrorMessage } from '@/core/api/apiError';
+import { APP_NAME } from '@/core/config';
 import { useAuth } from '../application/useAuth';
 import { registerSchema, type RegisterFormValues } from '../application/authSchemas';
 
@@ -37,7 +38,7 @@ export function RegisterPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">Crear cuenta</CardTitle>
-          <CardDescription>Empezá a usar MiCoach.</CardDescription>
+          <CardDescription>Empezá a usar {APP_NAME}.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>

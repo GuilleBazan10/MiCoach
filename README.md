@@ -123,6 +123,7 @@ Si otro modelo va a seguir este proyecto, lo primero que debe leer es:
 | `docs/03-api-contracts.md` | Contratos REST y eventos (Fase 2) |
 | `docs/04-adr/` | Architecture Decision Records |
 | `docs/05-manuals/` | Manual técnico y funcional (Fase 7) |
+| `docs/06-ux-ui-audit.md` | Auditoría UX/UI y deuda de diseño (branding, paridad web/mobile, accesibilidad) |
 | `docs/08-ai-prompt-v2.md` | Prompt v2 para IA generadora |
 | `mobile/README.md` | Cómo levantar y probar la app mobile (Flutter) |
 | `web/README.md` | Stack, estructura y arranque de la app web (ver ADR-003) |

@@ -3,6 +3,7 @@ import { ChevronRight, Plus, ShoppingCart } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import {
@@ -20,7 +21,7 @@ import { useShoppingLists } from '../application/queries';
 import { useCreateShoppingList } from '../application/mutations';
 
 export function ShoppingListListView() {
-  const { data: lists, isLoading, isError } = useShoppingLists();
+  const { data: lists, isLoading, isError, refetch } = useShoppingLists();
   const createList = useCreateShoppingList();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
@@ -68,7 +69,7 @@ export function ShoppingListListView() {
           <div className="size-6 animate-spin rounded-full border-2 border-muted border-t-primary" />
         </div>
       )}
-      {isError && <p className="py-12 text-center text-sm text-muted-foreground">No se pudieron cargar las listas.</p>}
+      {isError && <ErrorState onRetry={() => refetch()} />}
       {!isLoading && lists?.length === 0 && (
         <EmptyState icon={ShoppingCart} message="Todavía no creaste ninguna lista de compras." />
       )}

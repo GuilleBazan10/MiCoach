@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Activity, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
@@ -21,7 +22,7 @@ const dateFormatter = new Intl.DateTimeFormat('es-AR', {
 
 export function MetricEntriesView() {
   const [filter, setFilter] = useState<string | undefined>(undefined);
-  const { data: entries, isLoading, isError } = useProgressEntries(filter);
+  const { data: entries, isLoading, isError, refetch } = useProgressEntries(filter);
   const deleteEntry = useDeleteEntry();
 
   return (
@@ -48,7 +49,7 @@ export function MetricEntriesView() {
           <div className="size-6 animate-spin rounded-full border-2 border-muted border-t-primary" />
         </div>
       )}
-      {isError && <p className="py-12 text-center text-sm text-muted-foreground">No se pudieron cargar las métricas.</p>}
+      {isError && <ErrorState onRetry={() => refetch()} />}
       {!isLoading && entries?.length === 0 && (
         <EmptyState icon={Activity} message="Todavía no registraste ninguna métrica. ¡Sumá la primera!" />
       )}

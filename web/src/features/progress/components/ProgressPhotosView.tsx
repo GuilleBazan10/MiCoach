@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Camera, ImageOff, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { extractErrorMessage } from '@/core/api/apiError';
@@ -13,7 +14,7 @@ import { AddPhotoDialog } from './AddPhotoDialog';
 const dateFormatter = new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
 export function ProgressPhotosView() {
-  const { data: photos, isLoading, isError } = useProgressPhotos();
+  const { data: photos, isLoading, isError, refetch } = useProgressPhotos();
   const deletePhoto = useDeletePhoto();
 
   return (
@@ -31,7 +32,7 @@ export function ProgressPhotosView() {
           <div className="size-6 animate-spin rounded-full border-2 border-muted border-t-primary" />
         </div>
       )}
-      {isError && <p className="py-12 text-center text-sm text-muted-foreground">No se pudieron cargar las fotos.</p>}
+      {isError && <ErrorState onRetry={() => refetch()} />}
       {!isLoading && photos?.length === 0 && (
         <EmptyState icon={Camera} message="Todavía no subiste ninguna foto de progreso." />
       )}

@@ -17,6 +17,7 @@
 | 5 | Testing completo | ⬜ Pendiente |
 | 6 | CI/CD y despliegue | 🟡 PARCIAL (deploy productivo Render+Vercel+Supabase hecho; falta GitHub Actions, APK Flutter) |
 | 7 | Documentación final (README, manuales) | ⬜ Pendiente |
+| — | UX/UI (auditoría, transversal a las fases) | 🟡 EN CURSO — ver [`docs/06-ux-ui-audit.md`](./06-ux-ui-audit.md), tier "rápido y barato" (4/4) resuelto en web 2026-08-17 |
 
 ## Fase 0 — Cimientos (COMPLETADA)
 
@@ -1032,6 +1033,18 @@ parte del alcance de la Fase 6:
 Consolidado de todo lo que quedó suelto durante el desarrollo y el primer deploy,
 para no perderlo de vista:
 
+- **Auditoría UX/UI**: `docs/06-ux-ui-audit.md` es la fuente de verdad de deuda de
+  diseño (generada por un chat de diseño aparte, verificada contra el código real
+  antes de actuar sobre ella). Tiene su propio roadmap por costo/impacto — no
+  duplicar el detalle acá, solo el estado global:
+  - [x] Tier "rápido y barato" (§9.1-4: `APP_NAME`, `ErrorState`, progreso de IA
+        con expectativa de tiempo, `EmptyState` condicional por perfil incompleto)
+        — resuelto **en web** 2026-08-17. Falta portar a Flutter (se suma al ítem
+        de paridad mobile de abajo, no es un pendiente aparte).
+  - [ ] Tier "medio" (§9.5-7: paridad `HeroBanner`/`EmptyState` en Flutter, escala
+        tipográfica nombrada, auditoría de cobertura de toasts de éxito).
+  - [ ] Bloqueado hasta tener assets de marca reales (§8, §9.8-9): logo, favicon,
+        paleta final, chequeo de contraste WCAG AA.
 - [ ] **Paridad Flutter** de las dos features de IA de nutrición que solo existen en
       web: sustitución de ingredientes y ajuste de calorías del plan (`/admin/ai` NO
       entra acá — esa fue decisión explícita de que quede solo en web).
