@@ -13,9 +13,9 @@
 | 2 | Backend módulo a módulo (Java/Spring) | ✅ COMPLETADA (shared, auth, user, workout, nutrition, progress, notification, admin, ai) |
 | 3.1 | Frontend Mobile (Flutter) | ✅ COMPLETADA (core, auth, profile, workout, nutrition, progress — `admin`/`ai` sin frontend, es deliberado) |
 | 3.2 | Frontend Web (React) | ✅ COMPLETADA (core, auth, profile, workout, nutrition, progress — mismo alcance que 3.1) |
-| 4 | Integración IA (LangChain4j + Ollama) | 🟡 EN CURSO (generación de rutinas ✅ — faltan planes/sustituciones/calorías) |
+| 4 | Integración IA (LangChain4j + Ollama/Groq/Gemini) | ✅ COMPLETADA (falta paridad Flutter de 2 features, ver "Pendientes globales") |
 | 5 | Testing completo | ⬜ Pendiente |
-| 6 | CI/CD y despliegue | ⬜ Pendiente |
+| 6 | CI/CD y despliegue | 🟡 PARCIAL (deploy productivo Render+Vercel+Supabase hecho; falta GitHub Actions, APK Flutter) |
 | 7 | Documentación final (README, manuales) | ⬜ Pendiente |
 
 ## Fase 0 — Cimientos (COMPLETADA)
@@ -984,22 +984,88 @@ misma entrega.
   ahora** — no se portaron a Flutter en esta entrega (a diferencia de generación de
   rutina/plan, que sí tienen paridad). Pendiente si se quiere completar más adelante.
 
+### Cierre real de la Fase 4 y despliegue a producción (2026-08-15/16)
+
+Con el commit + push pendiente ya resuelto, se hizo además un **rename completo del
+proyecto** (KineticOs → MiCoach, pedido explícito del usuario: paquetes Java, paquete
+Dart/Android, DB config, docs) y el **primer despliegue a producción**, adelantando
+parte del alcance de la Fase 6:
+
+- **Infra**: Supabase (Postgres), Render (backend, Docker, free tier, autoDeploy),
+  Vercel (web, autoDeploy). `backend/Dockerfile`, `render.yaml`, `web/vercel.json`,
+  guía completa en `docs/09-deployment.md`.
+- **Bugs de deploy encontrados y resueltos** (quedan documentados porque son gotchas
+  no obvios si se vuelve a desplegar desde cero):
+  - Supabase: usar el **Session pooler** (puerto 5432), no "Direct connection"
+    (IPv6-only) ni el Transaction pooler (rompe prepared statements de Hibernate).
+  - Circuit breaker de Supabase (`ECIRCUITBREAKER`) tras varios intentos con
+    credenciales mal cargadas — se destraba reseteando el password en Supabase.
+  - Checksums de Flyway rotos porque el rename tocó comentarios de migraciones ya
+    aplicadas contra la base real. Fix permanente: `FlywayConfig` (`backend/app/src/
+    main/java/com/micoach/app/config/FlywayConfig.java`) corre `flyway.repair()`
+    antes de `migrate()` en cada arranque — necesario porque el equipo no siempre
+    tiene acceso directo a la base para correrlo a mano. Trade-off aceptado: si
+    algún día se edita el contenido lógico (no solo comentarios) de una migración ya
+    aplicada, esto lo va a "perdonar" en silencio en vez de frenar el deploy.
+  - Import sin usar (`Card`/`CardContent` en `SessionPage.tsx`, leftover de una
+    refactorización anterior) rompía `tsc -b` en el build limpio de Vercel (no se
+    detectaba en local por caché incremental de TypeScript).
+  - Timeout del cliente HTTP (`web/src/core/api/client.ts`) subido de 15s a 60s: en
+    Render free tier el cold start puede tardar varios minutos, y el timeout corto
+    cancelaba el primer request tras cada período de inactividad.
+  - `CORS_ALLOWED_ORIGINS` mal cargado en Render (el puerto de Postgres `5432` en vez
+    de la URL de Vercel) causaba 403 "CORS" en login/register.
+- **Usuario admin de arranque**: no hay forma de auto-otorgarse admin ni self-service
+  sin acceso a la base, así que se sembró por migración (`V18__seed_admin_user.sql`):
+  `admin@micoach.dev`, password hasheada con BCrypt directamente en el INSERT (sin
+  depender del flujo de registro). Pendiente rotarla una vez confirmado que todo
+  funciona, porque quedó expuesta en el chat de esta sesión.
+- **Groq configurado en producción** vía `/admin/ai` con esa cuenta (2026-08-16).
+
 ### Pendiente
 
-- [ ] Paridad Flutter de sustitución de ingredientes y ajuste de calorías.
-- [ ] Commit + push a GitHub — pendiente hasta cerrar toda la Fase 4 (pedido explícito
-      del usuario). Con esta entrega, la Fase 4 queda funcionalmente completa.
+- [ ] Paridad Flutter de sustitución de ingredientes y ajuste de calorías (ver
+      "Pendientes globales" más abajo).
+
+## Pendientes globales / deuda técnica
+
+Consolidado de todo lo que quedó suelto durante el desarrollo y el primer deploy,
+para no perderlo de vista:
+
+- [ ] **Paridad Flutter** de las dos features de IA de nutrición que solo existen en
+      web: sustitución de ingredientes y ajuste de calorías del plan (`/admin/ai` NO
+      entra acá — esa fue decisión explícita de que quede solo en web).
+- [ ] **Rotar la password del admin seed** (`admin@micoach.dev`) — quedó en texto
+      plano en el chat de esta sesión.
+- [ ] `.env` local todavía tiene `POSTGRES_DB=kineticos`/`POSTGRES_USER=kineticos`
+      (el Postgres de Docker local ya se creó con ese nombre). Cosmético, no rompe
+      nada; para dejarlo 100% consistente hay que recrear el volumen de Docker local.
+- [ ] Reconsiderar el auto-repair permanente de Flyway (`FlywayConfig`) una vez que
+      el equipo tenga acceso directo a Supabase — hoy es un parche necesario, no el
+      estado ideal a largo plazo (ver nota arriba).
+- [ ] Rama local `backup-antes-de-reescribir` — sin decidir si se borra.
+- [ ] Render free tier: se observó un arranque de ~230s con un apagado/reinicio raro
+      a los pocos segundos de quedar "live" (probablemente un redeploy solapado por
+      otro push, no confirmado). Si se repite sin un push de por medio, investigar
+      límites de recursos del plan free.
 
 ## Fase 5 — Testing (PLAN)
 
 Testcontainers (PostgreSQL, Redis, RabbitMQ reales) en integración. Widget/unit tests en
 Flutter mobile + tests de componentes en React (web). Cobertura objetivo ≥70% en dominio.
 
-## Fase 6 — CI/CD (PLAN)
+## Fase 6 — CI/CD (PARCIAL — deploy productivo ya hecho, adelantado desde la Fase 4)
 
-GitHub Actions (build, test, lint). Dockerfile multi-stage para backend, build de la web
-(React) y build de la APK Flutter. Compose de "producción" con Nginx. Kubernetes solo
-como plan documentado.
+- [x] Dockerfile multi-stage para backend.
+- [x] Build de la web (React) automatizado.
+- [x] Despliegue productivo con auto-deploy (Render + Vercel), sin GitHub Actions
+      propio — Render/Vercel escuchan el repo directamente.
+- [ ] GitHub Actions (build, test, lint) como gate de PRs — hoy el único control es
+      que compile/buildee en el proveedor de deploy, no hay CI previo al merge.
+- [ ] Build de la APK Flutter (nunca se generó, pendiente desde la Fase 3.1).
+- [ ] Compose de "producción" con Nginx — probablemente ya no haga falta, dado que
+      el hosting quedó resuelto con Render/Vercel/Supabase.
+- [ ] Kubernetes solo como plan documentado (baja prioridad para un proyecto de curso).
 
 ## Fase 7 — Documentación (PLAN)
 
