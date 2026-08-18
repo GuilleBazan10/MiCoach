@@ -201,8 +201,15 @@ public class AiService implements AiUseCase {
             throw e;
         }
         int durationMs = (int) (System.currentTimeMillis() - start);
-        logAttempt(userId, prompt, resolved, variables, Map.of("raw", output), durationMs, "success");
-        return new GenerationResult(output, resolved.provider(), resolved.model(), durationMs);
+        GenerationLog saved = logAttempt(userId, prompt, resolved, variables, Map.of("raw", output), durationMs,
+                "success");
+        return new GenerationResult(saved.getId(), output, resolved.provider(), resolved.model(), durationMs);
+    }
+
+    @Override
+    @Transactional
+    public void markGenerationPartial(Long logId) {
+        repository.updateGenerationLogStatus(logId, "partial");
     }
 
     private ResolvedProvider resolve(AiProviderConfig config) {
@@ -218,9 +225,9 @@ public class AiService implements AiUseCase {
                         "No hay implementación para el proveedor de IA '" + providerId + "'"));
     }
 
-    private void logAttempt(Long userId, Prompt prompt, ResolvedProvider provider, Map<String, Object> input,
+    private GenerationLog logAttempt(Long userId, Prompt prompt, ResolvedProvider provider, Map<String, Object> input,
                             Map<String, Object> output, int durationMs, String status) {
-        repository.saveGenerationLog(GenerationLog.create(userId, prompt.getSlug(), prompt.getVersion(),
+        return repository.saveGenerationLog(GenerationLog.create(userId, prompt.getSlug(), prompt.getVersion(),
                 provider.provider(), provider.model(), input, output, durationMs, status));
     }
 

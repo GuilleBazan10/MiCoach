@@ -23,6 +23,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DomainException.class)
     public ResponseEntity<ApiError> handleDomain(DomainException ex, HttpServletRequest request) {
+        log.warn("DomainException en {} ({}): {}", request.getRequestURI(), ex.getCode(), ex.getMessage());
         ApiError body = ApiError.of(ex.getStatus(), ex.getCode(), ex.getMessage(), request.getRequestURI());
         return ResponseEntity.status(ex.getStatus()).body(body);
     }

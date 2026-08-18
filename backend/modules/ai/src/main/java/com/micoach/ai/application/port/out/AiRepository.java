@@ -21,4 +21,5 @@ public interface AiRepository {
     ChatMessage saveMessage(ChatMessage message);
     List<GenerationLog> findGenerationLogs(GenerationLogFilter filter);
     GenerationLog saveGenerationLog(GenerationLog log);
+    void updateGenerationLogStatus(Long logId, String status);
 }

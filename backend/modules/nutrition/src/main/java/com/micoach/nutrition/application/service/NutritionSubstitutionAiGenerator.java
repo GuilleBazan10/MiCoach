@@ -68,9 +68,10 @@ class NutritionSubstitutionAiGenerator {
                 "profile", buildProfileText(userId),
                 "catalog", catalogText));
 
-        AiSubstitutionJson parsed = parseJson(result.rawOutput());
+        AiSubstitutionJson parsed = parseJson(result);
         Long substituteId = resolveIngredientId(parsed.substituteName(), candidates);
         if (substituteId == null) {
+            aiUseCase.markGenerationPartial(result.logId());
             throw new DomainException(502, ErrorCode.INTERNAL_ERROR,
                     "La IA no encontró un sustituto válido en el catálogo");
         }
@@ -112,14 +113,16 @@ class NutritionSubstitutionAiGenerator {
         return text.isEmpty() ? "Sin datos de perfil cargados." : text.toString();
     }
 
-    private AiSubstitutionJson parseJson(String raw) {
-        String jsonSlice = extractFirstJsonObject(raw);
+    private AiSubstitutionJson parseJson(AiUseCase.GenerationResult result) {
+        String jsonSlice = extractFirstJsonObject(result.rawOutput());
         if (jsonSlice == null) {
+            aiUseCase.markGenerationPartial(result.logId());
             throw new DomainException(502, ErrorCode.INTERNAL_ERROR, "La IA no devolvió un JSON válido");
         }
         try {
             return objectMapper.readValue(jsonSlice, AiSubstitutionJson.class);
         } catch (Exception e) {
+            aiUseCase.markGenerationPartial(result.logId());
             throw new DomainException(502, ErrorCode.INTERNAL_ERROR,
                     "No se pudo interpretar la sustitución generada por la IA: " + e.getMessage());
         }
