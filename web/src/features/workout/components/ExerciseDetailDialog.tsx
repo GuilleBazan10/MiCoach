@@ -3,6 +3,7 @@
 // Se abre al tocar el nombre de un ejercicio en una rutina o sesión.
 // =====================================================================
 import { ImageOff, Video } from 'lucide-react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CATEGORY_LABELS, DIFFICULTY_LABELS, labelFor } from '../domain/workoutLabels';
@@ -101,10 +102,16 @@ export function ExerciseDetailDialog({
 }
 
 function ExercisePositionImage({ url, label, name }: { url?: string | null; label: string; name: string }) {
+  const [broken, setBroken] = useState(false);
   return (
     <div className="flex flex-col gap-1">
-      {url ? (
-        <img src={url} alt={`${name} — ${label}`} className="aspect-square w-full rounded-lg object-cover" />
+      {url && !broken ? (
+        <img
+          src={url}
+          alt={`${name} — ${label}`}
+          className="aspect-square w-full rounded-lg object-cover"
+          onError={() => setBroken(true)}
+        />
       ) : (
         <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg bg-muted text-muted-foreground">
           <ImageOff className="size-5" />

@@ -44,7 +44,7 @@ export function MealPlanListView() {
               </div>
               <p className="truncate text-sm text-muted-foreground">
                 {shortDate.format(new Date(plan.startDate))} — {shortDate.format(new Date(plan.endDate))} ·{' '}
-                {plan.days.length} días
+                {plan.days.length} {plan.days.length === 1 ? 'día' : 'días'}
               </p>
             </div>
             <ChevronRight className="shrink-0 text-muted-foreground" />

@@ -85,6 +85,8 @@ export interface PlannedExerciseDraft {
   repsMin?: number | null;
   repsMax?: number | null;
   restSeconds?: number | null;
+  intensityPercent?: number | null;
+  tempo?: string | null;
 }
 
 export interface WorkoutDayDraft {
@@ -125,6 +127,8 @@ export function draftFromWorkout(workout: Workout): WorkoutDraft {
         repsMin: e.repsMin,
         repsMax: e.repsMax,
         restSeconds: e.restSeconds,
+        intensityPercent: e.intensityPercent,
+        tempo: e.tempo,
       })),
     })),
   };
@@ -148,6 +152,8 @@ export function workoutDraftToPayload(draft: WorkoutDraft) {
         repsMin: e.repsMin ?? null,
         repsMax: e.repsMax ?? null,
         restSeconds: e.restSeconds ?? null,
+        intensityPercent: e.intensityPercent ?? null,
+        tempo: e.tempo || null,
       })),
     })),
   };

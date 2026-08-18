@@ -206,8 +206,11 @@ public class AiService implements AiUseCase {
         return new GenerationResult(saved.getId(), output, resolved.provider(), resolved.model(), durationMs);
     }
 
+    // REQUIRES_NEW: igual que generate() arriba — si no, la DomainException que el
+    // llamador lanza justo después de marcar "partial" hace rollback de esta misma
+    // transacción y el UPDATE se pierde, dejando el log en "success" pese al rechazo.
     @Override
-    @Transactional
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void markGenerationPartial(Long logId) {
         repository.updateGenerationLogStatus(logId, "partial");
     }

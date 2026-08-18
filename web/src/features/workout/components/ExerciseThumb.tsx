@@ -4,6 +4,7 @@
 // ícono de color por categoría en vez de un espacio vacío.
 // =====================================================================
 import { Dumbbell } from 'lucide-react';
+import { useState } from 'react';
 import { CATEGORY_COLORS, colorFor } from '../domain/workoutLabels';
 
 export function ExerciseThumb({
@@ -15,14 +16,16 @@ export function ExerciseThumb({
   category?: string | null;
   size?: 'sm' | 'md';
 }) {
+  const [broken, setBroken] = useState(false);
   const dimensions = size === 'sm' ? 'size-9' : 'size-11';
 
-  if (imageUrl) {
+  if (imageUrl && !broken) {
     return (
       <img
         src={imageUrl}
         alt=""
         className={`${dimensions} shrink-0 rounded-lg object-cover ring-1 ring-border`}
+        onError={() => setBroken(true)}
       />
     );
   }

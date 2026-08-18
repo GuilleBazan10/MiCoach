@@ -657,7 +657,263 @@
 
 ---
 
+## I. Verificación en vivo (2026-08-18) — qué quedó realmente bien y qué falta
+
+> Después de que se implementaron los 18 hallazgos marcados como resueltos arriba, se
+> volvió a levantar el entorno local (backend reconstruido con las migraciones hasta
+> `V20`, web contra ese backend) y se probó de nuevo en vivo: perfil, generación de
+> rutina y de plan de alimentación con IA (Ollama local, se probó tanto `llama3.2:1b`
+> como `llama3.2:latest` 3.2B), sesión de entrenamiento, y gráfico de progreso con
+> datos reales cargados. La mayoría de lo marcado como "RESUELTO" se comprobó andando
+> tal como se especificó — el detalle está en cada hallazgo de arriba. Lo que sigue acá
+> son **cosas nuevas que aparecieron al probar en vivo**, que no estaban en la primera
+> pasada (revisión de código sin ejecutar) y que conviene cerrar en la próxima vuelta.
+
+### I.1 — ✅ RESUELTO 2026-08-18 — Regresión: el registro de auditoría vuelve a mentir cuando la generación se rechaza (mismo bug de A.1, reintroducido en el fix nuevo)
+
+> **Fix aplicado**: `@Transactional(propagation = Propagation.REQUIRES_NEW)` en
+> `AiService.markGenerationPartial()` (`AiService.java`), mismo criterio que ya usaba
+> `generate()`. Cambio de una línea (más un comentario explicando por qué), tal como se
+> preveía en el diagnóstico original. Compila limpio (`:modules:ai:compileJava`).
+
+- **Reproducido**: se pidió una rutina nueva con IA dos veces seguidas. Ambas fueron
+  **rechazadas** por la validación nueva de C.1 ("La IA generó un día de entrenamiento
+  con muy pocos ejercicios (1)" / "(2)", visible en el toast al usuario — eso funciona
+  bien). Pero `ai_generation_logs` sigue mostrando `status = 'success'` para esos dos
+  intentos rechazados, en vez de `'partial'`. Se reprodujo el mismo problema del lado de
+  nutrición (`meal_plan_generator`, dos generaciones rechazadas por
+  `"La IA no devolvió un JSON válido"` / error de parseo, ambas quedaron como
+  `'success'` en el log).
+- **Causa exacta**: `WorkoutAiGenerator.toWorkoutData()` (y el equivalente en
+  `NutritionAiGenerator`) llama a `aiUseCase.markGenerationPartial(result.logId())`
+  **justo antes** de lanzar la `DomainException` que rechaza la generación. El problema
+  es que `markGenerationPartial()` (`AiService.java:209-212`) está anotado solo
+  `@Transactional` (propagación `REQUIRED`) — como el método que la llama
+  (`WorkoutService.generateWorkout()` / `NutritionService.generateMealPlan()`) también
+  es `@Transactional`, el `UPDATE` de status **se une a esa misma transacción**. La
+  `DomainException` lanzada un instante después marca toda la transacción para
+  rollback (comportamiento estándar de Spring con `RuntimeException`), así que el
+  `UPDATE` a `'partial'` se deshace junto con todo lo demás. **Es exactamente el mismo
+  problema que ya se había encontrado y resuelto una vez** — por eso
+  `AiService.generate()` (la llamada a la IA en sí) usa
+  `@Transactional(propagation = Propagation.REQUIRES_NEW)` — pero el fix nuevo de
+  `markGenerationPartial()` no copió ese mismo criterio.
+- **Por qué importa**: es el problema original de A.1 (auditoría poco confiable) que
+  vuelve a aparecer en un lugar nuevo. Si en algún momento alguien mira
+  `ai_generation_logs` para depurar por qué la IA "no genera nada" para ciertos
+  usuarios, va a ver puro `'success'` y asumir que el problema está en otro lado.
+- **Qué hacer**: agregar `@Transactional(propagation = Propagation.REQUIRES_NEW)` a
+  `AiService.markGenerationPartial()` (`AiService.java:210-212`), mismo criterio que ya
+  tiene `generate()` un poco más arriba en el mismo archivo. Cambio de una línea,
+  mismo fix ya validado una vez en este proyecto.
+
+### I.2 — ✅ RESUELTO 2026-08-18 (frente manual) — H.1 y E.2 están bien implementados pero hoy no los activa nada (capacidad lista, sin datos que la usen)
+
+> **Fix aplicado — frente 1, carga manual**: se agregaron inputs opcionales de
+> "Descanso (seg)", "Intensidad (%)" y "Tempo" a `WorkoutDayEditor.tsx` por ejercicio,
+> mismo patrón que series/reps. Se agregaron `intensityPercent`/`tempo` al tipo
+> `PlannedExerciseDraft` (`workoutTypes.ts`) y a los mapeos `draftFromWorkout`/
+> `workoutDraftToPayload` — el backend ya aceptaba estos campos en el payload, solo
+> faltaba el lado del formulario. **Verificado en vivo**: se cargó descanso 90s /
+> intensidad 75% / tempo 3-1-2 en un ejercicio real (`/workouts/15`), se guardó
+> (`PUT /api/v1/workouts/15 → 200`), se confirmó que persistió en la respuesta del
+> backend, y la ficha de rutina ya muestra "3 series · 8-12 reps · descanso 90s · 75%
+> intensidad · tempo 3-1-2" — H.1 activado de punta a punta.
+>
+> **Fix aplicado — frente 2, default de IA**: `WorkoutAiGenerator.java` ahora calcula
+> un `restSeconds` por defecto en vez de mandar siempre `null` — heurística por
+> `category`/`equipment` del catálogo (90s para compuestos con barra/rack/sled,
+> 60s para el resto de fuerza, `null` para cardio/movilidad/etc. donde "descanso entre
+> series" no aplica igual). `intensityPercent`/`tempo` siguen en `null` desde la IA
+> (no hay una heurística confiable para esos dos sin pedírselo al modelo — queda como
+> posible siguiente paso, no bloqueante).
+
+- **Verificado en vivo**: se inició una sesión desde un día de la rutina y se confirmó
+  que el diálogo de registro **sí** precarga "Planificado: 3 series · 8-12 reps" y los
+  campos de series/reps (exactamente como se pidió en E.1) — eso funciona perfecto.
+  Pero **el descanso nunca aparece**, ni en la ficha de rutina (H.1) ni como
+  temporizador durante la sesión (E.2, `SessionPage.tsx:86-87`: el timer solo arranca
+  `if (planned?.restSeconds)`).
+- **Causa**: se confirmó contra la base (`workout_workout_exercises`) que
+  `rest_seconds`, `intensity_percent` y `tempo` están en `NULL` para **todos** los
+  ejercicios planificados, tanto los generados por IA (`WorkoutAiGenerator.java`
+  manda `null, null, null, null` a propósito para esos 4 campos — no es un bug, el
+  generador nunca los completó) como para rutinas armadas a mano (`WorkoutDayEditor`
+  no tiene ningún input para esos 3 campos, se confirmó que no cambió con este ciclo
+  de fixes). **No hay, hoy, ningún camino en toda la app para que esos campos tengan
+  un valor** — ni IA ni carga manual.
+- **Por qué importa**: H.1 y E.2 están perfectamente implementados del lado de
+  presentación (se verificó el código y el comportamiento condicional), pero en la
+  práctica **ningún usuario va a ver nunca** el descanso/tempo/intensidad, porque nunca
+  hay dato que mostrar. Es la diferencia entre "la funcionalidad existe" y "la
+  funcionalidad se usa" — vale la pena cerrar el loop para que el trabajo ya hecho en
+  H.1/E.2 rinda de verdad.
+- **Qué hacer** (dos frentes, cualquiera de los dos ya destraba H.1/E.2 parcialmente):
+  1. **Carga manual**: agregar inputs de descanso (segundos) e intensidad/tempo
+     (opcionales) a `WorkoutDayEditor.tsx`, mismo patrón que ya usa para
+     sets/repsMin/repsMax.
+  2. **Generación con IA**: al menos un default razonable — si el prompt no le pide a
+     la IA un descanso explícito, completar `restSeconds` con un valor por defecto
+     sensato server-side según el tipo de ejercicio (ej. 90s para compuestos con
+     barra, 60s para aislados/máquina — heurística simple basada en `category`, no
+     hace falta pedírselo a la IA) en vez de dejarlo en `null` sistemáticamente.
+
+### I.3 — H.4 (miniatura de receta) está bien implementado pero el catálogo de recetas no tiene ninguna imagen
+
+- **Verificado en la base**: `SELECT count(*) total, count(image_url) has_image FROM
+  nutrition_recipes` → **0 de 60 recetas tienen imagen**. El componente `RecipeThumb`
+  (nuevo, hecho para H.4) funciona exactamente como se pidió — foto si existe, ícono de
+  color por tipo de comida si no — pero como ninguna receta tiene `image_url`, **hoy
+  se ve el ícono genérico en el 100% de los casos**, igual que antes del fix desde el
+  punto de vista del usuario final (el código está listo, el contenido no).
+- **Es el mismo tipo de gap que C.3** (videos de ejercicios: 0/106) — contenido, no
+  código. A diferencia de los ejercicios (que sí se pudieron nutrir de
+  `free-exercise-db`, dataset público gratuito), las recetas no tienen un dataset
+  público equivalente tan directo — conseguir imágenes reales para 60 recetas locales
+  específicas (nombres en español, combinaciones caseras) probablemente requiera
+  generarlas (IA de imágenes) o fotografiarlas, no solo scrapear una fuente abierta.
+- **Qué hacer**: no es un fix de código — es contenido. Si se prioriza, empezar por las
+  ~10-15 recetas que más aparecen en los planes generados por IA (desayunos y
+  almuerzos altos en proteína, que fueron los que más se repitieron en las pruebas)
+  en vez de intentar cubrir las 60 de una.
+
+### I.4 — ✅ RESUELTO 2026-08-18 — Nuevo, menor: "1 días" en la tarjeta de plan (mismo tipo de bug que G.1, instancia distinta)
+
+> **Fix aplicado**: `MealPlanListView.tsx` — `{plan.days.length === 1 ? 'día' : 'días'}`,
+> mismo criterio inline que ya usan `NutritionHomePage.tsx`/`WorkoutHomePage.tsx`.
+> **Verificado en vivo**: el plan de 1 día ahora muestra "17/8 — 23/8 · 1 día" en
+> `/nutrition`.
+
+- **Evidencia**: `MealPlanListView.tsx:47` — `{plan.days.length} días`, sin
+  pluralización condicional. Un plan de 1 día muestra "1 días" en la tarjeta de la
+  lista. El fix de G.1 resolvió la concordancia de "generado/a(s) con IA" pero esta
+  instancia (conteo de días) no formaba parte de ese hallazgo original y quedó afuera.
+- **Qué hacer**: mismo criterio que ya se aplicó en G.1
+  (`plan.days.length === 1 ? 'día' : 'días'`).
+
+### I.5 — Confirmado: la generación de plan de alimentación sigue siendo poco confiable con el modelo local más chico (consistente con el estado "parcialmente resuelto" de A.1)
+
+- **Reproducido**: 3 intentos seguidos de generar un plan de alimentación con
+  `llama3.2:1b` fallaron (2 por JSON inválido/mal armado, mismo síntoma que motivó
+  A.1 originalmente). Al cambiar al modelo local más grande disponible
+  (`llama3.2:latest`, 3.2B) la generación **sí funcionó** al primer intento, con un
+  resultado de buena calidad nutricional (ver I.6). No es una regresión nueva — es
+  exactamente lo que el propio estado "🟡 PARCIALMENTE RESUELTO" de A.1 ya reconocía
+  (el prompt necesita más robustez con modelos chicos), confirmado ahora con datos
+  frescos: 0/3 con el modelo de 1B, 1/1 con el de 3.2B en esta sesión de prueba.
+- **Qué hacer**: si el plan del proyecto es seguir soportando Ollama local como
+  proveedor gratuito de desarrollo (no solo Groq/Gemini en producción), vale la pena
+  considerar `llama3.2:latest` (3.2B) como el default local en vez de `:1b` — más
+  lento (~40-70s vs ~25-40s en esta máquina) pero notablemente más confiable para
+  generar JSON válido. Ajuste de configuración (`OLLAMA_MODEL` en `.env`), no de
+  código.
+
+### I.6 — Buena noticia: cuando la generación de nutrición funciona, el resultado y el formato ya son sólidos
+
+- **Plan real generado y verificado** ("plan simple para ganar masa muscular, 2 días,
+  alto en proteína", `llama3.2:latest`): Día 1 — batido proteico (desayuno), pollo con
+  puré de boniato (almuerzo), merluza al horno (cena): 1091 kcal, 115g de proteína
+  (~42% de las calorías, coherente con "alto en proteína"). Día 2 — tostada con
+  palta y huevo, salmón con quinoa, cordero al horno: 1449 kcal, 85g de proteína.
+  Selección de comidas con sentido nutricional real (fuentes de proteína magra,
+  variedad entre días, sin repetir recetas) — a diferencia del problema de coherencia
+  que sí persiste del lado de rutinas (ver abajo), acá el modelo elige bien.
+- **Formato confirmado en pantalla, tal como se especificó en H.4/D.3**: cada día
+  muestra el total de macros bajo la fecha (`1091 kcal · P 115g · C 116g · G 20g`), y
+  cada comida su chip de tipo + nombre + porciones + macros de esa comida
+  (`277 kcal · P 31g · C 35g · G 2g`) — coincide exactamente con el mockup propuesto
+  en H.4.
+- **Nota aparte, no un hallazgo nuevo**: el problema de coherencia día/ejercicio de
+  C.1 (rutinas) sigue sin resolverse a nivel de contenido — la validación nueva
+  (mínimo 3 ejercicios por día) rechaza rutinas demasiado pobres, pero no valida que
+  el ejercicio elegido tenga sentido para el nombre del día (un "Push" con una
+  dominada seguiría pasando la validación si hubiera 2 ejercicios más, aunque
+  ninguno fuera de empuje). El roadmap original de C.1 ya preveía esto como el
+  siguiente paso ("validación de coherencia" además del mínimo de ejercicios) — sigue
+  pendiente, la validación actual es el mínimo viable que se implementó primero.
+
+### I.7 — ✅ RESUELTO 2026-08-18 — Jerarquía visual débil entre el nombre del día y el nombre del ejercicio (motivó una confusión real al probar)
+
+> **Fix aplicado**: el nombre del día en `WorkoutDetailPage.tsx` pasó de `font-medium`
+> a `text-base font-semibold` (mismo tratamiento que el heading "Días" de esa pantalla).
+> El nombre del ejercicio se dejó como estaba (ya heredaba `text-sm` sin peso extra del
+> contenedor de `PlannedExerciseRow`, no hizo falta tocarlo). **Verificado con estilos
+> computados en el navegador**, mismo caso real que motivó el hallazgo (día "Push" con
+> un solo ejercicio "Dominadas"): "Push" ahora renderiza a 16px/600, "Dominadas" se
+> mantiene en 14px/400 — la distinción de nivel ya no depende solo del peso de fuente.
+
+- **Medido en el navegador** (estilos computados, no estimado): en la ficha de rutina,
+  el nombre del día ("Push", `WorkoutDetailPage.tsx:95` — `className="font-medium"`)
+  renderiza a **14px / peso 500**. El nombre del ejercicio dentro de ese día
+  ("Dominadas", vía `ExerciseName` dentro de `PlannedExerciseRow.tsx`) renderiza a
+  **14px / peso 400**. Mismo tamaño, mismo color, la única diferencia es medium vs.
+  regular — una distinción demasiado sutil para transmitir "esto es la categoría, esto
+  es el contenido adentro".
+- **Por qué importa, con un caso real**: en un día con un solo ejercicio (frecuente en
+  datos de prueba/rutinas cortas, y no imposible en rutinas reales de un solo
+  movimiento por sesión), "Push" y "Dominadas" quedan como dos etiquetas cortas casi
+  idénticas, una arriba de la otra, sin nada que grite cuál es el nivel superior. Es
+  la causa más probable de que se perciba como si el nombre del ejercicio
+  reemplazara al nombre del día, en vez de estar subordinado a él.
+- **Aclaración importante, no confundir con un bug distinto**: nombrar los días por
+  tipo de entrenamiento (Push/Pull/Piernas) en vez de por día de la semana
+  (Lunes/Miércoles/Viernes) **es correcto y es la práctica estándar** en programación
+  de entrenamiento — un split real no depende de un calendario fijo, así que fijarlo a
+  días específicos generaría más problemas de los que resuelve (rutina se "pierde" un
+  día si el usuario no entrena justo ese día de la semana). Lo que hay que corregir es
+  la jerarquía visual, no el criterio de nombrado.
+- **Qué hacer**: reforzar la diferencia visual entre nivel "día" y nivel "ejercicio" —
+  ej. el nombre del día pasa a `text-base font-semibold` (como ya usa el heading
+  "Días" de esa misma pantalla) y el nombre del ejercicio se queda en `text-sm`, o
+  usar un tratamiento de mayúsculas/tracking distinto para el label del día
+  (patrón común de "eyebrow label" sobre una tarjeta). Cualquiera de los dos alcanza,
+  lo importante es que la distancia entre ambos deje de ser solo el peso de fuente.
+  **Backlog aparte, no bloqueante**: si en algún momento se quiere sumar un día de la
+  semana *sugerido* por encima del nombre del split (ej. "Push · sugerido: lunes"),
+  eso es una feature nueva (campo opcional en `WorkoutDay`), no un fix de este
+  hallazgo — el nombrado por split se mantiene como el criterio principal.
+
+### I.8 — ✅ RESUELTO 2026-08-18 — Las imágenes de ejercicios/recetas no tienen manejo de error si la carga externa falla
+
+> **Fix aplicado**: se replicó el patrón de `ProgressPhotosView.tsx` (estado `broken` +
+> `onError` + fallback al ícono/placeholder que ya existía para "sin URL") en
+> `ExerciseThumb.tsx`, `RecipeThumb.tsx` y `ExercisePositionImage`
+> (`ExerciseDetailDialog.tsx`). Sin cambios de diseño nuevos — cada componente cae al
+> mismo fallback visual que ya tenía para el caso "no hay `imageUrl`", ahora también
+> para el caso "hay `imageUrl` pero la carga falló".
+
+- **Verificado, no asumido**: se comprobó con `naturalWidth`/`complete` sobre los
+  `<img>` reales del navegador (no solo presencia en el DOM/árbol de accesibilidad,
+  que no garantiza que la imagen haya cargado) que las dos imágenes de "Posición
+  inicial"/"Posición final" cargan correctamente en este entorno de prueba. **Pero el
+  componente no tiene ningún manejo de error** (`ExercisePositionImage`,
+  `ExerciseDetailDialog.tsx:103-116`; mismo gap en `ExerciseThumb.tsx` y
+  `RecipeThumb.tsx`): si la imagen no carga (bloqueo de red del lado del usuario,
+  extensión del navegador, corte de GitHub, o cualquier motivo fuera del control de la
+  app, ya que las imágenes de ejercicios se sirven desde
+  `raw.githubusercontent.com`, un dominio externo), el navegador muestra el ícono de
+  imagen rota nativo — chico, gris, fácil de no registrar como "acá debería haber
+  algo" en vez de leerlo como que la imagen simplemente no existe.
+- **Ya hay un patrón resuelto en el propio proyecto para este caso exacto**:
+  `ProgressPhotosView.tsx:78` — `<img ... onError={() => setBroken(true)} />`, con un
+  estado React que muestra un placeholder claro cuando la carga falla. Ese mismo
+  patrón nunca se aplicó a `ExerciseThumb`, `RecipeThumb` ni
+  `ExercisePositionImage` — quedaron con `<img>` sin `onError` pese a depender los
+  tres de imágenes externas (GitHub para ejercicios; recetas hoy no tienen imagen en
+  absoluto, ver I.3, pero cuando las tengan va a aplicar lo mismo).
+- **Qué hacer**: aplicar el mismo patrón de `ProgressPhotosView` (estado `broken` +
+  `onError` + fallback al mismo placeholder que ya se usa para "sin URL") en
+  `ExerciseThumb.tsx`, `RecipeThumb.tsx` y `ExercisePositionImage` (dentro de
+  `ExerciseDetailDialog.tsx`). Cambio chico y ya probado una vez en este mismo
+  proyecto — no hay que inventar el patrón, solo replicarlo.
+
+---
+
 ## Roadmap sugerido (por impacto real en la utilidad de la app, no solo por costo)
+
+**Nuevo, tras la verificación en vivo del 2026-08-18:**
+0. ✅ **I.1** — `@Transactional(REQUIRES_NEW)` en `AiService.markGenerationPartial()` —
+   RESUELTO 2026-08-18.
 
 **Los dos cambios de mayor impacto — habilitan varios otros hallazgos de este documento:**
 1. ✅ **B.1** — Calcular TDEE/BMR automáticamente a partir del perfil — RESUELTO
@@ -717,6 +973,29 @@
 
 **Rápido y sin dependencias:**
 22. ✅ **G.1** — Concordancia de género/número en los contadores "generado/a(s) con IA" — RESUELTO 2026-08-17.
+23. ✅ **I.4** — Mismo tipo de fix que G.1, instancia nueva: "1 días" en
+    `MealPlanListView.tsx:47` — RESUELTO 2026-08-18.
+
+**Nuevo de la verificación en vivo — cierra el loop de fixes que ya están construidos pero sin datos que los activen:**
+24. ✅ **I.2** — Poblar `restSeconds`/`intensityPercent`/`tempo`: inputs en
+    `WorkoutDayEditor` (manual) y default heurístico server-side en
+    `WorkoutAiGenerator` (IA) — RESUELTO 2026-08-18. H.1 y E.2 ya se ven en la
+    práctica (verificado con carga real y refetch del backend).
+25. **I.3** — Imágenes para el catálogo de recetas (contenido, no código) — sin esto,
+    H.4 (ya implementado) muestra el ícono genérico en el 100% de los casos. Empezar
+    por las recetas más usadas en planes generados con IA.
+
+**Nuevo de la verificación en vivo — baratos, sin dependencias, encontrados al probar con un usuario real:**
+26. ✅ **I.7** — Reforzar la jerarquía visual entre el nombre del día y el nombre del
+    ejercicio en la ficha de rutina — RESUELTO 2026-08-18.
+27. ✅ **I.8** — Manejo de error (`onError`) en las imágenes de ejercicio/receta
+    (`ExerciseThumb`, `RecipeThumb`, `ExercisePositionImage`) — RESUELTO 2026-08-18,
+    mismo patrón replicado de `ProgressPhotosView.tsx`.
+
+**Configuración, no código:**
+28. **I.5** — Evaluar `llama3.2:latest` (3.2B) como modelo local default en vez de
+    `:1b` para `meal_plan_generator` — más confiable generando JSON válido, a costa de
+    más tiempo de espera.
 
 ---
 
@@ -757,3 +1036,42 @@ contenido puro y backlog explícito:
 - Con esto, de los 22 hallazgos originales del roadmap solo quedan sin cerrar: C.1
   (parcial), C.3, H.2 y H.5-parte-2 — los cuatro por decisión explícita de alcance, no
   por falta de tiempo.
+
+**Tercera ronda — verificación en vivo (2026-08-18)**: se probó el resultado real de
+la segunda ronda contra el backend levantado (no solo lectura de código). La gran
+mayoría se comportó exactamente como se especificó. Se encontraron 6 cosas nuevas,
+documentadas en la § I:
+
+- 🔴 **I.1** — Regresión real (no cosmética): el fix de auditoría de A.1 se rompió de
+  nuevo en un lugar nuevo (`markGenerationPartial` sin `REQUIRES_NEW`). Prioridad alta,
+  fix de una línea.
+- 🟡 **I.2 / I.3** — H.1/E.2 (rutina) y H.4 (nutrición) están **bien implementados**
+  pero no tienen datos/contenido que los activen en la práctica hoy (descanso/tempo
+  nunca se completa; ninguna receta tiene imagen). No son bugs del fix — son el
+  siguiente paso natural para que el trabajo ya hecho rinda.
+- 🟢 **I.4** — Bug menor nuevo (plural "1 días"), mismo patrón que G.1.
+- 🟢 **I.5** — Confirma que A.1 sigue correctamente marcado como parcial: el modelo
+  local chico (`:1b`) sigue siendo poco confiable para `meal_plan_generator`; el
+  modelo mediano (3.2B) resolvió el problema en la prueba.
+- ✅ **I.6** — Buena noticia sin acción pendiente: cuando la generación de nutrición
+  funciona, tanto el contenido (selección de comidas coherente con "alto en
+  proteína") como el formato (macros por día y por comida) ya están al nivel
+  esperado.
+
+**Cuarta ronda — fixes de la verificación en vivo (2026-08-18)**: se resolvieron 5 de
+los 8 hallazgos de la § I en la misma sesión, todos verificados en vivo (compilación +
+navegador, no solo lectura de código):
+
+- ✅ **I.1** — `REQUIRES_NEW` en `markGenerationPartial()`. Compila limpio.
+- ✅ **I.2** — Inputs manuales de descanso/intensidad/tempo en `WorkoutDayEditor` +
+  default heurístico de `restSeconds` en `WorkoutAiGenerator` según categoría/equipo.
+  Verificado de punta a punta: cargado, guardado (`PUT /workouts/15 → 200`), persistido
+  y visible en la ficha de rutina ("descanso 90s · 75% intensidad · tempo 3-1-2").
+- ✅ **I.4** — Plural "1 día" corregido y verificado en `/nutrition`.
+- ✅ **I.7** — Jerarquía visual día/ejercicio corregida y verificada con estilos
+  computados (16px/600 vs 14px/400).
+- ✅ **I.8** — `onError` + fallback replicado en los tres componentes.
+
+Quedan sin cerrar, por ser contenido o configuración y no código: **I.3** (imágenes de
+recetas), **I.5** (evaluar `llama3.2:latest` como default local), **I.6** (sin acción,
+es una nota positiva).

@@ -5,6 +5,7 @@
 // nutrición, que hoy es más pobre visualmente que el de entrenamiento).
 // =====================================================================
 import { UtensilsCrossed } from 'lucide-react';
+import { useState } from 'react';
 import { MEAL_TYPE_COLORS, colorFor } from '../domain/nutritionLabels';
 
 export function RecipeThumb({
@@ -16,14 +17,16 @@ export function RecipeThumb({
   mealType?: string | null;
   size?: 'sm' | 'md';
 }) {
+  const [broken, setBroken] = useState(false);
   const dimensions = size === 'sm' ? 'size-9' : 'size-11';
 
-  if (imageUrl) {
+  if (imageUrl && !broken) {
     return (
       <img
         src={imageUrl}
         alt=""
         className={`${dimensions} shrink-0 rounded-lg object-cover ring-1 ring-border`}
+        onError={() => setBroken(true)}
       />
     );
   }
