@@ -17,6 +17,11 @@
 > formularios/inputs y "detalles que deberían existir por lógica" (ver §§11-19),
 > hecha revisando código de ambas plataformas y probando la web levantada en local.
 > No cambia nada de lo escrito en §§0-10, lo extiende.
+>
+> **Actualización 2026-08-18**: llegó el logo real y se aplicó en web (paleta, ícono,
+> favicon) — el párrafo de arriba sobre "todavía no hay logo" y la nota del punto 3 ya
+> no aplican del lado web. Perfil completo en `docs/11-identidad-marca.md`. Pendiente
+> únicamente en mobile (§8).
 
 ## 0. Resumen ejecutivo
 

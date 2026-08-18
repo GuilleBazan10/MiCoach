@@ -1085,11 +1085,19 @@ que quede claro de un vistazo qué le falta a mobile:
   paridad Flutter (arriba) y el backlog bloqueado por marca/assets.
 - **`docs/10-recomendaciones-coach-nutricion.md`**: fuente de verdad de si el
   *contenido* de entrenamiento/nutrición que genera y muestra la app tiene sentido
-  real (no solo si la UI es prolija). Sección A (bugs críticos) + G.1 resueltos
-  2026-08-17. Sin empezar: B (TDEE/IMC — el hallazgo de mayor impacto de ese
-  documento), C (calidad de la rutina generada por IA), D (macros visibles), E
-  (sesión de entrenamiento activa), F (gráficos de progreso), H.1-H.4/H.6 (formato
-  visual de rutinas/planes).
+  real (no solo si la UI es prolija). Actualizado 2026-08-18 — la mayoría del
+  roadmap original (22 hallazgos) más los 8 nuevos de la verificación en vivo (§I) ya
+  está resuelta. Queda sin cerrar, por decisión explícita de alcance o porque es
+  contenido/config y no código:
+  - [ ] **C.1** (parcial) — falta el chequeo de coherencia contra grupo muscular
+        esperado (el mínimo de 3 ejercicios por día ya se valida).
+  - [ ] **C.3** — videos de demostración para ejercicios compuestos (contenido).
+  - [ ] **H.2** — agrupación de superseries/circuitos (backlog, modelo de datos nuevo).
+  - [ ] **H.5 parte 2** — horario real por comida (backlog).
+  - [ ] **I.3** — imágenes para el catálogo de recetas (contenido; sin esto H.4 ya
+        implementado no se ve en la práctica).
+  - [ ] **I.5** — evaluar `llama3.2:latest` como default local de Ollama en vez de
+        `:1b` (config, no código).
 - [ ] **Rotar la password del admin seed** (`admin@micoach.dev`) — quedó en texto
       plano en el chat de esta sesión.
 - [ ] `.env` local todavía tiene `POSTGRES_DB=kineticos`/`POSTGRES_USER=kineticos`
