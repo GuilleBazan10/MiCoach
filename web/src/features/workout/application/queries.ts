@@ -31,8 +31,12 @@ export function useWorkoutList(templates: boolean) {
   return useQuery({ queryKey: workoutKeys.list(templates), queryFn: () => workoutApi.listWorkouts(templates) });
 }
 
-export function useWorkoutDetail(id: number) {
-  return useQuery({ queryKey: workoutKeys.detail(id), queryFn: () => workoutApi.getWorkout(id) });
+export function useWorkoutDetail(id?: number | null) {
+  return useQuery({
+    queryKey: workoutKeys.detail(id ?? -1),
+    queryFn: () => workoutApi.getWorkout(id as number),
+    enabled: id != null,
+  });
 }
 
 export function useSessionList() {

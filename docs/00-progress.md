@@ -18,7 +18,7 @@
 | 6 | CI/CD y despliegue | 🟡 PARCIAL (deploy productivo Render+Vercel+Supabase hecho; falta GitHub Actions, APK Flutter) |
 | 7 | Documentación final (README, manuales) | ⬜ Pendiente |
 | — | UX/UI (auditoría, transversal a las fases) | 🟡 EN CURSO — ver [`docs/06-ux-ui-audit.md`](./06-ux-ui-audit.md). Parte 1 (4/4) y Parte 2 (11/11) resueltas **en web** 2026-08-17. Falta portar todo a Flutter y el backlog de "¿olvidaste tu contraseña?" |
-| — | Calidad de entrenamiento/nutrición (auditoría, transversal) | 🟡 EN CURSO — ver [`docs/10-recomendaciones-coach-nutricion.md`](./10-recomendaciones-coach-nutricion.md). Sección A (bugs críticos) + G.1 resueltos 2026-08-17. Faltan B-F y H.1-H.4/H.6 (TDEE, gráficos, sesión activa, formato visual) |
+| — | Calidad de entrenamiento/nutrición (auditoría, transversal) | 🟢 CASI CERRADA — ver [`docs/10-recomendaciones-coach-nutricion.md`](./10-recomendaciones-coach-nutricion.md). 18/22 hallazgos resueltos (o parciales) en web 2026-08-17. Quedan solo por decisión de alcance: C.3 (contenido), H.2 y H.5-parte-2 (backlog) |
 
 ## Fase 0 — Cimientos (COMPLETADA)
 
@@ -1060,6 +1060,14 @@ que quede claro de un vistazo qué le falta a mobile:
       contadores "generado/a(s) con IA") — no aplica literal hoy (mobile no tiene
       ese contador, es parte del `HeroBanner` que todavía no se portó); se resuelve
       solo cuando se porte `HeroBanner` arriba.
+- [ ] `docs/10-recomendaciones-coach-nutricion.md`, segunda ronda (resuelto en web
+      2026-08-17): TDEE/IMC editables en el perfil, macros visibles en receta/plan/
+      diario (con barra de progreso), músculos trabajados y segunda imagen
+      (posición final) en el detalle de ejercicio, ficha de rutina con
+      descanso/intensidad/tempo/orden y resumen por día, **plan del día + timer de
+      descanso durante la sesión activa** (`SessionPage`), gráfico de evolución de
+      métricas en Progreso. Es el bloque de paridad más grande pendiente — mobile no
+      tiene ninguna de estas mejoras.
 - **Explícitamente NO entra acá** (decisión del usuario, no un olvido): el panel
   `/admin/ai` queda solo en web a propósito.
 - **Bloqueado** hasta tener assets de marca reales (`docs/06` §8, §9.8-9): logo,

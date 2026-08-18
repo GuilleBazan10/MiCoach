@@ -13,6 +13,7 @@ import { useDeleteEntry } from '../application/mutations';
 import type { ProgressEntry } from '../domain/progressTypes';
 import { METRIC_TYPE_LABELS, labelFor } from '../domain/progressLabels';
 import { AddEntryDialog } from './AddEntryDialog';
+import { MetricChart } from './MetricChart';
 
 const dateFormatter = new Intl.DateTimeFormat('es-AR', {
   day: '2-digit',
@@ -56,6 +57,7 @@ export function MetricEntriesView() {
       {!isLoading && entries?.length === 0 && (
         <EmptyState icon={Activity} message="Todavía no registraste ninguna métrica. ¡Sumá la primera!" />
       )}
+      {filter && entries && entries.length >= 2 && <MetricChart entries={entries} unit={entries[0].unit} />}
       <div className="flex flex-col gap-2">
         {entries?.map((entry) => (
           <Card key={entry.id}>

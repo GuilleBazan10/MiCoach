@@ -118,7 +118,7 @@
 
 ## B. Perfil y línea base nutricional — falta el cálculo que sostiene todo lo demás
 
-### B.1 — El TDEE (gasto calórico diario) nunca se calcula, aunque todos los datos para hacerlo ya están cargados
+### B.1 — El TDEE (gasto calórico diario) nunca se calcula, aunque todos los datos para hacerlo ya están cargados — ✅ RESUELTO (2026-08-17)
 
 - **Evidencia**: el perfil (`UserProfile`) ya captura `sex`, `birthDate`, `heightCm`,
   `weightKg` y `activityLevel` — exactamente lo que pide la fórmula estándar de
@@ -154,7 +154,7 @@
   4. Una vez calculado, se vuelve la base para B.2 y C.1 más abajo — varios hallazgos
      de este documento dependen de que este número exista.
 
-### B.2 — El IMC no se calcula ni se muestra en el perfil
+### B.2 — El IMC no se calcula ni se muestra en el perfil — ✅ RESUELTO (2026-08-17)
 
 - **Evidencia**: `ProfileForm.tsx` captura altura y peso pero no calcula ni muestra el
   IMC en ningún lado de esa pantalla. La única forma de tener un IMC en la app es
@@ -172,7 +172,7 @@
 
 ## C. Calidad del contenido generado por IA (entrenamiento)
 
-### C.1 — La rutina generada por IA es incoherente: los nombres de los días no corresponden a los ejercicios asignados
+### C.1 — La rutina generada por IA es incoherente: los nombres de los días no corresponden a los ejercicios asignados — 🟡 PARCIAL (2026-08-17, mínimo viable)
 
 - **Reproducido y verificado contra el catálogo real** (pedido: "Rutina de hipertrofia,
   4 días a la semana, nivel intermedio, con mancuernas, barra y banco, enfocada en tren
@@ -198,10 +198,9 @@
   día** — confía ciegamente en que el modelo de 1-3B parámetros entienda qué es "Push"
   vs "Pull" vs "Piernas", cosa que en la práctica no hace de forma confiable.
 - **Qué hacer** (de más simple/barato a más robusto):
-  1. **Mínimo viable**: validar server-side que cada día tenga al menos 3-4 ejercicios
-     antes de guardar la rutina generada — si el modelo devuelve menos, es señal de que
-     la generación fue pobre y conviene reintentar o devolver un error claro en vez de
-     guardar una rutina inutilizable.
+  1. ✅ **HECHO 2026-08-17** — `WorkoutAiGenerator` rechaza (502, pide reintentar) un
+     día no-descanso con menos de 3 ejercicios resueltos, y marca el log de generación
+     como `partial`. Ya no se guarda una rutina de 1 ejercicio por día.
   2. **Validación de coherencia**: usar el catálogo de `workout_exercise_muscles` para
      mapear cada nombre de día común (Push/Pull/Piernas/Full body/etc.) a un set
      esperado de grupos musculares, y filtrar o re-pedir cuando el ejercicio elegido no
@@ -219,7 +218,7 @@
      de esto solo, pero la validación server-side sigue siendo necesaria como red de
      seguridad (nunca hay que confiar 100% en que el LLM entienda anatomía).
 
-### C.2 — El detalle de un ejercicio no muestra qué músculo trabaja
+### C.2 — El detalle de un ejercicio no muestra qué músculo trabaja — ✅ RESUELTO (2026-08-17)
 
 - **Evidencia**: `ExerciseDetailDialog.tsx:29-38` muestra categoría, dificultad y
   equipamiento, pero no consume `workout_exercise_muscles` para mostrar "Trabaja:
@@ -257,7 +256,7 @@
 
 ## D. Visualización de datos de nutrición
 
-### D.1 — El diario alimentario no muestra ningún objetivo de referencia, solo lo consumido
+### D.1 — El diario alimentario no muestra ningún objetivo de referencia, solo lo consumido — ✅ RESUELTO (2026-08-17)
 
 - **Evidencia**: `DailyIntakeView.tsx:36-43` calcula y muestra
   `{calorías} kcal · P {}g · C {}g · G {}g` del día, pero no hay ningún target contra
@@ -273,7 +272,7 @@
   nada manualmente si B.1 ya está resuelto — el target puede salir del TDEE ajustado
   por objetivo.
 
-### D.2 — El detalle de una receta no muestra macros, solo calorías
+### D.2 — El detalle de una receta no muestra macros, solo calorías — ✅ RESUELTO (2026-08-17)
 
 - **Evidencia**: `RecipeDetailDialog.tsx:38` solo renderiza
   `{recipe.caloriesPerServing} kcal/porción` como badge. El tipo `Recipe`
@@ -288,7 +287,7 @@
   fibra si hay espacio) en `RecipeDetailDialog.tsx` — cambio chico, el dato ya está
   disponible en el objeto `recipe` que el componente ya recibe.
 
-### D.3 — El plan de alimentación no desglosa macros por día, solo calorías totales del plan
+### D.3 — El plan de alimentación no desglosa macros por día, solo calorías totales del plan — ✅ RESUELTO (2026-08-17)
 
 - **Evidencia**: `MealPlanDetailPage.tsx:90` muestra un único badge
   `{plan.targetCalories} kcal/día` a nivel de plan completo, pero no hay ningún total de
@@ -304,7 +303,7 @@
 
 ## E. Ejecución de la sesión de entrenamiento — el momento real de entrenar
 
-### E.1 — Durante la sesión no se muestra lo que la rutina planificó (series, reps, descanso, tempo)
+### E.1 — Durante la sesión no se muestra lo que la rutina planificó (series, reps, descanso, tempo) — ✅ RESUELTO (2026-08-17)
 
 - **Evidencia**: `WorkoutSession` (`workoutTypes.ts:172-180`) tiene `workoutDayId`, que
   referencia al `WorkoutDay` planificado — y cada `PlannedExercise`
@@ -337,7 +336,7 @@
      sesión libre" o para agregar un ejercicio extra no planificado — no hay que
      sacarlo, solo dejar de forzarlo como único camino cuando sí hay un plan de fondo.
 
-### E.2 — No hay temporizador de descanso entre series
+### E.2 — No hay temporizador de descanso entre series — ✅ RESUELTO (2026-08-17)
 
 - **Evidencia**: `restSeconds` está modelado en `PlannedExercise` pero no se usa en
   ningún lado de la UI de sesión activa — no hay cuenta regresiva, ni notificación, ni
@@ -356,7 +355,7 @@
 
 ## F. Progreso — falta la visualización que le da sentido a los datos
 
-### F.1 — No existe ningún gráfico de evolución de métricas
+### F.1 — No existe ningún gráfico de evolución de métricas — ✅ RESUELTO EN WEB (2026-08-17)
 
 - **Evidencia**: `MetricEntriesView.tsx` es una lista cronológica plana de tarjetas
   (`entry.value entry.unit` + fecha) con filtro por tipo de métrica, sin ningún
@@ -415,7 +414,7 @@
 > información, qué va en negrita vs. en gris) sin tener que inventar el layout desde
 > cero ni volver a consultar con nadie qué se espera visualmente.
 
-### H.1 — La ficha de rutina no muestra orden, descanso, tempo ni intensidad, aunque están cargados
+### H.1 — La ficha de rutina no muestra orden, descanso, tempo ni intensidad, aunque están cargados — ✅ RESUELTO (2026-08-17)
 
 - **Evidencia**: `PlannedExerciseRow.tsx:13-22` arma cada fila con miniatura + nombre +
   el resultado de `formatSetsReps()`
@@ -474,7 +473,7 @@
   arma rutinas con superseries, pero vale la pena dejarlo marcado para cuando el
   producto quiera soportar programación más avanzada.
 
-### H.3 — Sin resumen del día a simple vista
+### H.3 — Sin resumen del día a simple vista — ✅ RESUELTO (2026-08-17)
 
 - **Qué pasa**: cada tarjeta de día muestra el nombre y la lista de ejercicios, pero
   ningún total agregado (cantidad de ejercicios, series totales, duración estimada, o
@@ -502,7 +501,7 @@
   helper `summarizeDay(day: WorkoutDay)` en `workoutLabels.ts` para poder reusarlo
   también en la vista de edición `WorkoutForm` si se quiere el mismo resumen ahí).
 
-### H.4 — El plan de alimentación no muestra imagen ni calorías por comida (asimetría con el módulo de entrenamiento)
+### H.4 — El plan de alimentación no muestra imagen ni calorías por comida (asimetría con el módulo de entrenamiento) — ✅ RESUELTO (2026-08-17)
 
 - **Evidencia**: `MealPlanDetailPage.tsx:102-108` renderiza cada comida como
   `{tipo de comida} {nombre de receta, clickeable} x{porciones}` — texto plano, sin
@@ -573,7 +572,7 @@
      — se deja anotado acá para cuando se priorice timing nutricional (relevante sobre
      todo para planes de rendimiento deportivo, pre/post entreno).
 
-### H.6 — El detalle de ejercicio muestra una sola imagen, pero la fuente de datos ya tiene dos (posición inicial y final del movimiento)
+### H.6 — El detalle de ejercicio muestra una sola imagen, pero la fuente de datos ya tiene dos (posición inicial y final del movimiento) — ✅ RESUELTO (2026-08-17)
 
 - **Hallazgo confirmado**: el catálogo usa el dataset público `free-exercise-db`
   (`github.com/yuhonas/free-exercise-db`, ver
@@ -661,10 +660,12 @@
 ## Roadmap sugerido (por impacto real en la utilidad de la app, no solo por costo)
 
 **Los dos cambios de mayor impacto — habilitan varios otros hallazgos de este documento:**
-1. **B.1** — Calcular TDEE/BMR automáticamente a partir del perfil. Sin esto, D.1 y
-   parte de la calidad de los planes de nutrición no tienen base real.
-2. **F.1** — Gráfico de evolución en Progreso (al menos peso). Sin esto, la sección
-   "Progreso" registra datos que nadie puede interpretar de un vistazo.
+1. ✅ **B.1** — Calcular TDEE/BMR automáticamente a partir del perfil — RESUELTO
+   2026-08-17 (`TdeeCalculator.java`, Mifflin-St Jeor + factor de actividad + ajuste
+   por objetivo; editable a mano en `ProfileForm`).
+2. ✅ **F.1** — Gráfico de evolución en Progreso — RESUELTO EN WEB 2026-08-17
+   (`MetricChart.tsx`, SVG a mano, se muestra al filtrar por un tipo de métrica
+   específico con 2+ registros).
 
 **Bugs a corregir antes de seguir sumando features de IA:**
 3. ✅ **A.2** — Actualizar el modelo de Groq — RESUELTO 2026-08-17 (`V19__fix_groq_model.sql`).
@@ -676,36 +677,33 @@
    2026-08-17). Parte 2 (horario real por comida) sigue pendiente, ver backlog.
 
 **Contenido verificado, requiere una migración chica (alto impacto, esfuerzo contenido):**
-7. **H.6** — Segunda imagen (posición final del movimiento) en el detalle de
-   ejercicio — **verificado que el dataset ya la tiene** (`1.jpg` junto a `0.jpg` en
-   `free-exercise-db`), solo falta traerla. Es el hallazgo que más mejora la
-   comprensión real de la técnica de un ejercicio con el menor esfuerzo de todo este
-   documento: una migración de backfill determinístico + un campo nuevo en 3 capas
-   (JPA/dominio/DTO) + mostrar la segunda imagen en `ExerciseDetailDialog`.
+7. ✅ **H.6** — Segunda imagen (posición final) en el detalle de ejercicio — RESUELTO
+   2026-08-17 (`V20__exercise_end_position_images.sql`, backfill determinístico +
+   `imageUrlEnd` en las 3 capas + `ExerciseDetailDialog` muestra ambas lado a lado).
 
 **Calidad del contenido generado (afecta la confianza del usuario en la IA):**
-8. **C.1** — Validar coherencia día/ejercicio en la generación de rutinas (mínimo:
-   cantidad mínima de ejercicios por día; ideal: chequeo contra grupo muscular
-   esperado).
+8. 🟡 **C.1** — Validar coherencia día/ejercicio — PARCIAL 2026-08-17 (mínimo viable:
+   rechaza días con menos de 3 ejercicios y pide reintentar). Falta el chequeo de
+   coherencia contra grupo muscular esperado (items 2-4 del hallazgo original).
 
 **Mejoras de visualización — dato ya disponible en la API, solo falta mostrarlo (bajo costo, alto valor):**
-9. **D.2** — Macros (proteína/carbos/grasa) en el detalle de receta.
-10. **H.4** — Miniatura de la receta + calorías visibles en cada fila del plan de
-    alimentación (nivela el tratamiento visual con las filas de ejercicio, que ya
-    tienen miniatura).
-11. **C.2** — Músculos trabajados en el detalle de ejercicio.
-12. **H.1** — Descanso, tempo/intensidad y número de orden visibles en cada fila de
-    ejercicio de la ficha de rutina (hoy solo se ve series/reps).
-13. **B.2** — IMC calculado y mostrado en el perfil.
-14. **D.1** — Barra de progreso de calorías/macros en el diario (depende de #1).
-15. **D.3** — Macros por día en el detalle del plan de alimentación.
-16. **H.3** — Resumen por día (cantidad de ejercicios/series totales) en la ficha de
-    rutina.
+9. ✅ **D.2** — Macros en el detalle de receta — RESUELTO 2026-08-17.
+10. ✅ **H.4** — Miniatura + calorías por fila del plan de alimentación — RESUELTO
+    2026-08-17.
+11. ✅ **C.2** — Músculos trabajados en el detalle de ejercicio — RESUELTO 2026-08-17.
+12. ✅ **H.1** — Descanso, intensidad, tempo y número de orden en la ficha de rutina —
+    RESUELTO 2026-08-17.
+13. ✅ **B.2** — IMC calculado y mostrado en el perfil — RESUELTO 2026-08-17.
+14. ✅ **D.1** — Barra de progreso de calorías en el diario — RESUELTO 2026-08-17.
+15. ✅ **D.3** — Macros por día en el detalle del plan de alimentación — RESUELTO
+    2026-08-17.
+16. ✅ **H.3** — Resumen por día (ejercicios/series totales) — RESUELTO 2026-08-17.
 
 **Mejora de flujo central de la app (más trabajo, pero es el corazón del producto):**
-17. **E.1** — Mostrar el objetivo planificado (series/reps/descanso) durante la sesión
-    activa, no solo un registro en blanco.
-18. **E.2** — Temporizador de descanso entre series (depende de #17).
+17. ✅ **E.1** — Mostrar el objetivo planificado durante la sesión activa — RESUELTO
+    2026-08-17 (`SessionPage.tsx` § "Plan de hoy", pre-carga sets/reps al registrar).
+18. ✅ **E.2** — Temporizador de descanso entre series — RESUELTO 2026-08-17 (arranca
+    automáticamente al registrar un ejercicio planificado con `restSeconds`).
 
 **Backlog — requiere modelo de datos nuevo, no urgente:**
 19. **H.2** — Agrupación visual de superseries/circuitos (campo nuevo tipo
@@ -737,22 +735,25 @@
   audita la interfaz en general; este audita si el **contenido de entrenamiento y
   nutrición que la app genera y muestra tiene sentido real** desde la disciplina.
 
-## Estado (actualizado 2026-08-17)
+## Estado (actualizado 2026-08-17, segunda ronda)
 
-Primera ronda de trabajo sobre este documento — se atacó la sección A completa (bugs
-críticos) más G.1 (rápido y sin dependencias):
+**Primera ronda**: sección A completa (bugs críticos) + G.1.
 
-- ✅ Resuelto: A.1 (parcial, ver nota), A.2, G.1.
-- ❌ Falsos positivos verificados contra el código real (no hicieron falta cambios):
-  A.3, H.5 (parte 1). Quedan documentados igual, con la verificación, para que nadie
-  vuelva a investigarlos de cero.
+**Segunda ronda** (la misma sesión, a continuación): todo lo que quedaba salvo
+contenido puro y backlog explícito:
+
+- ✅ Resuelto: B.1, B.2, C.2, D.1, D.2, D.3, E.1, E.2, F.1 (web), H.1, H.3, H.4, H.6.
+- 🟡 Parcial: C.1 (mínimo viable — rechaza rutinas con muy pocos ejercicios por día;
+  falta el chequeo de coherencia contra grupo muscular esperado).
+- **Deliberadamente sin tocar** (clasificación del propio documento, no un olvido):
+  - **C.3** — carga de videos de ejercicios: es contenido, no código.
+  - **H.2** — agrupación de superseries: backlog, requiere campo nuevo en el modelo
+    de datos, "no urgente" según el propio documento.
+  - **H.5 (parte 2)** — horario real por comida: backlog, mismo criterio.
 - Todo lo de arriba es **solo backend/web** — no se tocó Flutter en esta ronda (no hay
   entorno Flutter disponible desde este chat para compilar/verificar). El seguimiento
-  consolidado de qué le falta a mobile para tener paridad con esto (y con el resto del
-  proyecto) vive en `docs/00-progress.md` § Pendientes globales, no acá — evitar
-  duplicar la lista en los dos documentos.
-- **Sin empezar todavía**: B (TDEE/IMC), C (calidad de la rutina generada, músculos,
-  videos), D (macros visibles), E (sesión activa, timer de descanso), F (gráficos de
-  progreso), H.1-H.4 y H.6 (formato visual). Son los ítems de mayor esfuerzo del
-  documento — B.1 y F.1 son los de mayor impacto según el roadmap y buenos candidatos
-  para la próxima ronda.
+  consolidado de qué le falta a mobile para tener paridad con esto vive en
+  `docs/00-progress.md` § Pendientes globales, no acá.
+- Con esto, de los 22 hallazgos originales del roadmap solo quedan sin cerrar: C.1
+  (parcial), C.3, H.2 y H.5-parte-2 — los cuatro por decisión explícita de alcance, no
+  por falta de tiempo.
