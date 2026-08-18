@@ -48,7 +48,7 @@ export function GenerateWorkoutDialog() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !generateWorkout.isPending && setOpen(next)}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Sparkles /> Generar con IA
@@ -71,15 +71,18 @@ export function GenerateWorkoutDialog() {
           autoFocus
         />
         {generateWorkout.isPending && (
-          <p className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Loader2 className="size-3.5 shrink-0 animate-spin" /> {progressMessage}
-          </p>
+          <div className="flex flex-col gap-1">
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="size-3.5 shrink-0 animate-spin" /> {progressMessage}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Podés cerrar esta ventana — te avisamos cuando esté lista.
+            </p>
+          </div>
         )}
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="ghost" disabled={generateWorkout.isPending}>
-              Cancelar
-            </Button>
+            <Button variant="ghost">Cerrar</Button>
           </DialogClose>
           <Button onClick={handleSubmit} disabled={generateWorkout.isPending || !goal.trim()}>
             {generateWorkout.isPending ? 'Generando…' : 'Generar'}

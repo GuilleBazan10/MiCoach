@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { OptionSelect } from '@/components/option-select';
 import { extractErrorMessage } from '@/core/api/apiError';
+import { useUnsavedChangesGuard } from '@/core/hooks/useUnsavedChangesGuard';
 import { OBJECTIVE_LABELS, LEVEL_LABELS } from '../domain/workoutLabels';
 import type { WorkoutDraft } from '../domain/workoutTypes';
 import { useCreateWorkout, useUpdateWorkout } from '../application/mutations';
@@ -17,10 +18,12 @@ export function WorkoutForm({ initialDraft, workoutId }: { initialDraft: Workout
   const navigate = useNavigate();
   const isEditing = workoutId != null;
   const [draft, setDraft] = useState(initialDraft);
+  const [saved, setSaved] = useState(false);
 
   const createWorkout = useCreateWorkout();
   const updateWorkout = useUpdateWorkout(workoutId ?? -1);
   const saving = createWorkout.isPending || updateWorkout.isPending;
+  useUnsavedChangesGuard(!saved && JSON.stringify(draft) !== JSON.stringify(initialDraft));
 
   function addDay() {
     setDraft((d) => ({ ...d, days: [...d.days, { dayIndex: d.days.length + 1, restDay: false, exercises: [] }] }));
@@ -44,7 +47,10 @@ export function WorkoutForm({ initialDraft, workoutId }: { initialDraft: Workout
     }
     const mutation = isEditing ? updateWorkout : createWorkout;
     mutation.mutate(draft, {
-      onSuccess: (saved) => navigate(`/workouts/${saved.id}`),
+      onSuccess: (result) => {
+        setSaved(true);
+        navigate(`/workouts/${result.id}`);
+      },
       onError: (error) => toast.error(extractErrorMessage(error)),
     });
   }
@@ -82,9 +88,14 @@ export function WorkoutForm({ initialDraft, workoutId }: { initialDraft: Workout
         <Label htmlFor="workout-duration">Duración (semanas)</Label>
         <Input
           id="workout-duration"
-          type="number"
-          value={draft.durationWeeks ?? ''}
-          onChange={(e) => setDraft({ ...draft, durationWeeks: e.target.value ? Number(e.target.value) : null })}
+          inputMode="numeric"
+          value={draft.durationWeeks?.toString() ?? ''}
+          onChange={(e) => {
+            const raw = e.target.value.trim();
+            const parsed = raw === '' ? null : Number.parseInt(raw, 10);
+            if (raw !== '' && Number.isNaN(parsed)) return;
+            setDraft({ ...draft, durationWeeks: parsed });
+          }}
         />
       </div>
 

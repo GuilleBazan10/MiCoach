@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Camera, ImageOff, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { EmptyState } from '@/components/EmptyState';
 import { ErrorState } from '@/components/ErrorState';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ const dateFormatter = new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: 
 export function ProgressPhotosView() {
   const { data: photos, isLoading, isError, refetch } = useProgressPhotos();
   const deletePhoto = useDeletePhoto();
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
   return (
     <div className="flex flex-col gap-3">
@@ -42,10 +44,24 @@ export function ProgressPhotosView() {
             key={photo.id}
             photoUrl={photo.photoUrl}
             caption={`${labelFor(PHOTO_ANGLE_LABELS, photo.angle)} · ${dateFormatter.format(new Date(photo.takenAt))}`}
-            onDelete={() => deletePhoto.mutate(photo.id, { onError: (error) => toast.error(extractErrorMessage(error)) })}
+            onDelete={() => setPendingDeleteId(photo.id)}
           />
         ))}
       </div>
+      <ConfirmDeleteDialog
+        open={pendingDeleteId != null}
+        onOpenChange={(next) => !next && setPendingDeleteId(null)}
+        title="Borrar foto"
+        message="¿Seguro que querés borrar esta foto de progreso? Esta acción no se puede deshacer."
+        pending={deletePhoto.isPending}
+        onConfirm={() => {
+          if (pendingDeleteId == null) return;
+          deletePhoto.mutate(pendingDeleteId, {
+            onSuccess: () => setPendingDeleteId(null),
+            onError: (error) => toast.error(extractErrorMessage(error)),
+          });
+        }}
+      />
     </div>
   );
 }

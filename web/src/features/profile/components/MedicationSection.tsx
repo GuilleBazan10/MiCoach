@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import {
   Dialog,
   DialogClose,
@@ -23,6 +24,7 @@ export function MedicationSection({ medications }: { medications: UserMedication
   const [name, setName] = useState('');
   const [dosage, setDosage] = useState('');
   const [schedule, setSchedule] = useState('');
+  const [pendingDelete, setPendingDelete] = useState<UserMedication | null>(null);
 
   function handleAdd() {
     if (!name.trim()) return;
@@ -51,14 +53,7 @@ export function MedicationSection({ medications }: { medications: UserMedication
                 <p className="text-sm font-medium">{item.medicationName}</p>
                 {item.schedule && <p className="text-xs text-muted-foreground">{item.schedule}</p>}
               </div>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Borrar medicación"
-                onClick={() =>
-                  deleteMedication.mutate(item.id, { onError: (error) => toast.error(extractErrorMessage(error)) })
-                }
-              >
+              <Button variant="ghost" size="icon-sm" aria-label="Borrar medicación" onClick={() => setPendingDelete(item)}>
                 <Trash2 />
               </Button>
             </div>
@@ -92,6 +87,20 @@ export function MedicationSection({ medications }: { medications: UserMedication
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          <ConfirmDeleteDialog
+            open={pendingDelete != null}
+            onOpenChange={(next) => !next && setPendingDelete(null)}
+            title="Borrar medicación"
+            message={`¿Seguro que querés borrar "${pendingDelete?.medicationName ?? ''}"? Esta acción no se puede deshacer.`}
+            pending={deleteMedication.isPending}
+            onConfirm={() => {
+              if (!pendingDelete) return;
+              deleteMedication.mutate(pendingDelete.id, {
+                onSuccess: () => setPendingDelete(null),
+                onError: (error) => toast.error(extractErrorMessage(error)),
+              });
+            }}
+          />
         </AccordionContent>
       </AccordionItem>
     </Accordion>

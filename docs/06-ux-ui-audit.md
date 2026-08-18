@@ -351,7 +351,7 @@ parchearlo local.
 
 ## 11. Contraseñas
 
-### 11.1 Ningún formulario permite mostrar/ocultar la contraseña — el ejemplo que disparó esta auditoría
+### 11.1 Ningún formulario permite mostrar/ocultar la contraseña — el ejemplo que disparó esta auditoría — ✅ RESUELTO EN WEB (2026-08-17)
 - **Verificado en vivo**: en `http://localhost:5173/login` y `/register`, el campo
   contraseña es un `<input type="password">` plano, sin ícono de ojo ni ningún control
   para revelar el texto. Código: `LoginPage.tsx:62-69`, `RegisterPage.tsx:60-69`.
@@ -381,7 +381,7 @@ parchearlo local.
 - **Prioridad**: alta, barata, sin dependencias — es el quick win más directo de todo
   el documento.
 
-### 11.2 Web no pide "confirmar contraseña" al registrarse — mobile sí (gap de paridad real)
+### 11.2 Web no pide "confirmar contraseña" al registrarse — mobile sí (gap de paridad real) — ✅ RESUELTO EN WEB (2026-08-17)
 - **Evidencia concreta**: `register_screen.dart:73-81` (mobile) tiene un tercer campo
   `_confirmController` con validación `value != _passwordController.text ? 'Las
   contraseñas no coinciden' : null`. `RegisterPage.tsx` (web) solo tiene email +
@@ -396,7 +396,7 @@ parchearlo local.
   correspondiente en `RegisterPage.tsx` (mismo patrón visual que el campo contraseña
   existente). Es directamente portar lo que mobile ya tiene resuelto.
 
-### 11.3 El requisito de contraseña (mínimo 8 caracteres) solo se ve **después** de fallar
+### 11.3 El requisito de contraseña (mínimo 8 caracteres) solo se ve **después** de fallar — ✅ RESUELTO EN WEB (2026-08-17)
 - **Qué pasa**: tanto `authSchemas.ts:16` (web) como `register_screen.dart:70` (mobile)
   muestran "La contraseña debe tener al menos 8 caracteres" / "Mínimo 8 caracteres"
   como mensaje de error, recién tras un intento de submit fallido. No hay texto de
@@ -420,7 +420,7 @@ parchearlo local.
 
 ## 12. Confirmación de acciones destructivas
 
-### 12.1 Patrón inconsistente: las entidades principales confirman el borrado, los sub-recursos no — en ambas plataformas
+### 12.1 Patrón inconsistente: las entidades principales confirman el borrado, los sub-recursos no — en ambas plataformas — ✅ RESUELTO EN WEB (2026-08-17)
 - **Lo que sí está bien resuelto** (para no perder de vista lo que funciona): borrar
   una **rutina** completa sí pide confirmación en los dos frontends —
   `WorkoutDetailPage.tsx:75,119-129` (web, `Dialog` con `DialogTitle "Borrar rutina"` +
@@ -460,7 +460,7 @@ parchearlo local.
 
 ## 13. Formularios que fallan en silencio
 
-### 13.1 `AddEntryDialog` (registrar métrica de progreso) no muestra error si el valor es inválido
+### 13.1 `AddEntryDialog` (registrar métrica de progreso) no muestra error si el valor es inválido — ✅ RESUELTO (2026-08-17)
 - **Código**: `AddEntryDialog.tsx:26-28` —
   ```ts
   function handleSubmit() {
@@ -480,7 +480,7 @@ parchearlo local.
   como mínimo un `toast.error('Ingresá un valor numérico válido')` en el mismo punto
   donde hoy hay el `return`.
 
-### 13.2 `ProfileForm` convierte texto inválido en `null` sin avisar
+### 13.2 `ProfileForm` convierte texto inválido en `null` sin avisar — ✅ RESUELTO (2026-08-17)
 - **Código**: `ProfileForm.tsx:19-24`, función `toNumberOrNull` — si el usuario escribe
   algo no numérico en "Altura (cm)" o "Peso (kg)" y guarda, el valor se transforma
   silenciosamente en `null` (se borra el dato) en vez de bloquear el guardado o avisar.
@@ -506,7 +506,7 @@ parchearlo local.
   validación con mensaje) a los pocos campos que sí son estrictamente obligatorios en
   cada formulario, en vez de que sea una decisión ad-hoc por desarrollador.
 
-## 14. Inputs de búsqueda (pickers de ejercicios/recetas)
+## 14. Inputs de búsqueda (pickers de ejercicios/recetas) — ✅ RESUELTO (2026-08-17)
 
 - **Sin debounce**: `ExercisePickerDialog.tsx:20-21` dispara `useExerciseCatalog` en
   cada tecla presionada (`search` va directo al hook sin debounce). Se verificó que no
@@ -523,7 +523,7 @@ parchearlo local.
   Prioridad media — no es un bug, es pulido de una interacción que se usa seguido
   (elegir ejercicios/recetas es parte central del flujo de armar rutinas/planes).
 
-## 15. Cambios sin guardar se pierden en silencio
+## 15. Cambios sin guardar se pierden en silencio — ✅ RESUELTO (2026-08-17)
 
 - **Qué pasa**: `WorkoutForm.tsx` y `ProfileForm.tsx` mantienen el borrador en estado
   local (`useState`) sin ningún tracking de "dirty" (¿hay cambios sin guardar?) ni
@@ -545,7 +545,7 @@ parchearlo local.
   formulario de una — el riesgo es el mismo pero la sesión de edición suele ser más
   corta).
 
-## 16. Dos patrones distintos de input numérico conviviendo sin criterio
+## 16. Dos patrones distintos de input numérico conviviendo sin criterio — ✅ RESUELTO (2026-08-17)
 
 - **Evidencia**: `WorkoutForm.tsx:85` usa `type="number"` nativo (con las flechitas de
   incremento/decremento del navegador) para "Duración (semanas)", mientras
@@ -564,7 +564,7 @@ parchearlo local.
   corto en `web/src/components/ui/input.tsx` o en este mismo documento, para que no
   vuelva a mezclarse en formularios nuevos.
 
-## 17. Foco automático (autofocus) aplicado solo en diálogos, no en páginas completas
+## 17. Foco automático (autofocus) aplicado solo en diálogos, no en páginas completas — ✅ RESUELTO EN WEB (2026-08-17)
 
 - **Evidencia**: `ExercisePickerDialog.tsx:36` y `GenerateWorkoutDialog.tsx:62` usan
   `autoFocus` en su input/textarea principal (correcto — son diálogos modales, tiene
@@ -577,7 +577,7 @@ parchearlo local.
   como `ProfileForm`/`WorkoutForm` — ahí autofocar el primer campo no aporta (el
   usuario entra a leer/navegar, no a escribir de inmediato).
 
-## 18. Generación con IA: no se puede cancelar una vez iniciada
+## 18. Generación con IA: no se puede cancelar una vez iniciada — ✅ RESUELTO EN WEB (2026-08-17)
 
 - **Complementa el hallazgo de §3.1** (loading state sin progreso) con un problema
   adicional encontrado al leer el código del diálogo: `GenerateWorkoutDialog.tsx:42,66`
@@ -601,30 +601,42 @@ parchearlo local.
 ## 19. Roadmap actualizado (Parte 1 + Parte 2)
 
 **Quick wins nuevos de esta parte (baratos, sin dependencias, sin bloqueos):**
-1. **Mostrar/ocultar contraseña** en los 4 campos de contraseña de ambas plataformas
-   (§11.1) — el hallazgo que disparó esta auditoría.
-2. Confirmar contraseña en el registro web, portando el patrón ya resuelto en mobile
-   (§11.2).
-3. Texto de ayuda visible ("Mínimo 8 caracteres") en vez de solo error post-submit
-   (§11.3).
-4. `autoFocus` en el campo Email de login/registro (§17).
-5. Mostrar error visible en vez de fallar en silencio en `AddEntryDialog` (§13.1).
+1. ✅ **Mostrar/ocultar contraseña** en los 4 campos de contraseña de ambas plataformas
+   (§11.1) — el hallazgo que disparó esta auditoría. RESUELTO EN WEB 2026-08-17
+   (`web/src/components/ui/password-input.tsx`). Falta Flutter.
+2. ✅ Confirmar contraseña en el registro web, portando el patrón ya resuelto en mobile
+   (§11.2) — RESUELTO 2026-08-17 (`authSchemas.ts` + `RegisterPage.tsx`).
+3. ✅ Texto de ayuda visible ("Mínimo 8 caracteres") en vez de solo error post-submit
+   (§11.3) — RESUELTO EN WEB 2026-08-17.
+4. ✅ `autoFocus` en el campo Email de login/registro (§17) — RESUELTO EN WEB 2026-08-17.
+5. ✅ Mostrar error visible en vez de fallar en silencio en `AddEntryDialog` (§13.1) —
+   RESUELTO 2026-08-17.
 
 **Prioridad alta — riesgo real de pérdida de datos:**
-6. Extender el diálogo de confirmación de borrado (ya resuelto para
+6. ✅ Extender el diálogo de confirmación de borrado (ya resuelto para
    rutina/plan de alimentación) a **todos** los sub-recursos con borrado directo:
    objetivos, patologías, lesiones, medicación, entradas de progreso, fotos, ítems de
-   lista de compras, comidas del diario (§12.1). Es el hallazgo más importante de esta
-   segunda pasada.
+   lista de compras, comidas del diario (§12.1). RESUELTO EN WEB 2026-08-17
+   (`web/src/components/ConfirmDeleteDialog.tsx`, cableado en los 8 lugares
+   identificados). Falta Flutter — mismo patrón que `workout_detail_screen.dart`
+   extendido a `goal_section.dart` y equivalentes.
 
 **Medio — mejoras de robustez/consistencia, requieren un poco más de trabajo:**
-7. Validación en vez de conversión silenciosa a `null` en campos numéricos de
-   `ProfileForm` (§13.2).
-8. Debounce + botón de limpiar en los inputs de búsqueda de los pickers (§14).
-9. Advertencia de cambios sin guardar en `WorkoutForm`/`MealPlanForm` (§15).
-10. Unificar el patrón de input numérico (`type="number"` vs `inputMode`) (§16).
-11. Permitir cancelar/cerrar el diálogo de generación con IA sin esperar a que termine
-    (§18).
+7. ✅ Validación en vez de conversión silenciosa a `null` en campos numéricos de
+   `ProfileForm` (§13.2) — RESUELTO 2026-08-17.
+8. ✅ Debounce + botón de limpiar en los inputs de búsqueda de los pickers (§14) —
+   RESUELTO 2026-08-17 (`web/src/core/hooks/useDebouncedValue.ts`).
+9. ✅ Advertencia de cambios sin guardar en `WorkoutForm`/`MealPlanForm` (§15) —
+   RESUELTO EN WEB 2026-08-17 (`web/src/core/hooks/useUnsavedChangesGuard.ts`).
+10. ✅ Unificar el patrón de input numérico (`type="number"` vs `inputMode`) (§16) —
+    RESUELTO 2026-08-17.
+11. ✅ Permitir cancelar/cerrar el diálogo de generación con IA sin esperar a que
+    termine (§18) — RESUELTO EN WEB 2026-08-17 (la mutation sigue en background,
+    resultado vía toast + navegación al terminar).
+
+Todo lo de arriba está hecho **en web únicamente** — mobile no se tocó en esta ronda
+(no hay entorno Flutter disponible para verificar compilación desde este chat). Queda
+como paridad pendiente junto con el resto del §2.1.
 
 **Backlog — requiere infraestructura o decisión de producto, no es solo UI:**
 12. Flujo de recuperación de contraseña ("¿Olvidaste tu contraseña?") — necesita envío

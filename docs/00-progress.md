@@ -17,7 +17,7 @@
 | 5 | Testing completo | ⬜ Pendiente |
 | 6 | CI/CD y despliegue | 🟡 PARCIAL (deploy productivo Render+Vercel+Supabase hecho; falta GitHub Actions, APK Flutter) |
 | 7 | Documentación final (README, manuales) | ⬜ Pendiente |
-| — | UX/UI (auditoría, transversal a las fases) | 🟡 EN CURSO — ver [`docs/06-ux-ui-audit.md`](./06-ux-ui-audit.md), tier "rápido y barato" (4/4) resuelto en web 2026-08-17 |
+| — | UX/UI (auditoría, transversal a las fases) | 🟡 EN CURSO — ver [`docs/06-ux-ui-audit.md`](./06-ux-ui-audit.md). Parte 1 (4/4) y Parte 2 (11/11) resueltas **en web** 2026-08-17. Falta portar todo a Flutter y el backlog de "¿olvidaste tu contraseña?" |
 
 ## Fase 0 — Cimientos (COMPLETADA)
 
@@ -1037,12 +1037,24 @@ para no perderlo de vista:
   diseño (generada por un chat de diseño aparte, verificada contra el código real
   antes de actuar sobre ella). Tiene su propio roadmap por costo/impacto — no
   duplicar el detalle acá, solo el estado global:
-  - [x] Tier "rápido y barato" (§9.1-4: `APP_NAME`, `ErrorState`, progreso de IA
-        con expectativa de tiempo, `EmptyState` condicional por perfil incompleto)
-        — resuelto **en web** 2026-08-17. Falta portar a Flutter (se suma al ítem
-        de paridad mobile de abajo, no es un pendiente aparte).
-  - [ ] Tier "medio" (§9.5-7: paridad `HeroBanner`/`EmptyState` en Flutter, escala
-        tipográfica nombrada, auditoría de cobertura de toasts de éxito).
+  - [x] Parte 1, tier "rápido y barato" (§9.1-4: `APP_NAME`, `ErrorState`, progreso
+        de IA con expectativa de tiempo, `EmptyState` condicional por perfil
+        incompleto) — resuelto **en web** 2026-08-17.
+  - [x] Parte 2 completa (§19.1-11: mostrar/ocultar contraseña, confirmar
+        contraseña, ayuda de password visible, autofocus login/registro, error
+        visible en `AddEntryDialog`, **confirmación de borrado en los 8 sub-recursos
+        que borraban directo** — el hallazgo de mayor riesgo real de todo el audit,
+        validación numérica en `ProfileForm`, debounce + limpiar en los pickers,
+        advertencia de cambios sin guardar en `WorkoutForm`/`MealPlanForm`, input
+        numérico unificado, cancelar el diálogo de generación con IA sin esperar) —
+        resuelto **en web** 2026-08-17.
+  - [ ] Todo lo de arriba falta portarlo a Flutter (se suma al ítem de paridad
+        mobile de abajo, no es un pendiente aparte).
+  - [ ] Tier "medio" de Parte 1 (§9.5-7: paridad `HeroBanner`/`EmptyState` en
+        Flutter, escala tipográfica nombrada, auditoría de cobertura de toasts de
+        éxito).
+  - [ ] Backlog de Parte 2 (§11.4): flujo de "¿olvidaste tu contraseña?" — requiere
+        infraestructura nueva (email, tokens de reset), no es solo UI.
   - [ ] Bloqueado hasta tener assets de marca reales (§8, §9.8-9): logo, favicon,
         paleta final, chequeo de contraste WCAG AA.
 - [ ] **Paridad Flutter** de las dos features de IA de nutrición que solo existen en

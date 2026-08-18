@@ -1,6 +1,8 @@
 import { useState } from 'react';
 import { Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
+import { ErrorState } from '@/components/ErrorState';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { extractErrorMessage } from '@/core/api/apiError';
@@ -16,9 +18,10 @@ function today(): string {
 
 export function DailyIntakeView() {
   const date = today();
-  const { data: entries, isLoading, isError } = useDailyIntake(date);
+  const { data: entries, isLoading, isError, refetch } = useDailyIntake(date);
   const deleteIntake = useDeleteIntake(date);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
   const totals = (entries ?? []).reduce(
     (acc, e) => ({
@@ -52,7 +55,7 @@ export function DailyIntakeView() {
           <div className="size-6 animate-spin rounded-full border-2 border-muted border-t-primary" />
         </div>
       )}
-      {isError && <p className="py-12 text-center text-sm text-muted-foreground">No se pudo cargar el diario.</p>}
+      {isError && <ErrorState onRetry={() => refetch()} />}
       {!isLoading && entries?.length === 0 && (
         <p className="py-8 text-center text-sm text-muted-foreground">Todavía no registraste ninguna comida hoy.</p>
       )}
@@ -66,18 +69,27 @@ export function DailyIntakeView() {
                   {labelFor(MEAL_TYPE_LABELS, entry.mealType)} · {entry.calories != null ? Math.round(entry.calories) : '?'} kcal
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Borrar registro"
-                onClick={() => deleteIntake.mutate(entry.id, { onError: (error) => toast.error(extractErrorMessage(error)) })}
-              >
+              <Button variant="ghost" size="icon-sm" aria-label="Borrar registro" onClick={() => setPendingDeleteId(entry.id)}>
                 <Trash2 />
               </Button>
             </CardContent>
           </Card>
         ))}
       </div>
+      <ConfirmDeleteDialog
+        open={pendingDeleteId != null}
+        onOpenChange={(next) => !next && setPendingDeleteId(null)}
+        title="Borrar registro"
+        message="¿Seguro que querés borrar este registro del diario? Esta acción no se puede deshacer."
+        pending={deleteIntake.isPending}
+        onConfirm={() => {
+          if (pendingDeleteId == null) return;
+          deleteIntake.mutate(pendingDeleteId, {
+            onSuccess: () => setPendingDeleteId(null),
+            onError: (error) => toast.error(extractErrorMessage(error)),
+          });
+        }}
+      />
     </div>
   );
 }

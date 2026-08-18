@@ -1,10 +1,11 @@
 // Diálogo para buscar y elegir un ejercicio del catálogo.
 // Paridad con exercise_picker_dialog.dart.
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useDebouncedValue } from '@/core/hooks/useDebouncedValue';
 import { useExerciseCatalog } from '../application/queries';
 import { CATEGORY_LABELS, DIFFICULTY_LABELS, labelFor } from '../domain/workoutLabels';
 import type { Exercise } from '../domain/workoutTypes';
@@ -18,7 +19,8 @@ interface ExercisePickerDialogProps {
 
 export function ExercisePickerDialog({ open, onOpenChange, onSelect }: ExercisePickerDialogProps) {
   const [search, setSearch] = useState('');
-  const { data: exercises, isLoading } = useExerciseCatalog({ search: search || undefined });
+  const debouncedSearch = useDebouncedValue(search);
+  const { data: exercises, isLoading } = useExerciseCatalog({ search: debouncedSearch || undefined });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -30,11 +32,21 @@ export function ExercisePickerDialog({ open, onOpenChange, onSelect }: ExerciseP
           <Search className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
           <Input
             placeholder="Buscar"
-            className="pl-8"
+            className="pr-8 pl-8"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             autoFocus
           />
+          {search.length > 0 && (
+            <button
+              type="button"
+              onClick={() => setSearch('')}
+              aria-label="Limpiar búsqueda"
+              className="absolute top-1/2 right-2.5 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            >
+              <X className="size-4" />
+            </button>
+          )}
         </div>
         <ScrollArea className="h-80">
           {isLoading && <p className="p-4 text-sm text-muted-foreground">Cargando…</p>}

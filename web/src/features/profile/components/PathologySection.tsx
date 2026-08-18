@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import {
   Dialog,
   DialogClose,
@@ -22,6 +23,7 @@ export function PathologySection({ pathologies }: { pathologies: UserPathology[]
   const [open, setOpen] = useState(false);
   const [pathology, setPathology] = useState('');
   const [notes, setNotes] = useState('');
+  const [pendingDelete, setPendingDelete] = useState<UserPathology | null>(null);
 
   function handleAdd() {
     if (!pathology.trim()) return;
@@ -49,14 +51,7 @@ export function PathologySection({ pathologies }: { pathologies: UserPathology[]
                 <p className="text-sm font-medium">{item.pathology}</p>
                 {item.notes && <p className="text-xs text-muted-foreground">{item.notes}</p>}
               </div>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Borrar patología"
-                onClick={() =>
-                  deletePathology.mutate(item.id, { onError: (error) => toast.error(extractErrorMessage(error)) })
-                }
-              >
+              <Button variant="ghost" size="icon-sm" aria-label="Borrar patología" onClick={() => setPendingDelete(item)}>
                 <Trash2 />
               </Button>
             </div>
@@ -85,6 +80,20 @@ export function PathologySection({ pathologies }: { pathologies: UserPathology[]
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          <ConfirmDeleteDialog
+            open={pendingDelete != null}
+            onOpenChange={(next) => !next && setPendingDelete(null)}
+            title="Borrar patología"
+            message={`¿Seguro que querés borrar "${pendingDelete?.pathology ?? ''}"? Esta acción no se puede deshacer.`}
+            pending={deletePathology.isPending}
+            onConfirm={() => {
+              if (!pendingDelete) return;
+              deletePathology.mutate(pendingDelete.id, {
+                onSuccess: () => setPendingDelete(null),
+                onError: (error) => toast.error(extractErrorMessage(error)),
+              });
+            }}
+          />
         </AccordionContent>
       </AccordionItem>
     </Accordion>

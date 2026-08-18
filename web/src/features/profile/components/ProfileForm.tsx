@@ -30,6 +30,12 @@ function toIntOrNull(value: string): number | null {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
+/** Vacío es válido (campo opcional) — solo bloquea si escribieron algo no numérico. */
+function isValidOptionalNumber(value: string): boolean {
+  const trimmed = value.trim();
+  return trimmed === '' || !Number.isNaN(Number(trimmed.replace(',', '.')));
+}
+
 export function ProfileForm({ profile }: { profile: UserProfile }) {
   const { updateProfile } = useProfile();
 
@@ -47,6 +53,11 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
   const [notes, setNotes] = useState(profile.notes ?? '');
 
   function handleSave() {
+    if (!isValidOptionalNumber(heightCm)) return toast.error('Altura inválida: ingresá solo números.');
+    if (!isValidOptionalNumber(weightKg)) return toast.error('Peso inválido: ingresá solo números.');
+    if (!isValidOptionalNumber(trainingDaysPerWeek)) return toast.error('Días por semana inválido: ingresá solo números.');
+    if (!isValidOptionalNumber(trainingMinutes)) return toast.error('Minutos por sesión inválido: ingresá solo números.');
+
     const updated: UserProfile = {
       sex: sex ?? null,
       birthDate: birthDate || null,

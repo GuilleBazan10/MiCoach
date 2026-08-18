@@ -25,7 +25,14 @@ export function AddEntryDialog({ initialMetricType, trigger }: { initialMetricTy
 
   function handleSubmit() {
     const numericValue = Number(value.replace(',', '.'));
-    if (Number.isNaN(numericValue) || !unit.trim()) return;
+    if (Number.isNaN(numericValue) || value.trim() === '') {
+      toast.error('Ingresá un valor numérico válido.');
+      return;
+    }
+    if (!unit.trim()) {
+      toast.error('Ingresá la unidad de la métrica.');
+      return;
+    }
     addEntry.mutate(
       { metricType, value: numericValue, unit: unit.trim(), notes: notes.trim() || null },
       {
