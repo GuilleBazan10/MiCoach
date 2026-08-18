@@ -1,0 +1,125 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 400" width="100%" height="100%">
+<defs>
+<!-- Teal/Blue Shield Right Arc Gradient -->
+<linearGradient id="blueShieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+<stop offset="0%" stop-color="#0284C7"/>
+<stop offset="100%" stop-color="#0F172A"/>
+</linearGradient>
+
+    <!-- Green Shield Left Arc & Leaf Gradient -->
+<linearGradient id="greenShieldGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+<stop offset="0%" stop-color="#16A34A"/>
+<stop offset="50%" stop-color="#22C55E"/>
+<stop offset="100%" stop-color="#4ADE80"/>
+</linearGradient>
+
+    <!-- Human Figure Gradient -->
+<linearGradient id="figureGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+<stop offset="0%" stop-color="#0284C7"/>
+<stop offset="100%" stop-color="#0369A1"/>
+</linearGradient>
+
+    <!-- Orange Accent for "ble" -->
+<linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+<stop offset="0%" stop-color="#F97316"/>
+<stop offset="100%" stop-color="#FB923C"/>
+</linearGradient>
+
+    <!-- Soft Drop Shadow for Icon -->
+<filter id="softShadow" x="-10%" y="-10%" width="130%" height="130%">
+<feDropShadow dx="2" dy="6" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.12"/>
+</filter>
+</defs>
+
+  <style>
+    .brand-text-main {
+      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 52px;
+      font-weight: 700;
+      fill: #0F2942;
+      letter-spacing: -0.5px;
+    }
+    .brand-text-sub {
+      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 52px;
+      font-weight: 700;
+      fill: #0F2942;
+      letter-spacing: -0.5px;
+    }
+    .brand-text-highlight {
+      fill: url(#orangeGrad);
+      font-weight: 700;
+    }
+    .tagline-text {
+      font-family: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      fill: #64748B;
+      letter-spacing: 2px;
+    }
+</style>
+
+  <!-- BACKGROUND: Pure Crisp Clean White -->
+<rect width="800" height="400" fill="#FFFFFF"/>
+
+  <!-- ISOTIPO: ESCUDO + FIGURA HUMANA + HOJA ORGANICA -->
+<g transform="translate(60, 50)" filter="url(#softShadow)">
+<!-- LADO DERECHO DEL ESCUDO (Azul Marino / Protección Médica) -->
+<path d="M 140 30
+             C 190 30, 230 45, 240 80
+             C 255 150, 210 240, 140 280
+             C 142 250, 165 210, 180 180
+             C 205 130, 195 70, 140 52
+             Z"
+          fill="url(#blueShieldGrad)"/>
+
+    <!-- LADO IZQUIERDO DEL ESCUDO & RAMA HOJA (Verde / Salud Nutricional) -->
+<path d="M 140 30
+             C 90 30, 50 45, 40 80
+             C 25 150, 70 240, 140 280
+             C 105 240, 60 170, 70 110
+             C 78 70, 110 48, 140 48
+             Z"
+          fill="url(#greenShieldGrad)"/>
+
+    <!-- DETALLE HOJA NUTRITIVA (Lado Izquierdo Interior) -->
+<path d="M 65 190
+             C 45 150, 85 125, 110 145
+             C 115 175, 80 210, 65 190 Z"
+          fill="url(#greenShieldGrad)"/>
+<path d="M 72 185 C 85 168, 98 158, 105 152" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.8"/>
+
+    <!-- FIGURA HUMANA ACTIVA EN CIENTO (Prototipo de Progreso y Salud) -->
+<!-- Cabeza -->
+<circle cx="140" cy="100" r="17" fill="url(#figureGrad)"/>
+<!-- Creador del cuerpo con brazos abiertos hacia el triunfo -->
+<path d="M 140 125
+             C 120 125, 80 135, 65 120
+             C 60 115, 75 110, 95 118
+             C 120 128, 132 135, 140 135
+             C 148 135, 160 128, 185 118
+             C 205 110, 220 115, 215 120
+             C 200 135, 160 125, 140 125 Z"
+          fill="url(#figureGrad)"/>
+
+    <!-- Torso y Piernas Dinámicas -->
+<path d="M 130 130
+             C 145 150, 150 180, 130 250
+             C 145 230, 165 190, 150 130 Z"
+          fill="url(#figureGrad)"/>
+</g>
+
+  <!-- TIPOGRAFÍA PROFESIONAL MEJORADA -->
+<g transform="translate(340, 165)">
+<!-- Primera Línea: Mi Coach -->
+<text x="0" y="0" class="brand-text-main">Mi Coach</text>
+
+    <!-- Segunda Línea: Saludable (con 'ble' en naranja suave) -->
+<text x="0" y="65" class="brand-text-sub">
+      Saluda<tspan class="brand-text-highlight">ble</tspan>
+</text>
+
+    <!-- Slogan / Subtítulo Adaptativo -->
+<text x="0" y="110" class="tagline-text">SALUD &amp; ENTRENAMIENTO ADAPTATIVO</text>
+</g>
+</svg>

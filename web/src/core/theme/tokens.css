@@ -7,18 +7,30 @@
    src/components/ui/* (shadcn) y todas las pantallas consumen estas
    variables vía las clases de Tailwind (bg-primary, text-foreground, etc.),
    nunca colores hardcodeados.
+
+   2026-08-18: paleta actualizada a la marca real (docs/11-identidad-marca.md,
+   isotipo + perfil de estilo). mobile/lib/core/theme/app_colors.dart TODAVÍA
+   NO se portó — ver docs/00-progress.md § Paridad Flutter y docs/06-ux-ui-audit.md
+   §8 para el checklist exacto de lo que falta actualizar allá.
    ===================================================================== */
 
 :root {
   --background: #f6faf6; /* leve tinte verde, no gris neutro puro — más "vivo" que #fafafa */
-  --foreground: #16211a; /* mobile: AppColors.light.onSurface */
+  --foreground: #0F2942; /* Ink Navy de marca (docs/11-identidad-marca.md) — 14:1 sobre --background */
 
   --card: #ffffff; /* mobile: AppColors.light.surface */
   --card-foreground: #16211a;
   --popover: #ffffff;
   --popover-foreground: #16211a;
 
-  --primary: #1fa251; /* verde más saturado/vívido que el original #4caf50 — más "energía" */
+  /* Paleta de marca real (docs/11-identidad-marca.md), extraída del isotipo
+     2026-08-18. primary/accent/highlight quedan un paso más oscuros que el hex "puro"
+     de marca (verde #16A34A, azul #0284C7, naranja #F97316): con blanco encima (texto
+     de botón text-sm/14px, no cuenta como "large text" en WCAG) el hex puro no llega a
+     4.5:1 — estos sí. El hex puro de marca sigue vivo en el isotipo (src/assets/brand/)
+     y en superficies grandes sin texto encima. Números exactos en docs/11 § Frente a
+     los tokens actuales. */
+  --primary: #15803d; /* verde-700 — un paso más oscuro que el verde de marca #16A34A */
   --primary-foreground: #ffffff;
 
   --secondary: #e7f2e9;
@@ -27,34 +39,33 @@
   --muted: #eef1ee;
   --muted-foreground: #62685f;
 
-  --accent: #00c2a8; /* turquesa (energía/hidratación), un poco más vívido */
+  --accent: #0369a1; /* azul cielo — mismo tono que ya usa la figura humana del isotipo */
   --accent-foreground: #ffffff;
 
-  /* Acento cálido nuevo — rachas, badges "generado con IA", destacados. Los fitness apps
-     necesitan un segundo color además del verde de marca o todo se ve monocromático. */
-  --highlight: #ff7a33;
+  /* Acento cálido — rachas, badges "generado con IA", destacados. */
+  --highlight: #c2410c; /* naranja-700 — un paso más oscuro que el naranja de marca #F97316 */
   --highlight-foreground: #ffffff;
 
-  --gradient-hero: linear-gradient(135deg, #1fa251 0%, #00c2a8 100%);
+  --gradient-hero: linear-gradient(135deg, #15803d 0%, #0369a1 100%);
 
   --destructive: #b3261e; /* mobile: AppColors.light.error */
   --destructive-foreground: #ffffff;
 
   --border: #e2e5e2;
   --input: #e2e5e2;
-  --ring: #1fa251;
+  --ring: #15803d;
 
   --radius: 0.75rem;
 
   /* Sidebar (sin uso todavía — admin no tiene pantalla, ver docs/00-progress.md) */
   --sidebar: #ffffff;
   --sidebar-foreground: #1c1b1f;
-  --sidebar-primary: #4caf50;
+  --sidebar-primary: #15803d;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-accent: #eef1ee;
   --sidebar-accent-foreground: #1c1b1f;
   --sidebar-border: #e2e5e2;
-  --sidebar-ring: #4caf50;
+  --sidebar-ring: #15803d;
 
   /* Series de gráficos (progress/nutrition podrían usarlas a futuro) */
   --chart-1: #4caf50;
@@ -66,45 +77,49 @@
 
 .dark {
   --background: #121212; /* mobile: AppColors.dark.background */
-  --foreground: #e6e1e5; /* mobile: AppColors.dark.onSurface */
+  --foreground: #e9f1f8; /* tinte navy de marca, no gris neutro (docs/11-identidad-marca.md) */
 
   --card: #1e1e1e; /* mobile: AppColors.dark.surface */
-  --card-foreground: #e6e1e5;
+  --card-foreground: #e9f1f8;
   --popover: #1e1e1e;
-  --popover-foreground: #e6e1e5;
+  --popover-foreground: #e9f1f8;
 
-  --primary: #81c784; /* mobile: AppColors.dark.primary */
-  --primary-foreground: #00391f;
+  /* primary/accent/highlight pasan a los stops claros del propio degradé de marca
+     (docs/11-identidad-marca.md) — más brillo para leerse sobre fondo oscuro. El ink
+     "-foreground" es #0f172a, el stop oscuro del escudo azul del isotipo, reusado acá
+     como color de texto en vez de inventar uno nuevo. */
+  --primary: #4ade80; /* verde claro — stop final del degradé verde del isotipo */
+  --primary-foreground: #0f172a;
 
   --secondary: #2a2a2a;
-  --secondary-foreground: #e6e1e5;
+  --secondary-foreground: #e9f1f8;
 
   --muted: #2a2a2a;
   --muted-foreground: #a1a5a1;
 
-  --accent: #00d9bc;
-  --accent-foreground: #00251f;
+  --accent: #38bdf8; /* azul cielo claro, misma familia que el escudo azul */
+  --accent-foreground: #0f172a;
 
-  --highlight: #ff9257;
-  --highlight-foreground: #2a1200;
+  --highlight: #fb923c; /* naranja claro — stop final del degradé naranja del isotipo */
+  --highlight-foreground: #0f172a;
 
-  --gradient-hero: linear-gradient(135deg, #1c7a3e 0%, #00877a 100%);
+  --gradient-hero: linear-gradient(135deg, #4ade80 0%, #38bdf8 100%);
 
   --destructive: #f2b8b5; /* mobile: AppColors.dark.error */
   --destructive-foreground: #370907;
 
   --border: rgba(255, 255, 255, 0.1);
   --input: rgba(255, 255, 255, 0.15);
-  --ring: #81c784;
+  --ring: #4ade80;
 
   --sidebar: #1e1e1e;
-  --sidebar-foreground: #e6e1e5;
-  --sidebar-primary: #81c784;
-  --sidebar-primary-foreground: #00391f;
+  --sidebar-foreground: #e9f1f8;
+  --sidebar-primary: #4ade80;
+  --sidebar-primary-foreground: #0f172a;
   --sidebar-accent: #2a2a2a;
-  --sidebar-accent-foreground: #e6e1e5;
+  --sidebar-accent-foreground: #e9f1f8;
   --sidebar-border: rgba(255, 255, 255, 0.1);
-  --sidebar-ring: #81c784;
+  --sidebar-ring: #4ade80;
 
   --chart-1: #81c784;
   --chart-2: #00bfa5;

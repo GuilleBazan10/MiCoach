@@ -44,22 +44,17 @@ apalancamiento correcto. El trabajo es **extender ese sistema**, no reemplazarlo
 
 ## 1. Identidad de marca (branding)
 
-### 1.1 Nombre y favicon son placeholders sin marcar visualmente como tales
-- **Qué pasa**: el favicon actual (`web/public/favicon.svg`) es el logo genérico por
-  defecto del scaffold de shadcn (figura abstracta violeta), no tiene relación con la
-  paleta verde/turquesa del resto de la app. El ícono del header (`AppShell.tsx:36-42`)
-  usa un rayo (`lucide-react` `Zap`) genérico sobre un cuadrado con gradiente — funciona
-  como placeholder pero no es un logo, es un ícono de librería.
-- **Por qué importa**: cuando lleguen los assets reales de marca, hay que tocar mínimo
-  4 lugares independientes que hoy no están conectados entre sí (ver §8 para la lista
-  completa) — si no se deja documentado, es fácil que quede desincronizado (web con
-  logo nuevo, mobile con el ícono de Flutter por defecto).
-- **Mobile aún peor**: `mobile/web/icons/Icon-*.png` son los íconos placeholder que
-  genera `flutter create` automáticamente — nunca se reemplazaron. Es el ícono
-  genérico de Flutter, ni siquiera un intento de marca.
-- **Recomendación**: no accionar todavía (bloqueado por §8), pero cuando lleguen los
-  assets, tratarlos como **un solo cambio atómico** que toque los 2 frontends a la vez,
-  no como retoques sueltos por feature.
+### 1.1 Nombre y favicon eran placeholders sin marcar visualmente como tales — ✅ RESUELTO EN WEB (2026-08-18)
+- **Qué pasaba**: el favicon (`web/public/favicon.svg`) era el logo genérico por
+  defecto del scaffold de shadcn (figura abstracta violeta), sin relación con la paleta
+  de la app. El header (`AppShell.tsx`) usaba un rayo (`lucide-react` `Zap`) genérico
+  sobre un cuadrado con gradiente.
+- **Resuelto**: favicon reemplazado por el isotipo real; header usa `<Logo />`
+  (`web/src/components/Logo.tsx`) en vez del ícono `Zap`. Detalle completo en
+  `docs/11-identidad-marca.md`.
+- **Mobile sigue pendiente**: `mobile/web/icons/Icon-*.png` son los íconos placeholder
+  que genera `flutter create` automáticamente — todavía sin reemplazar. Checklist exacto
+  en `docs/11-identidad-marca.md § Pendiente en mobile`.
 
 ### 1.2 El nombre "MiCoach" aparece hardcodeado en 3+ lugares de UI, no solo en config — ✅ RESUELTO (2026-08-17)
 - **Qué pasa**: `AppShell.tsx:42` (`<span>MiCoach</span>`), `LoginPage.tsx:42`
@@ -268,26 +263,25 @@ apalancamiento correcto. El trabajo es **extender ese sistema**, no reemplazarlo
 
 ---
 
-## 8. Pendiente: assets de marca reales
+## 8. Assets de marca reales — ✅ RESUELTO EN WEB (2026-08-18), pendiente mobile
 
-Esta sección se actualiza cuando lleguen el logo y los diseños de referencia. Mientras
-tanto, queda documentado **dónde impactan** para que integrarlos sea un checklist, no
-una exploración:
+El logo llegó 2026-08-18. Perfil completo, valores exactos y checklist de mobile en
+**`docs/11-identidad-marca.md`** — esta sección queda como el registro histórico de qué
+se preveía tocar; el detalle vivo está en `docs/11`.
 
 | Asset | Dónde va (web) | Dónde va (mobile) |
 |---|---|---|
-| Logo / isotipo | `web/public/` (favicon.svg/ico + variante para header, reemplaza `Zap` en `AppShell.tsx:36-42`) | `mobile/web/icons/Icon-*.png` (regenerar con herramienta de app icons), más ícono nativo Android/iOS si se genera APK/build firmado |
-| Paleta de marca | `web/src/core/theme/tokens.css` (bloques `:root` y `.dark`) | `mobile/lib/core/theme/app_colors.dart` (`AppColors.light`/`AppColors.dark`) — **deben quedar sincronizados**, ya hay comentarios cruzados en ambos archivos que lo recuerdan |
-| Tipografía de marca | `web/index.html` (font import) + `tokens.css`/Tailwind config — actualmente `@fontsource-variable/geist` | `mobile/lib/core/theme/app_text_styles.dart` |
-| Nombre final del producto | Constante única de UI (crear, ver §1.2) + `web/index.html` `<title>` + `README.md` + guía de rename en `docs/01-architecture.md § 11` | `mobile/pubspec.yaml` (`name`), strings de UI, `android`/`ios` display name |
-| Splash screen | — (SPA no tiene splash tradicional) | `mobile/lib/core/router/splash_screen.dart` ya existe como pantalla mientras se restaura sesión — es el lugar natural para el logo animado/estático |
+| Logo / isotipo | ✅ `web/public/favicon.svg` + `web/src/assets/brand/` + `Logo.tsx`, reemplaza `Zap` en `AppShell.tsx` | ⬜ `mobile/web/icons/Icon-*.png` (regenerar con herramienta de app icons), más ícono nativo Android/iOS si se genera APK/build firmado |
+| Paleta de marca | ✅ `web/src/core/theme/tokens.css` (bloques `:root` y `.dark`) | ⬜ `mobile/lib/core/theme/app_colors.dart` (`AppColors.light`/`AppColors.dark`) — **deben quedar sincronizados**, ya hay comentarios cruzados en ambos archivos que lo recuerdan |
+| Tipografía de marca | ⬜ Sin aplicar todavía en ningún lado — `web/index.html` sigue con `@fontsource-variable/geist`, Plus Jakarta Sans (la de la marca) queda pendiente | ⬜ `mobile/lib/core/theme/app_text_styles.dart` |
+| Nombre final del producto | ✅ RESUELTO 2026-08-17 (§1.2, `APP_NAME`) | `mobile/pubspec.yaml` (`name`), strings de UI, `android`/`ios` display name |
+| Splash screen | — (SPA no tiene splash tradicional) | ⬜ `mobile/lib/core/router/splash_screen.dart` ya existe como pantalla mientras se restaura sesión — es el lugar natural para el logo animado/estático |
 
-**Instrucción para quien reciba los assets**: no aplicar la paleta nueva parche por
-parche en cada componente. Actualizar únicamente los dos archivos de tokens
-(`tokens.css` y `app_colors.dart`) — todo el resto de la UI ya consume esas variables
-por diseño (es literalmente el propósito documentado de esos archivos, ver comentarios
-en la cabecera de ambos). Si al aplicar la paleta nueva algún componente *no* se
-actualiza solo, es señal de que ese componente tiene un color hardcodeado por fuera del
+**Instrucción para quien porte esto a mobile**: no aplicar la paleta nueva parche por
+parche en cada componente. Actualizar únicamente `app_colors.dart` — todo el resto de la
+UI ya consume esas variables por diseño (es literalmente el propósito documentado de ese
+archivo, ver comentario en su cabecera). Si al aplicar la paleta nueva algún widget *no*
+se actualiza solo, es señal de que ese widget tiene un color hardcodeado por fuera del
 sistema de tokens — vale la pena flaguearlo como bug de arquitectura de diseño, no
 parchearlo local.
 
@@ -309,10 +303,13 @@ parchearlo local.
 6. Escala tipográfica nombrada y exhaustiva en ambas plataformas (§2.2).
 7. Auditoría de cobertura de toasts de éxito en todas las mutations (§3.3).
 
-**Bloqueado hasta tener assets de marca (§8):**
-8. Logo, favicon, íconos de app, splash — cambio atómico en los 2 frontends.
-9. Chequeo de contraste WCAG AA sobre la paleta final (§5.1) — hacerlo una vez con
-   colores definitivos, no con el placeholder actual.
+**Ya no bloqueado — assets de marca llegaron 2026-08-18 (§8, `docs/11-identidad-marca.md`):**
+8. ✅ Logo y favicon — RESUELTO EN WEB. ⬜ Íconos de app y splash — pendiente en mobile.
+9. ✅ Chequeo de contraste WCAG AA sobre la paleta final (§5.1) — RESUELTO 2026-08-18,
+   con números reales de luminancia relativa (no estimado): `--primary`/`--accent`/
+   `--highlight` se ajustaron un paso más oscuro que el hex puro de marca donde hacía
+   falta para pasar 4.5:1 con texto blanco encima. Detalle en `docs/11 § Ajuste de
+   contraste WCAG`.
 
 **Sin asignar / requiere decisión de producto, no solo de diseño:**
 10. Progreso real (streaming) en generación con IA vía WebSocket/SSE — cambio de

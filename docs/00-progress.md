@@ -1070,9 +1070,13 @@ que quede claro de un vistazo qué le falta a mobile:
       tiene ninguna de estas mejoras.
 - **Explícitamente NO entra acá** (decisión del usuario, no un olvido): el panel
   `/admin/ai` queda solo en web a propósito.
-- **Bloqueado** hasta tener assets de marca reales (`docs/06` §8, §9.8-9): logo,
-  favicon, paleta final, chequeo de contraste WCAG AA — no tiene sentido portar dos
-  veces (placeholder + final).
+- [ ] **Identidad de marca real, aplicada en web, pendiente en mobile** (llegó el logo
+      2026-08-18, dejó de estar bloqueado — ver `docs/11-identidad-marca.md` completo):
+      `mobile/lib/core/theme/app_colors.dart` (paleta, falta agregar un campo
+      `highlight` que hoy no existe), íconos de app (`mobile/web/icons/Icon-*.png`,
+      siguen siendo el placeholder de `flutter create`), logo en
+      `splash_screen.dart`, tipografía (`app_text_styles.dart`). Checklist exacto con
+      archivo por archivo en `docs/11-identidad-marca.md § Pendiente en mobile`.
 
 ### Otras auditorías activas
 
