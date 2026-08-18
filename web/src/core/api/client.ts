@@ -10,7 +10,7 @@
 import axios, { type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
 import { tokenStorage } from './tokenStorage';
 
-export const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8081/api/v1';
+export const apiBaseUrl = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/v1';
 
 const PUBLIC_AUTH_PATHS = ['/auth/register', '/auth/login', '/auth/refresh'];
 
