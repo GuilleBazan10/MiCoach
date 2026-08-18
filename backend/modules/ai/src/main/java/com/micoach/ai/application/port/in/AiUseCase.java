@@ -61,6 +61,14 @@ public interface AiUseCase {
      */
     GenerationResult generate(Long userId, String promptSlug, Map<String, Object> variables);
 
+    /**
+     * La IA respondió (no fue un error de proveedor/red) pero el llamador no pudo usar
+     * el resultado (ej. no era JSON válido) — distingue esto de un éxito real en
+     * {@code ai_generation_logs}, que si no queda registrado como "success" aunque el
+     * usuario haya visto un error.
+     */
+    void markGenerationPartial(Long logId);
+
     record PromptData(String slug, String provider, String model, String content, Map<String, Object> params) {
     }
 
@@ -71,7 +79,7 @@ public interface AiUseCase {
     record ProviderTestResult(boolean ok, String message) {
     }
 
-    record GenerationResult(String rawOutput, String provider, String model, Integer durationMs) {
+    record GenerationResult(Long logId, String rawOutput, String provider, String model, Integer durationMs) {
     }
 
     record MessageData(String role, String content, String provider, String model,

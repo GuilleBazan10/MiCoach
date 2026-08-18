@@ -22,7 +22,7 @@ export function WorkoutHomePage() {
         subtitle="Tu plan de entrenamiento, a tu manera"
         stats={[
           { label: workouts?.length === 1 ? 'rutina' : 'rutinas', value: workouts?.length ?? 0 },
-          { label: 'generadas con IA ✨', value: aiCount },
+          { label: aiCount === 1 ? 'generada con IA ✨' : 'generadas con IA ✨', value: aiCount },
         ]}
       />
       {tab === 'own' && (

@@ -23,7 +23,7 @@ export function NutritionHomePage() {
         subtitle="Planificá qué comer sin pensarlo dos veces"
         stats={[
           { label: plans?.length === 1 ? 'plan' : 'planes', value: plans?.length ?? 0 },
-          { label: 'generados con IA ✨', value: aiCount },
+          { label: aiCount === 1 ? 'generado con IA ✨' : 'generados con IA ✨', value: aiCount },
         ]}
       />
       {tab === 'plans' && (

@@ -18,6 +18,7 @@
 | 6 | CI/CD y despliegue | 🟡 PARCIAL (deploy productivo Render+Vercel+Supabase hecho; falta GitHub Actions, APK Flutter) |
 | 7 | Documentación final (README, manuales) | ⬜ Pendiente |
 | — | UX/UI (auditoría, transversal a las fases) | 🟡 EN CURSO — ver [`docs/06-ux-ui-audit.md`](./06-ux-ui-audit.md). Parte 1 (4/4) y Parte 2 (11/11) resueltas **en web** 2026-08-17. Falta portar todo a Flutter y el backlog de "¿olvidaste tu contraseña?" |
+| — | Calidad de entrenamiento/nutrición (auditoría, transversal) | 🟡 EN CURSO — ver [`docs/10-recomendaciones-coach-nutricion.md`](./10-recomendaciones-coach-nutricion.md). Sección A (bugs críticos) + G.1 resueltos 2026-08-17. Faltan B-F y H.1-H.4/H.6 (TDEE, gráficos, sesión activa, formato visual) |
 
 ## Fase 0 — Cimientos (COMPLETADA)
 
@@ -1031,35 +1032,52 @@ parte del alcance de la Fase 6:
 ## Pendientes globales / deuda técnica
 
 Consolidado de todo lo que quedó suelto durante el desarrollo y el primer deploy,
-para no perderlo de vista:
+para no perderlo de vista.
 
-- **Auditoría UX/UI**: `docs/06-ux-ui-audit.md` es la fuente de verdad de deuda de
-  diseño (generada por un chat de diseño aparte, verificada contra el código real
-  antes de actuar sobre ella). Tiene su propio roadmap por costo/impacto — no
-  duplicar el detalle acá, solo el estado global:
-  - [x] Parte 1, tier "rápido y barato" (§9.1-4: `APP_NAME`, `ErrorState`, progreso
-        de IA con expectativa de tiempo, `EmptyState` condicional por perfil
-        incompleto) — resuelto **en web** 2026-08-17.
-  - [x] Parte 2 completa (§19.1-11: mostrar/ocultar contraseña, confirmar
-        contraseña, ayuda de password visible, autofocus login/registro, error
-        visible en `AddEntryDialog`, **confirmación de borrado en los 8 sub-recursos
-        que borraban directo** — el hallazgo de mayor riesgo real de todo el audit,
-        validación numérica en `ProfileForm`, debounce + limpiar en los pickers,
-        advertencia de cambios sin guardar en `WorkoutForm`/`MealPlanForm`, input
-        numérico unificado, cancelar el diálogo de generación con IA sin esperar) —
-        resuelto **en web** 2026-08-17.
-  - [ ] Todo lo de arriba falta portarlo a Flutter (se suma al ítem de paridad
-        mobile de abajo, no es un pendiente aparte).
-  - [ ] Tier "medio" de Parte 1 (§9.5-7: paridad `HeroBanner`/`EmptyState` en
-        Flutter, escala tipográfica nombrada, auditoría de cobertura de toasts de
-        éxito).
-  - [ ] Backlog de Parte 2 (§11.4): flujo de "¿olvidaste tu contraseña?" — requiere
-        infraestructura nueva (email, tokens de reset), no es solo UI.
-  - [ ] Bloqueado hasta tener assets de marca reales (§8, §9.8-9): logo, favicon,
-        paleta final, chequeo de contraste WCAG AA.
-- [ ] **Paridad Flutter** de las dos features de IA de nutrición que solo existen en
-      web: sustitución de ingredientes y ajuste de calorías del plan (`/admin/ai` NO
-      entra acá — esa fue decisión explícita de que quede solo en web).
+### Paridad Flutter (lista única — todo lo que hoy solo existe en web)
+
+Todo lo de esta lista es **traducir a Flutter un patrón que ya está resuelto en
+React** — no requiere decisiones de diseño nuevas, es trabajo de implementación
+puro. Se consolida acá en un solo lugar (no repetir en `docs/06`/`docs/10`) para
+que quede claro de un vistazo qué le falta a mobile:
+
+- [ ] Features de IA de nutrición (Fase 4): sustitución de ingredientes, ajuste de
+      calorías del plan.
+- [ ] `docs/06-ux-ui-audit.md` Parte 1, tier "rápido y barato" (resuelto en web
+      2026-08-17): `APP_NAME` equivalente, `ErrorState`, progreso de IA con
+      expectativa de tiempo, `EmptyState` condicional por perfil incompleto.
+- [ ] `docs/06-ux-ui-audit.md` Parte 2 completa (resuelto en web 2026-08-17):
+      mostrar/ocultar contraseña, confirmar contraseña, ayuda de password visible,
+      autofocus login/registro, error visible en registro de métrica,
+      **confirmación de borrado en los 8 sub-recursos que borraban directo** (el
+      hallazgo de mayor riesgo real de ese audit), validación numérica de perfil,
+      debounce + limpiar en los pickers, advertencia de cambios sin guardar, input
+      numérico unificado, cancelar el diálogo de generación con IA sin esperar.
+- [ ] `docs/06-ux-ui-audit.md` tier "medio" de Parte 1: `HeroBanner`/`EmptyState`
+      compartidos, escala tipográfica nombrada, auditoría de cobertura de toasts de
+      éxito.
+- [ ] `docs/10-recomendaciones-coach-nutricion.md` G.1 (concordancia de género en
+      contadores "generado/a(s) con IA") — no aplica literal hoy (mobile no tiene
+      ese contador, es parte del `HeroBanner` que todavía no se portó); se resuelve
+      solo cuando se porte `HeroBanner` arriba.
+- **Explícitamente NO entra acá** (decisión del usuario, no un olvido): el panel
+  `/admin/ai` queda solo en web a propósito.
+- **Bloqueado** hasta tener assets de marca reales (`docs/06` §8, §9.8-9): logo,
+  favicon, paleta final, chequeo de contraste WCAG AA — no tiene sentido portar dos
+  veces (placeholder + final).
+
+### Otras auditorías activas
+
+- **`docs/06-ux-ui-audit.md`**: fuente de verdad de deuda de diseño puro. Todo lo
+  accionable en web ya está resuelto (Parte 1 y 2, ver arriba); lo que resta es la
+  paridad Flutter (arriba) y el backlog bloqueado por marca/assets.
+- **`docs/10-recomendaciones-coach-nutricion.md`**: fuente de verdad de si el
+  *contenido* de entrenamiento/nutrición que genera y muestra la app tiene sentido
+  real (no solo si la UI es prolija). Sección A (bugs críticos) + G.1 resueltos
+  2026-08-17. Sin empezar: B (TDEE/IMC — el hallazgo de mayor impacto de ese
+  documento), C (calidad de la rutina generada por IA), D (macros visibles), E
+  (sesión de entrenamiento activa), F (gráficos de progreso), H.1-H.4/H.6 (formato
+  visual de rutinas/planes).
 - [ ] **Rotar la password del admin seed** (`admin@micoach.dev`) — quedó en texto
       plano en el chat de esta sesión.
 - [ ] `.env` local todavía tiene `POSTGRES_DB=kineticos`/`POSTGRES_USER=kineticos`

@@ -151,4 +151,9 @@ public class AiRepositoryAdapter implements AiRepository {
     public GenerationLog saveGenerationLog(GenerationLog log) {
         return GenerationLogMapper.toDomain(generationLogRepository.save(GenerationLogMapper.toJpa(log)));
     }
+
+    @Override
+    public void updateGenerationLogStatus(Long logId, String status) {
+        generationLogRepository.updateStatus(logId, status);
+    }
 }

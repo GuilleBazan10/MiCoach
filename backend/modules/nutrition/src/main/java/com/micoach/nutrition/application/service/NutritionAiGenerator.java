@@ -50,7 +50,7 @@ class NutritionAiGenerator {
         AiUseCase.GenerationResult result = aiUseCase.generate(userId, PROMPT_SLUG,
                 Map.of("goal", goal, "catalog", catalogText, "profile", buildProfileText(userId)));
 
-        AiMealPlanJson parsed = parseJson(result.rawOutput());
+        AiMealPlanJson parsed = parseJson(result);
         return toMealPlanData(parsed, catalog);
     }
 
@@ -77,14 +77,16 @@ class NutritionAiGenerator {
         return text.isEmpty() ? "Sin datos de perfil cargados." : text.toString();
     }
 
-    private AiMealPlanJson parseJson(String raw) {
-        String jsonSlice = extractFirstJsonObject(raw);
+    private AiMealPlanJson parseJson(AiUseCase.GenerationResult result) {
+        String jsonSlice = extractFirstJsonObject(result.rawOutput());
         if (jsonSlice == null) {
+            aiUseCase.markGenerationPartial(result.logId());
             throw new DomainException(502, ErrorCode.INTERNAL_ERROR, "La IA no devolvió un JSON válido");
         }
         try {
             return objectMapper.readValue(jsonSlice, AiMealPlanJson.class);
         } catch (Exception e) {
+            aiUseCase.markGenerationPartial(result.logId());
             throw new DomainException(502, ErrorCode.INTERNAL_ERROR,
                     "No se pudo interpretar el plan generado por la IA: " + e.getMessage());
         }

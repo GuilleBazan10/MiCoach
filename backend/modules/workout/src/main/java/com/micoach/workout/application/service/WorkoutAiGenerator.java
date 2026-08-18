@@ -52,7 +52,7 @@ class WorkoutAiGenerator {
         AiUseCase.GenerationResult result = aiUseCase.generate(userId, PROMPT_SLUG,
                 Map.of("goal", goal, "catalog", catalogText, "profile", buildProfileText(userId, profile)));
 
-        AiWorkoutJson parsed = parseJson(result.rawOutput());
+        AiWorkoutJson parsed = parseJson(result);
         return toWorkoutData(parsed, filteredCatalog);
     }
 
@@ -117,14 +117,16 @@ class WorkoutAiGenerator {
         return text.isEmpty() ? "Sin datos de perfil cargados." : text.toString();
     }
 
-    private AiWorkoutJson parseJson(String raw) {
-        String jsonSlice = extractFirstJsonObject(raw);
+    private AiWorkoutJson parseJson(AiUseCase.GenerationResult result) {
+        String jsonSlice = extractFirstJsonObject(result.rawOutput());
         if (jsonSlice == null) {
+            aiUseCase.markGenerationPartial(result.logId());
             throw new DomainException(502, ErrorCode.INTERNAL_ERROR, "La IA no devolvió un JSON válido");
         }
         try {
             return objectMapper.readValue(jsonSlice, AiWorkoutJson.class);
         } catch (Exception e) {
+            aiUseCase.markGenerationPartial(result.logId());
             throw new DomainException(502, ErrorCode.INTERNAL_ERROR,
                     "No se pudo interpretar la rutina generada por la IA: " + e.getMessage());
         }
