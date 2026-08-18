@@ -54,7 +54,17 @@ public class OpenAiCompatibleProviderStrategy implements AiProviderStrategy {
                 .apiKey(provider.apiKey())
                 .modelName(provider.model())
                 .timeout(Duration.ofSeconds(60))
-                .maxTokens(2048)
+                // Visto en la práctica con modelos de razonamiento (ej. Groq
+                // openai/gpt-oss-120b): gastan una porción variable del presupuesto
+                // de tokens en razonamiento interno antes de escribir la respuesta
+                // visible, así que con 2048 un plan de 5-7 días se corta a mitad del
+                // JSON (finish_reason=length) en vez de devolver texto inválido.
+                // OJO: no subir esto demasiado — el free tier de Groq reserva
+                // prompt + maxTokens contra su límite de tokens por minuto (TPM), que
+                // para algunos modelos (ej. gpt-oss-120b) es tan bajo como 8000. Con
+                // 8192 acá y ~1300 de prompt (perfil + catálogo) ya se pasa del límite
+                // y Groq rechaza el request entero con 429 antes de generar nada.
+                .maxTokens(4096)
                 .build());
     }
 }

@@ -4,10 +4,12 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { PasswordInput } from '@/components/ui/password-input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { extractErrorMessage } from '@/core/api/apiError';
+import { APP_NAME } from '@/core/config';
 import { useAuth } from '../application/useAuth';
 import { loginSchema, type LoginFormValues } from '../application/authSchemas';
 
@@ -39,7 +41,7 @@ export function LoginPage() {
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle className="text-xl">Iniciar sesión</CardTitle>
-          <CardDescription>Entrá a tu cuenta de MiCoach.</CardDescription>
+          <CardDescription>Entrá a tu cuenta de {APP_NAME}.</CardDescription>
         </CardHeader>
         <CardContent>
           <form className="flex flex-col gap-4" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -54,6 +56,7 @@ export function LoginPage() {
                 id="email"
                 type="email"
                 autoComplete="email"
+                autoFocus
                 aria-invalid={!!errors.email}
                 {...register('email')}
               />
@@ -61,9 +64,8 @@ export function LoginPage() {
             </div>
             <div className="flex flex-col gap-1.5">
               <Label htmlFor="password">Contraseña</Label>
-              <Input
+              <PasswordInput
                 id="password"
-                type="password"
                 autoComplete="current-password"
                 aria-invalid={!!errors.password}
                 {...register('password')}

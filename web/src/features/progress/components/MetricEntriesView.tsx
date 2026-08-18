@@ -1,15 +1,19 @@
 import { useState } from 'react';
 import { Activity, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import { extractErrorMessage } from '@/core/api/apiError';
 import { useProgressEntries } from '../application/queries';
 import { useDeleteEntry } from '../application/mutations';
+import type { ProgressEntry } from '../domain/progressTypes';
 import { METRIC_TYPE_LABELS, labelFor } from '../domain/progressLabels';
 import { AddEntryDialog } from './AddEntryDialog';
+import { MetricChart } from './MetricChart';
 
 const dateFormatter = new Intl.DateTimeFormat('es-AR', {
   day: '2-digit',
@@ -21,8 +25,9 @@ const dateFormatter = new Intl.DateTimeFormat('es-AR', {
 
 export function MetricEntriesView() {
   const [filter, setFilter] = useState<string | undefined>(undefined);
-  const { data: entries, isLoading, isError } = useProgressEntries(filter);
+  const { data: entries, isLoading, isError, refetch } = useProgressEntries(filter);
   const deleteEntry = useDeleteEntry();
+  const [pendingDelete, setPendingDelete] = useState<ProgressEntry | null>(null);
 
   return (
     <div className="flex flex-col gap-3">
@@ -48,10 +53,11 @@ export function MetricEntriesView() {
           <div className="size-6 animate-spin rounded-full border-2 border-muted border-t-primary" />
         </div>
       )}
-      {isError && <p className="py-12 text-center text-sm text-muted-foreground">No se pudieron cargar las métricas.</p>}
+      {isError && <ErrorState onRetry={() => refetch()} />}
       {!isLoading && entries?.length === 0 && (
         <EmptyState icon={Activity} message="Todavía no registraste ninguna métrica. ¡Sumá la primera!" />
       )}
+      {filter && entries && entries.length >= 2 && <MetricChart entries={entries} unit={entries[0].unit} />}
       <div className="flex flex-col gap-2">
         {entries?.map((entry) => (
           <Card key={entry.id}>
@@ -65,18 +71,27 @@ export function MetricEntriesView() {
                 </p>
                 <p className="text-xs text-muted-foreground">{dateFormatter.format(new Date(entry.measuredAt))}</p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Borrar métrica"
-                onClick={() => deleteEntry.mutate(entry.id, { onError: (error) => toast.error(extractErrorMessage(error)) })}
-              >
+              <Button variant="ghost" size="icon-sm" aria-label="Borrar métrica" onClick={() => setPendingDelete(entry)}>
                 <Trash2 />
               </Button>
             </CardContent>
           </Card>
         ))}
       </div>
+      <ConfirmDeleteDialog
+        open={pendingDelete != null}
+        onOpenChange={(next) => !next && setPendingDelete(null)}
+        title="Borrar métrica"
+        message={`¿Seguro que querés borrar "${pendingDelete ? `${labelFor(METRIC_TYPE_LABELS, pendingDelete.metricType)}: ${pendingDelete.value} ${pendingDelete.unit}` : ''}"? Esta acción no se puede deshacer.`}
+        pending={deleteEntry.isPending}
+        onConfirm={() => {
+          if (!pendingDelete) return;
+          deleteEntry.mutate(pendingDelete.id, {
+            onSuccess: () => setPendingDelete(null),
+            onError: (error) => toast.error(extractErrorMessage(error)),
+          });
+        }}
+      />
     </div>
   );
 }

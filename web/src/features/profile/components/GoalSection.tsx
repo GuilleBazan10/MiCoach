@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import {
   Dialog,
   DialogClose,
@@ -25,6 +26,7 @@ export function GoalSection({ goals }: { goals: UserGoal[] }) {
   const [goalType, setGoalType] = useState(Object.keys(GOAL_TYPE_OPTIONS)[0]);
   const [targetValue, setTargetValue] = useState('');
   const [targetUnit, setTargetUnit] = useState('');
+  const [pendingDelete, setPendingDelete] = useState<UserGoal | null>(null);
 
   function handleAdd() {
     addGoal.mutate(
@@ -59,12 +61,7 @@ export function GoalSection({ goals }: { goals: UserGoal[] }) {
                   </p>
                 )}
               </div>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Borrar objetivo"
-                onClick={() => deleteGoal.mutate(goal.id, { onError: (error) => toast.error(extractErrorMessage(error)) })}
-              >
+              <Button variant="ghost" size="icon-sm" aria-label="Borrar objetivo" onClick={() => setPendingDelete(goal)}>
                 <Trash2 />
               </Button>
             </div>
@@ -105,6 +102,20 @@ export function GoalSection({ goals }: { goals: UserGoal[] }) {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          <ConfirmDeleteDialog
+            open={pendingDelete != null}
+            onOpenChange={(next) => !next && setPendingDelete(null)}
+            title="Borrar objetivo"
+            message={`¿Seguro que querés borrar "${pendingDelete ? (GOAL_TYPE_OPTIONS[pendingDelete.goalType] ?? pendingDelete.goalType) : ''}"? Esta acción no se puede deshacer.`}
+            pending={deleteGoal.isPending}
+            onConfirm={() => {
+              if (!pendingDelete) return;
+              deleteGoal.mutate(pendingDelete.id, {
+                onSuccess: () => setPendingDelete(null),
+                onError: (error) => toast.error(extractErrorMessage(error)),
+              });
+            }}
+          />
         </AccordionContent>
       </AccordionItem>
     </Accordion>

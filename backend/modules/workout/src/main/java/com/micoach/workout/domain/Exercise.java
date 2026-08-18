@@ -20,6 +20,8 @@ public class Exercise {
     private final String instructions;
     private final String videoUrl;
     private final String imageUrl;
+    /** Posición final/contraída del movimiento (docs/10-recomendaciones-coach-nutricion.md § H.6). */
+    private final String imageUrlEnd;
     /** 'reps' (por defecto) o 'duration' — ej. Plancha se sostiene X segundos, no se repite X veces. */
     private final String measurementType;
     private final boolean aiGenerated;
@@ -30,8 +32,9 @@ public class Exercise {
 
     private Exercise(Long id, String name, String description, String category,
                      List<String> equipment, String difficulty, String instructions,
-                     String videoUrl, String imageUrl, String measurementType, boolean aiGenerated,
-                     boolean active, List<ExerciseMuscle> muscles, Instant createdAt, Instant updatedAt) {
+                     String videoUrl, String imageUrl, String imageUrlEnd, String measurementType,
+                     boolean aiGenerated, boolean active, List<ExerciseMuscle> muscles, Instant createdAt,
+                     Instant updatedAt) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -41,6 +44,7 @@ public class Exercise {
         this.instructions = instructions;
         this.videoUrl = videoUrl;
         this.imageUrl = imageUrl;
+        this.imageUrlEnd = imageUrlEnd;
         this.measurementType = measurementType == null ? "reps" : measurementType;
         this.aiGenerated = aiGenerated;
         this.active = active;
@@ -51,10 +55,11 @@ public class Exercise {
 
     public static Exercise restore(Long id, String name, String description, String category,
                                    List<String> equipment, String difficulty, String instructions,
-                                   String videoUrl, String imageUrl, String measurementType,
+                                   String videoUrl, String imageUrl, String imageUrlEnd, String measurementType,
                                    boolean aiGenerated, boolean active, List<ExerciseMuscle> muscles,
                                    Instant createdAt, Instant updatedAt) {
         return new Exercise(id, name, description, category, equipment, difficulty, instructions,
-                videoUrl, imageUrl, measurementType, aiGenerated, active, muscles, createdAt, updatedAt);
+                videoUrl, imageUrl, imageUrlEnd, measurementType, aiGenerated, active, muscles, createdAt,
+                updatedAt);
     }
 }

@@ -1,5 +1,6 @@
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { ErrorState } from '@/components/ErrorState';
 import { Card } from '@/components/ui/card';
 import { useSessionList } from '../application/queries';
 import { SESSION_STATUS_LABELS, labelFor } from '../domain/workoutLabels';
@@ -13,7 +14,7 @@ const dateFormatter = new Intl.DateTimeFormat('es-AR', {
 });
 
 export function SessionHistoryList() {
-  const { data: sessions, isLoading, isError } = useSessionList();
+  const { data: sessions, isLoading, isError, refetch } = useSessionList();
 
   if (isLoading) {
     return (
@@ -24,7 +25,7 @@ export function SessionHistoryList() {
   }
 
   if (isError) {
-    return <p className="py-12 text-center text-sm text-muted-foreground">No se pudo cargar el historial.</p>;
+    return <ErrorState onRetry={() => refetch()} />;
   }
 
   if (!sessions || sessions.length === 0) {

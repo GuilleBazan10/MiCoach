@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { Camera, ImageOff, Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { extractErrorMessage } from '@/core/api/apiError';
@@ -13,8 +15,9 @@ import { AddPhotoDialog } from './AddPhotoDialog';
 const dateFormatter = new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
 export function ProgressPhotosView() {
-  const { data: photos, isLoading, isError } = useProgressPhotos();
+  const { data: photos, isLoading, isError, refetch } = useProgressPhotos();
   const deletePhoto = useDeletePhoto();
+  const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
 
   return (
     <div className="flex flex-col gap-3">
@@ -31,7 +34,7 @@ export function ProgressPhotosView() {
           <div className="size-6 animate-spin rounded-full border-2 border-muted border-t-primary" />
         </div>
       )}
-      {isError && <p className="py-12 text-center text-sm text-muted-foreground">No se pudieron cargar las fotos.</p>}
+      {isError && <ErrorState onRetry={() => refetch()} />}
       {!isLoading && photos?.length === 0 && (
         <EmptyState icon={Camera} message="Todavía no subiste ninguna foto de progreso." />
       )}
@@ -41,10 +44,24 @@ export function ProgressPhotosView() {
             key={photo.id}
             photoUrl={photo.photoUrl}
             caption={`${labelFor(PHOTO_ANGLE_LABELS, photo.angle)} · ${dateFormatter.format(new Date(photo.takenAt))}`}
-            onDelete={() => deletePhoto.mutate(photo.id, { onError: (error) => toast.error(extractErrorMessage(error)) })}
+            onDelete={() => setPendingDeleteId(photo.id)}
           />
         ))}
       </div>
+      <ConfirmDeleteDialog
+        open={pendingDeleteId != null}
+        onOpenChange={(next) => !next && setPendingDeleteId(null)}
+        title="Borrar foto"
+        message="¿Seguro que querés borrar esta foto de progreso? Esta acción no se puede deshacer."
+        pending={deletePhoto.isPending}
+        onConfirm={() => {
+          if (pendingDeleteId == null) return;
+          deletePhoto.mutate(pendingDeleteId, {
+            onSuccess: () => setPendingDeleteId(null),
+            onError: (error) => toast.error(extractErrorMessage(error)),
+          });
+        }}
+      />
     </div>
   );
 }

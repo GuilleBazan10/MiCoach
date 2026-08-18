@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { extractErrorMessage } from '@/core/api/apiError';
+import { useUnsavedChangesGuard } from '@/core/hooks/useUnsavedChangesGuard';
 import type { MealPlanDraft } from '../domain/nutritionTypes';
 import { useCreateMealPlan, useUpdateMealPlan } from '../application/mutations';
 import { MealPlanDayEditor } from './MealPlanDayEditor';
@@ -15,10 +16,12 @@ export function MealPlanForm({ initialDraft, mealPlanId }: { initialDraft: MealP
   const navigate = useNavigate();
   const isEditing = mealPlanId != null;
   const [draft, setDraft] = useState(initialDraft);
+  const [saved, setSaved] = useState(false);
 
   const createPlan = useCreateMealPlan();
   const updatePlan = useUpdateMealPlan(mealPlanId ?? -1);
   const saving = createPlan.isPending || updatePlan.isPending;
+  useUnsavedChangesGuard(!saved && JSON.stringify(draft) !== JSON.stringify(initialDraft));
 
   function addDay() {
     setDraft((d) => ({ ...d, days: [...d.days, { planDate: d.startDate, meals: [] }] }));
@@ -39,7 +42,10 @@ export function MealPlanForm({ initialDraft, mealPlanId }: { initialDraft: MealP
     }
     const mutation = isEditing ? updatePlan : createPlan;
     mutation.mutate(draft, {
-      onSuccess: (saved) => navigate(`/nutrition/plans/${saved.id}`),
+      onSuccess: (result) => {
+        setSaved(true);
+        navigate(`/nutrition/plans/${result.id}`);
+      },
       onError: (error) => toast.error(extractErrorMessage(error)),
     });
   }
@@ -85,9 +91,14 @@ export function MealPlanForm({ initialDraft, mealPlanId }: { initialDraft: MealP
         <Label htmlFor="plan-calories">Calorías objetivo (opcional)</Label>
         <Input
           id="plan-calories"
-          type="number"
-          value={draft.targetCalories ?? ''}
-          onChange={(e) => setDraft({ ...draft, targetCalories: e.target.value ? Number(e.target.value) : null })}
+          inputMode="numeric"
+          value={draft.targetCalories?.toString() ?? ''}
+          onChange={(e) => {
+            const raw = e.target.value.trim();
+            const parsed = raw === '' ? null : Number.parseInt(raw, 10);
+            if (raw !== '' && Number.isNaN(parsed)) return;
+            setDraft({ ...draft, targetCalories: parsed });
+          }}
         />
       </div>
 

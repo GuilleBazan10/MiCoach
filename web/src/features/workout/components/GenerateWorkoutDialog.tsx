@@ -2,7 +2,7 @@
 // rutina completa a partir de un pedido en lenguaje natural.
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles } from 'lucide-react';
+import { Loader2, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import {
@@ -17,13 +17,22 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { extractErrorMessage } from '@/core/api/apiError';
+import { useRotatingMessage } from '@/core/hooks/useRotatingMessage';
 import { useGenerateWorkout } from '../application/mutations';
+
+const PROGRESS_MESSAGES = [
+  'Analizando tu perfil y objetivo...',
+  'Seleccionando ejercicios del catálogo...',
+  'Armando los días de la rutina...',
+  'Ajustando series y repeticiones...',
+] as const;
 
 export function GenerateWorkoutDialog() {
   const navigate = useNavigate();
   const generateWorkout = useGenerateWorkout();
   const [open, setOpen] = useState(false);
   const [goal, setGoal] = useState('');
+  const progressMessage = useRotatingMessage(PROGRESS_MESSAGES, generateWorkout.isPending);
 
   function handleSubmit() {
     if (!goal.trim()) return;
@@ -39,7 +48,7 @@ export function GenerateWorkoutDialog() {
   }
 
   return (
-    <Dialog open={open} onOpenChange={(next) => !generateWorkout.isPending && setOpen(next)}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" size="sm">
           <Sparkles /> Generar con IA
@@ -49,8 +58,8 @@ export function GenerateWorkoutDialog() {
         <DialogHeader>
           <DialogTitle>Generar rutina con IA</DialogTitle>
           <DialogDescription>
-            Describí qué rutina querés y la IA (Ollama, corre local) arma los días y ejercicios con el
-            catálogo real. Puede tardar un rato — no hay GPU, corre en CPU.
+            Describí qué rutina querés y la IA arma los días y ejercicios con el catálogo real. Puede
+            tardar hasta 3 minutos.
           </DialogDescription>
         </DialogHeader>
         <Textarea
@@ -61,11 +70,19 @@ export function GenerateWorkoutDialog() {
           disabled={generateWorkout.isPending}
           autoFocus
         />
+        {generateWorkout.isPending && (
+          <div className="flex flex-col gap-1">
+            <p className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Loader2 className="size-3.5 shrink-0 animate-spin" /> {progressMessage}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Podés cerrar esta ventana — te avisamos cuando esté lista.
+            </p>
+          </div>
+        )}
         <DialogFooter>
           <DialogClose asChild>
-            <Button variant="ghost" disabled={generateWorkout.isPending}>
-              Cancelar
-            </Button>
+            <Button variant="ghost">Cerrar</Button>
           </DialogClose>
           <Button onClick={handleSubmit} disabled={generateWorkout.isPending || !goal.trim()}>
             {generateWorkout.isPending ? 'Generando…' : 'Generar'}

@@ -9,6 +9,7 @@ import com.micoach.user.domain.UserInjury;
 import com.micoach.user.domain.UserMedication;
 import com.micoach.user.domain.UserPathology;
 import com.micoach.user.domain.UserProfile;
+import com.micoach.user.domain.TdeeCalculator;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,10 +42,17 @@ public class UserProfileService implements UserProfileUseCase {
         UserProfile profile = repository.findByUserId(userId)
                 .orElseThrow(() -> new DomainException(404, ErrorCode.NOT_FOUND,
                         "Perfil no encontrado. Crea tu perfil primero."));
+        // Si no mandan un tdeeCalories explícito, se calcula (Mifflin-St Jeor + factor de
+        // actividad + ajuste por objetivo) en vez de dejarlo en null — el usuario sigue
+        // pudiendo pisarlo a mano mandando su propio valor.
+        Integer tdeeCalories = data.tdeeCalories() != null
+                ? data.tdeeCalories()
+                : TdeeCalculator.calculate(data.sex(), data.birthDate(), data.heightCm(), data.weightKg(),
+                        data.activityLevel(), data.dietaryGoal());
         profile.update(data.sex(), data.birthDate(), data.heightCm(), data.weightKg(),
                 data.activityLevel(), data.experienceLevel(), data.equipment(),
                 data.trainingDaysPerWeek(), data.trainingMinutes(), data.preferredTime(),
-                data.timezone(), data.tdeeCalories(), data.dietaryGoal(), data.notes());
+                data.timezone(), tdeeCalories, data.dietaryGoal(), data.notes());
         return repository.save(profile);
     }
 

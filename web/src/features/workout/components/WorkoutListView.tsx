@@ -1,12 +1,16 @@
 import { ChevronRight, Dumbbell, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
+import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
+import { useProfile } from '@/features/profile/application/useProfile';
 import { useWorkoutList } from '../application/queries';
 import { OBJECTIVE_LABELS, LEVEL_LABELS, colorFor, labelFor, OBJECTIVE_COLORS } from '../domain/workoutLabels';
 
 export function WorkoutListView({ templates }: { templates: boolean }) {
-  const { data: workouts, isLoading, isError } = useWorkoutList(templates);
+  const { data: workouts, isLoading, isError, refetch } = useWorkoutList(templates);
+  const { data: profileData } = useProfile();
 
   if (isLoading) {
     return (
@@ -17,10 +21,27 @@ export function WorkoutListView({ templates }: { templates: boolean }) {
   }
 
   if (isError) {
-    return <p className="py-12 text-center text-sm text-muted-foreground">No se pudieron cargar las rutinas.</p>;
+    return <ErrorState onRetry={() => refetch()} />;
   }
 
   if (!workouts || workouts.length === 0) {
+    const profile = profileData?.profile;
+    const profileIncomplete = !templates && profile != null && (!profile.experienceLevel || !profile.equipment?.length);
+
+    if (profileIncomplete) {
+      return (
+        <EmptyState
+          icon={Dumbbell}
+          message="Completá tu nivel de experiencia y equipamiento disponible en tu perfil para que la IA te genere rutinas realmente personalizadas."
+          action={
+            <Button asChild size="sm">
+              <Link to="/profile">Completar perfil</Link>
+            </Button>
+          }
+        />
+      );
+    }
+
     return (
       <EmptyState
         icon={Dumbbell}

@@ -5,9 +5,11 @@
 // en pantallas chicas, nav inline en el header a partir de `sm`.
 // =====================================================================
 import { NavLink, Outlet } from 'react-router-dom';
-import { Dumbbell, LogOut, Settings, TrendingUp, User, Utensils, Zap } from 'lucide-react';
+import { Dumbbell, LogOut, Settings, TrendingUp, User, Utensils } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Logo } from '@/components/Logo';
+import { APP_NAME } from '@/core/config';
 import { useAuth } from '@/features/auth/application/useAuth';
 
 const NAV_ITEMS = [
@@ -33,13 +35,8 @@ export function AppShell() {
         <div className="flex items-center justify-between px-4 py-2.5 sm:px-6">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-              <span
-                className="flex size-8 items-center justify-center rounded-xl text-primary-foreground shadow-sm"
-                style={{ background: 'var(--gradient-hero)' }}
-              >
-                <Zap className="size-4.5 fill-current" />
-              </span>
-              <span className="text-lg font-bold tracking-tight text-foreground">MiCoach</span>
+              <Logo className="size-8 shrink-0" />
+              <span className="text-lg font-bold tracking-tight text-foreground">{APP_NAME}</span>
             </div>
             <nav className="hidden items-center gap-1 sm:flex">
               {navItems.map((item) => (

@@ -52,8 +52,8 @@ class WorkoutAiGenerator {
         AiUseCase.GenerationResult result = aiUseCase.generate(userId, PROMPT_SLUG,
                 Map.of("goal", goal, "catalog", catalogText, "profile", buildProfileText(userId, profile)));
 
-        AiWorkoutJson parsed = parseJson(result.rawOutput());
-        return toWorkoutData(parsed, filteredCatalog);
+        AiWorkoutJson parsed = parseJson(result);
+        return toWorkoutData(result, parsed, filteredCatalog);
     }
 
     /**
@@ -117,14 +117,16 @@ class WorkoutAiGenerator {
         return text.isEmpty() ? "Sin datos de perfil cargados." : text.toString();
     }
 
-    private AiWorkoutJson parseJson(String raw) {
-        String jsonSlice = extractFirstJsonObject(raw);
+    private AiWorkoutJson parseJson(AiUseCase.GenerationResult result) {
+        String jsonSlice = extractFirstJsonObject(result.rawOutput());
         if (jsonSlice == null) {
+            aiUseCase.markGenerationPartial(result.logId());
             throw new DomainException(502, ErrorCode.INTERNAL_ERROR, "La IA no devolvió un JSON válido");
         }
         try {
             return objectMapper.readValue(jsonSlice, AiWorkoutJson.class);
         } catch (Exception e) {
+            aiUseCase.markGenerationPartial(result.logId());
             throw new DomainException(502, ErrorCode.INTERNAL_ERROR,
                     "No se pudo interpretar la rutina generada por la IA: " + e.getMessage());
         }
@@ -182,7 +184,13 @@ class WorkoutAiGenerator {
             Set.of("lose_fat", "gain_muscle", "maintain", "endurance", "strength", "general_health");
     private static final Set<String> VALID_LEVELS = Set.of("beginner", "intermediate", "advanced");
 
-    private WorkoutData toWorkoutData(AiWorkoutJson json, List<Exercise> catalog) {
+    // docs/10-recomendaciones-coach-nutricion.md § C.1: se vio en la práctica que el
+    // modelo puede devolver días con un solo ejercicio (ej. "Piernas" con una sola
+    // serie de crunches) — inutilizable como sesión real. Validación mínima viable:
+    // rechazar y pedir reintentar en vez de guardar una rutina que nadie puede usar.
+    private static final int MIN_EXERCISES_PER_DAY = 3;
+
+    private WorkoutData toWorkoutData(AiUseCase.GenerationResult result, AiWorkoutJson json, List<Exercise> catalog) {
         List<WorkoutDayData> days = new ArrayList<>();
         int dayIndex = 1;
         List<AiWorkoutDay> sourceDays = json.days() == null ? List.of() : json.days();
@@ -191,19 +199,26 @@ class WorkoutAiGenerator {
             int orderIndex = 1;
             List<AiExerciseEntry> sourceExercises = day.exercises() == null ? List.of() : day.exercises();
             for (AiExerciseEntry entry : sourceExercises) {
-                Long exerciseId = resolveExerciseId(entry.exerciseName(), catalog);
-                if (exerciseId == null) {
+                Exercise resolved = resolveExercise(entry.exerciseName(), catalog);
+                if (resolved == null) {
                     continue;
                 }
-                exercises.add(new PlannedExerciseData(exerciseId, orderIndex++, entry.sets(), entry.repsMin(),
-                        entry.repsMax(), null, null, null, null));
+                exercises.add(new PlannedExerciseData(resolved.getId(), orderIndex++, entry.sets(), entry.repsMin(),
+                        entry.repsMax(), defaultRestSeconds(resolved), null, null, null));
             }
             // Un día con ejercicios reales no puede ser "restDay": true pase lo que pase el
             // modelo haya marcado (visto en la práctica: los marcó todos true igual).
             boolean restDay = exercises.isEmpty() && Boolean.TRUE.equals(day.restDay());
+            if (!restDay && exercises.size() < MIN_EXERCISES_PER_DAY) {
+                aiUseCase.markGenerationPartial(result.logId());
+                throw new DomainException(502, ErrorCode.INTERNAL_ERROR,
+                        "La IA generó un día de entrenamiento con muy pocos ejercicios ("
+                                + exercises.size() + "). Probá generar de nuevo.");
+            }
             days.add(new WorkoutDayData(dayIndex++, truncate(day.name(), 100), restDay, exercises));
         }
         if (days.isEmpty()) {
+            aiUseCase.markGenerationPartial(result.logId());
             throw new DomainException(502, ErrorCode.INTERNAL_ERROR, "La IA generó una rutina sin días");
         }
         String name = truncate(json.name(), 200);
@@ -223,7 +238,7 @@ class WorkoutAiGenerator {
         return value.length() <= maxLength ? value : value.substring(0, maxLength);
     }
 
-    private Long resolveExerciseId(String name, List<Exercise> catalog) {
+    private Exercise resolveExercise(String name, List<Exercise> catalog) {
         if (name == null || name.isBlank()) {
             return null;
         }
@@ -235,8 +250,22 @@ class WorkoutAiGenerator {
                         .filter(e -> e.getName().toLowerCase().contains(normalized)
                                 || normalized.contains(e.getName().toLowerCase()))
                         .findFirst())
-                .map(Exercise::getId)
                 .orElse(null);
+    }
+
+    // docs/10-recomendaciones-coach-nutricion.md § I.2: la IA nunca completa restSeconds
+    // (no se le pide), así que sin un default nadie ve el temporizador de descanso (E.2) ni
+    // la ficha de rutina (H.1). Heurística simple en vez de default fijo: compuestos con
+    // barra sostienen más carga y necesitan más recuperación entre series que aislados o
+    // trabajo en máquina.
+    private static final Set<String> HEAVY_COMPOUND_EQUIPMENT = Set.of("barbell", "rack", "sled");
+
+    private Integer defaultRestSeconds(Exercise exercise) {
+        if (!"strength".equals(exercise.getCategory())) {
+            return null;
+        }
+        boolean heavyCompound = exercise.getEquipment().stream().anyMatch(HEAVY_COMPOUND_EQUIPMENT::contains);
+        return heavyCompound ? 90 : 60;
     }
 
     @JsonIgnoreProperties(ignoreUnknown = true)

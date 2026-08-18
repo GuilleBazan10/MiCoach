@@ -1,13 +1,14 @@
 import { CalendarRange, ChevronRight, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { EmptyState } from '@/components/EmptyState';
+import { ErrorState } from '@/components/ErrorState';
 import { Card } from '@/components/ui/card';
 import { useMealPlanList } from '../application/queries';
 
 const shortDate = new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: '2-digit' });
 
 export function MealPlanListView() {
-  const { data: plans, isLoading, isError } = useMealPlanList();
+  const { data: plans, isLoading, isError, refetch } = useMealPlanList();
 
   if (isLoading) {
     return (
@@ -17,7 +18,7 @@ export function MealPlanListView() {
     );
   }
   if (isError) {
-    return <p className="py-12 text-center text-sm text-muted-foreground">No se pudieron cargar los planes.</p>;
+    return <ErrorState onRetry={() => refetch()} />;
   }
   if (!plans || plans.length === 0) {
     return (
@@ -43,7 +44,7 @@ export function MealPlanListView() {
               </div>
               <p className="truncate text-sm text-muted-foreground">
                 {shortDate.format(new Date(plan.startDate))} — {shortDate.format(new Date(plan.endDate))} ·{' '}
-                {plan.days.length} días
+                {plan.days.length} {plan.days.length === 1 ? 'día' : 'días'}
               </p>
             </div>
             <ChevronRight className="shrink-0 text-muted-foreground" />

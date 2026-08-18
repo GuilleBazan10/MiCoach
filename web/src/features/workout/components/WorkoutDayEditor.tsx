@@ -53,40 +53,77 @@ export function WorkoutDayEditor({ day, onChange, onRemove }: WorkoutDayEditorPr
         {!day.restDay && (
           <div className="flex flex-col gap-2 border-t border-border pt-3">
             {day.exercises.map((exercise, index) => (
-              <div key={index} className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-end gap-1.5">
-                <p className="truncate text-sm" title={exercise.exerciseName}>
-                  {exercise.exerciseName}
-                </p>
-                <div>
-                  <Label className="text-xs">Series</Label>
-                  <Input
-                    type="number"
-                    value={exercise.sets}
-                    onChange={(e) => updateExercise(index, { sets: Number(e.target.value) || 0 })}
-                    className="mt-1 h-7"
-                  />
+              <div key={index} className="flex flex-col gap-1.5 border-b border-border pb-2 last:border-b-0 last:pb-0">
+                <div className="grid grid-cols-[2fr_1fr_1fr_1fr_auto] items-end gap-1.5">
+                  <p className="truncate text-sm" title={exercise.exerciseName}>
+                    {exercise.exerciseName}
+                  </p>
+                  <div>
+                    <Label className="text-xs">Series</Label>
+                    <Input
+                      type="number"
+                      value={exercise.sets}
+                      onChange={(e) => updateExercise(index, { sets: Number(e.target.value) || 0 })}
+                      className="mt-1 h-7"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Reps min</Label>
+                    <Input
+                      type="number"
+                      value={exercise.repsMin ?? ''}
+                      onChange={(e) => updateExercise(index, { repsMin: e.target.value ? Number(e.target.value) : null })}
+                      className="mt-1 h-7"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs">Reps max</Label>
+                    <Input
+                      type="number"
+                      value={exercise.repsMax ?? ''}
+                      onChange={(e) => updateExercise(index, { repsMax: e.target.value ? Number(e.target.value) : null })}
+                      className="mt-1 h-7"
+                    />
+                  </div>
+                  <Button type="button" variant="ghost" size="icon-sm" aria-label="Quitar ejercicio" onClick={() => removeExercise(index)}>
+                    <X className="size-4" />
+                  </Button>
                 </div>
-                <div>
-                  <Label className="text-xs">Reps min</Label>
-                  <Input
-                    type="number"
-                    value={exercise.repsMin ?? ''}
-                    onChange={(e) => updateExercise(index, { repsMin: e.target.value ? Number(e.target.value) : null })}
-                    className="mt-1 h-7"
-                  />
+                <div className="grid grid-cols-3 items-end gap-1.5">
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Descanso (seg)</Label>
+                    <Input
+                      type="number"
+                      value={exercise.restSeconds ?? ''}
+                      onChange={(e) =>
+                        updateExercise(index, { restSeconds: e.target.value ? Number(e.target.value) : null })
+                      }
+                      className="mt-1 h-7"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Intensidad (%)</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={100}
+                      value={exercise.intensityPercent ?? ''}
+                      onChange={(e) =>
+                        updateExercise(index, { intensityPercent: e.target.value ? Number(e.target.value) : null })
+                      }
+                      className="mt-1 h-7"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs text-muted-foreground">Tempo</Label>
+                    <Input
+                      value={exercise.tempo ?? ''}
+                      onChange={(e) => updateExercise(index, { tempo: e.target.value || null })}
+                      placeholder="ej. 3-1-2"
+                      className="mt-1 h-7"
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label className="text-xs">Reps max</Label>
-                  <Input
-                    type="number"
-                    value={exercise.repsMax ?? ''}
-                    onChange={(e) => updateExercise(index, { repsMax: e.target.value ? Number(e.target.value) : null })}
-                    className="mt-1 h-7"
-                  />
-                </div>
-                <Button type="button" variant="ghost" size="icon-sm" aria-label="Quitar ejercicio" onClick={() => removeExercise(index)}>
-                  <X className="size-4" />
-                </Button>
               </div>
             ))}
             <Button type="button" variant="ghost" className="self-start" onClick={() => setPickerOpen(true)}>

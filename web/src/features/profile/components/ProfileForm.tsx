@@ -30,6 +30,20 @@ function toIntOrNull(value: string): number | null {
   return Number.isNaN(parsed) ? null : parsed;
 }
 
+/** Vacío es válido (campo opcional) — solo bloquea si escribieron algo no numérico. */
+function isValidOptionalNumber(value: string): boolean {
+  const trimmed = value.trim();
+  return trimmed === '' || !Number.isNaN(Number(trimmed.replace(',', '.')));
+}
+
+/** Categorías estándar de la OMS. */
+function bmiCategory(bmi: number): string {
+  if (bmi < 18.5) return 'bajo peso';
+  if (bmi < 25) return 'peso normal';
+  if (bmi < 30) return 'sobrepeso';
+  return 'obesidad';
+}
+
 export function ProfileForm({ profile }: { profile: UserProfile }) {
   const { updateProfile } = useProfile();
 
@@ -44,9 +58,23 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
   const [trainingMinutes, setTrainingMinutes] = useState(profile.trainingMinutes?.toString() ?? '');
   const [preferredTime, setPreferredTime] = useState(profile.preferredTime ?? undefined);
   const [dietaryGoal, setDietaryGoal] = useState(profile.dietaryGoal ?? undefined);
+  const [tdeeCalories, setTdeeCalories] = useState(profile.tdeeCalories?.toString() ?? '');
   const [notes, setNotes] = useState(profile.notes ?? '');
 
+  const bmi = (() => {
+    const h = toNumberOrNull(heightCm);
+    const w = toNumberOrNull(weightKg);
+    if (!h || !w) return null;
+    return w / (h / 100) ** 2;
+  })();
+
   function handleSave() {
+    if (!isValidOptionalNumber(heightCm)) return toast.error('Altura inválida: ingresá solo números.');
+    if (!isValidOptionalNumber(weightKg)) return toast.error('Peso inválido: ingresá solo números.');
+    if (!isValidOptionalNumber(trainingDaysPerWeek)) return toast.error('Días por semana inválido: ingresá solo números.');
+    if (!isValidOptionalNumber(trainingMinutes)) return toast.error('Minutos por sesión inválido: ingresá solo números.');
+    if (!isValidOptionalNumber(tdeeCalories)) return toast.error('Calorías inválidas: ingresá solo números.');
+
     const updated: UserProfile = {
       sex: sex ?? null,
       birthDate: birthDate || null,
@@ -62,7 +90,7 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
       trainingMinutes: toIntOrNull(trainingMinutes),
       preferredTime: preferredTime ?? null,
       timezone: profile.timezone,
-      tdeeCalories: profile.tdeeCalories,
+      tdeeCalories: toIntOrNull(tdeeCalories),
       dietaryGoal: dietaryGoal ?? null,
       notes: notes.trim() || null,
     };
@@ -91,6 +119,12 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
             <Input id="weightKg" inputMode="decimal" value={weightKg} onChange={(e) => setWeightKg(e.target.value)} />
           </div>
         </div>
+        {bmi != null && (
+          <p className="text-sm text-muted-foreground">
+            IMC: <span className="font-medium text-foreground">{bmi.toFixed(1)}</span>{' '}
+            ({bmiCategory(bmi)})
+          </p>
+        )}
       </div>
 
       <div className="flex flex-col gap-3">
@@ -133,6 +167,22 @@ export function ProfileForm({ profile }: { profile: UserProfile }) {
           options={PREFERRED_TIME_OPTIONS}
         />
         <OptionSelect label="Objetivo principal" value={dietaryGoal} onChange={setDietaryGoal} options={DIETARY_GOAL_OPTIONS} />
+        <div className="flex flex-col gap-1.5">
+          <Label htmlFor="tdeeCalories">Gasto calórico diario estimado (TDEE)</Label>
+          <Input
+            id="tdeeCalories"
+            inputMode="numeric"
+            placeholder="Se calcula solo al guardar si dejás esto vacío"
+            value={tdeeCalories}
+            onChange={(e) => setTdeeCalories(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Se calcula automáticamente (Mifflin-St Jeor) a partir de sexo, edad, altura, peso
+            y actividad al guardar. Si ya conocés tu propio número (de un estudio de
+            composición corporal, por ejemplo), escribilo acá para usar ese en vez del
+            calculado.
+          </p>
+        </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="notes">Notas</Label>
           <Textarea id="notes" rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} />

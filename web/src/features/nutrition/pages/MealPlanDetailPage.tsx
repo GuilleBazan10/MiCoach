@@ -14,13 +14,24 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { extractErrorMessage } from '@/core/api/apiError';
-import { useMealPlanDetail } from '../application/queries';
+import { useDayMacros, useMealPlanDetail } from '../application/queries';
 import { useAdjustMealPlanCalories, useDeleteMealPlan } from '../application/mutations';
-import { MEAL_TYPE_LABELS, labelFor } from '../domain/nutritionLabels';
-import { RecipeName } from '../components/RecipeName';
+import type { MealPlanDay } from '../domain/nutritionTypes';
+import { MealRow } from '../components/MealRow';
 
 const shortDate = new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: '2-digit' });
 const fullDate = new Intl.DateTimeFormat('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+function DayMacrosSummary({ day }: { day: MealPlanDay }) {
+  const macros = useDayMacros(day);
+  if (!macros || macros.calories === 0) return null;
+  return (
+    <p className="text-xs text-muted-foreground">
+      {Math.round(macros.calories)} kcal · P {Math.round(macros.protein)}g · C {Math.round(macros.carbs)}g · G{' '}
+      {Math.round(macros.fat)}g
+    </p>
+  );
+}
 
 export function MealPlanDetailPage() {
   const params = useParams();
@@ -95,16 +106,15 @@ export function MealPlanDetailPage() {
         {plan.days.map((day, index) => (
           <Card key={day.id}>
             <CardContent className="flex flex-col gap-2">
-              <p className="font-medium">
-                Día {index + 1} <span className="font-normal text-muted-foreground">· {fullDate.format(new Date(day.planDate))}</span>
-              </p>
+              <div>
+                <p className="font-medium">
+                  Día {index + 1} <span className="font-normal text-muted-foreground">· {fullDate.format(new Date(day.planDate))}</span>
+                </p>
+                <DayMacrosSummary day={day} />
+              </div>
               {day.meals.length === 0 && <p className="text-sm text-muted-foreground">Sin comidas cargadas</p>}
               {day.meals.map((meal) => (
-                <div key={meal.id} className="flex items-center gap-3 text-sm">
-                  <span className="w-24 shrink-0 text-muted-foreground">{labelFor(MEAL_TYPE_LABELS, meal.mealType)}</span>
-                  <RecipeName recipeId={meal.recipeId} className="flex-1" />
-                  <span className="text-muted-foreground">x{meal.servings}</span>
-                </div>
+                <MealRow key={meal.id} meal={meal} />
               ))}
             </CardContent>
           </Card>

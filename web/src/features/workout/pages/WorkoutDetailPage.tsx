@@ -17,7 +17,7 @@ import { extractErrorMessage } from '@/core/api/apiError';
 import { useAuth } from '@/features/auth/application/useAuth';
 import { useWorkoutDetail } from '../application/queries';
 import { useDeleteWorkout, useStartSession } from '../application/mutations';
-import { OBJECTIVE_LABELS, LEVEL_LABELS, labelFor } from '../domain/workoutLabels';
+import { OBJECTIVE_LABELS, LEVEL_LABELS, labelFor, summarizeDay } from '../domain/workoutLabels';
 import { PlannedExerciseRow } from '../components/PlannedExerciseRow';
 
 export function WorkoutDetailPage() {
@@ -92,7 +92,12 @@ export function WorkoutDetailPage() {
           <Card key={day.id}>
             <CardContent className="flex flex-col gap-2">
               <div className="flex items-center justify-between">
-                <p className="font-medium">{day.name?.trim() ? day.name : `Día ${day.dayIndex}`}</p>
+                <div>
+                  <p className="text-base font-semibold">{day.name?.trim() ? day.name : `Día ${day.dayIndex}`}</p>
+                  {!day.restDay && day.exercises.length > 0 && (
+                    <p className="text-xs text-muted-foreground">{summarizeDay(day)}</p>
+                  )}
+                </div>
                 {day.restDay ? (
                   <Badge variant="secondary">Descanso</Badge>
                 ) : (

@@ -3,6 +3,7 @@
 // Se abre al tocar el nombre de un ejercicio en una rutina o sesión.
 // =====================================================================
 import { ImageOff, Video } from 'lucide-react';
+import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CATEGORY_LABELS, DIFFICULTY_LABELS, labelFor } from '../domain/workoutLabels';
@@ -37,13 +38,38 @@ export function ExerciseDetailDialog({
             ))}
           </div>
 
-          {exercise.imageUrl ? (
-            <img src={exercise.imageUrl} alt={exercise.name} className="w-full rounded-lg object-cover" />
+          {exercise.imageUrl || exercise.imageUrlEnd ? (
+            <div className="grid grid-cols-2 gap-2">
+              <ExercisePositionImage url={exercise.imageUrl} label="Posición inicial" name={exercise.name} />
+              <ExercisePositionImage url={exercise.imageUrlEnd} label="Posición final" name={exercise.name} />
+            </div>
           ) : (
             <div className="flex h-32 flex-col items-center justify-center gap-1 rounded-lg bg-muted text-muted-foreground">
               <ImageOff className="size-6" />
               <span className="text-xs">Todavía no hay imagen de referencia</span>
             </div>
+          )}
+
+          {exercise.muscles.length > 0 && (
+            <p className="text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">Músculos: </span>
+              {exercise.muscles
+                .filter((m) => m.role === 'primary')
+                .map((m) => m.muscleName)
+                .join(', ')}
+              {exercise.muscles.some((m) => m.role !== 'primary') && (
+                <>
+                  {exercise.muscles.some((m) => m.role === 'primary') && ' · '}
+                  <span className="italic">
+                    {exercise.muscles
+                      .filter((m) => m.role !== 'primary')
+                      .map((m) => m.muscleName)
+                      .join(', ')}{' '}
+                    (secundarios)
+                  </span>
+                </>
+              )}
+            </p>
           )}
 
           {exercise.videoUrl ? (
@@ -72,5 +98,26 @@ export function ExerciseDetailDialog({
         </div>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function ExercisePositionImage({ url, label, name }: { url?: string | null; label: string; name: string }) {
+  const [broken, setBroken] = useState(false);
+  return (
+    <div className="flex flex-col gap-1">
+      {url && !broken ? (
+        <img
+          src={url}
+          alt={`${name} — ${label}`}
+          className="aspect-square w-full rounded-lg object-cover"
+          onError={() => setBroken(true)}
+        />
+      ) : (
+        <div className="flex aspect-square w-full flex-col items-center justify-center gap-1 rounded-lg bg-muted text-muted-foreground">
+          <ImageOff className="size-5" />
+        </div>
+      )}
+      <p className="text-center text-xs text-muted-foreground">{label}</p>
+    </div>
   );
 }

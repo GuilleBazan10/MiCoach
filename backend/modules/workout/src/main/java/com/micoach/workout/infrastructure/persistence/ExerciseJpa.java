@@ -57,6 +57,9 @@ public class ExerciseJpa {
     @Column(name = "image_url")
     private String imageUrl;
 
+    @Column(name = "image_url_end")
+    private String imageUrlEnd;
+
     @Column(name = "measurement_type", nullable = false)
     private String measurementType;
 

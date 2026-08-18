@@ -17,6 +17,8 @@
 | 5 | Testing completo | ⬜ Pendiente |
 | 6 | CI/CD y despliegue | 🟡 PARCIAL (deploy productivo Render+Vercel+Supabase hecho; falta GitHub Actions, APK Flutter) |
 | 7 | Documentación final (README, manuales) | ⬜ Pendiente |
+| — | UX/UI (auditoría, transversal a las fases) | 🟡 EN CURSO — ver [`docs/06-ux-ui-audit.md`](./06-ux-ui-audit.md). Parte 1 (4/4) y Parte 2 (11/11) resueltas **en web** 2026-08-17. Falta portar todo a Flutter y el backlog de "¿olvidaste tu contraseña?" |
+| — | Calidad de entrenamiento/nutrición (auditoría, transversal) | 🟢 CASI CERRADA — ver [`docs/10-recomendaciones-coach-nutricion.md`](./10-recomendaciones-coach-nutricion.md). 18/22 hallazgos resueltos (o parciales) en web 2026-08-17. Quedan solo por decisión de alcance: C.3 (contenido), H.2 y H.5-parte-2 (backlog) |
 
 ## Fase 0 — Cimientos (COMPLETADA)
 
@@ -1030,11 +1032,72 @@ parte del alcance de la Fase 6:
 ## Pendientes globales / deuda técnica
 
 Consolidado de todo lo que quedó suelto durante el desarrollo y el primer deploy,
-para no perderlo de vista:
+para no perderlo de vista.
 
-- [ ] **Paridad Flutter** de las dos features de IA de nutrición que solo existen en
-      web: sustitución de ingredientes y ajuste de calorías del plan (`/admin/ai` NO
-      entra acá — esa fue decisión explícita de que quede solo en web).
+### Paridad Flutter (lista única — todo lo que hoy solo existe en web)
+
+Todo lo de esta lista es **traducir a Flutter un patrón que ya está resuelto en
+React** — no requiere decisiones de diseño nuevas, es trabajo de implementación
+puro. Se consolida acá en un solo lugar (no repetir en `docs/06`/`docs/10`) para
+que quede claro de un vistazo qué le falta a mobile:
+
+- [ ] Features de IA de nutrición (Fase 4): sustitución de ingredientes, ajuste de
+      calorías del plan.
+- [ ] `docs/06-ux-ui-audit.md` Parte 1, tier "rápido y barato" (resuelto en web
+      2026-08-17): `APP_NAME` equivalente, `ErrorState`, progreso de IA con
+      expectativa de tiempo, `EmptyState` condicional por perfil incompleto.
+- [ ] `docs/06-ux-ui-audit.md` Parte 2 completa (resuelto en web 2026-08-17):
+      mostrar/ocultar contraseña, confirmar contraseña, ayuda de password visible,
+      autofocus login/registro, error visible en registro de métrica,
+      **confirmación de borrado en los 8 sub-recursos que borraban directo** (el
+      hallazgo de mayor riesgo real de ese audit), validación numérica de perfil,
+      debounce + limpiar en los pickers, advertencia de cambios sin guardar, input
+      numérico unificado, cancelar el diálogo de generación con IA sin esperar.
+- [ ] `docs/06-ux-ui-audit.md` tier "medio" de Parte 1: `HeroBanner`/`EmptyState`
+      compartidos, escala tipográfica nombrada, auditoría de cobertura de toasts de
+      éxito.
+- [ ] `docs/10-recomendaciones-coach-nutricion.md` G.1 (concordancia de género en
+      contadores "generado/a(s) con IA") — no aplica literal hoy (mobile no tiene
+      ese contador, es parte del `HeroBanner` que todavía no se portó); se resuelve
+      solo cuando se porte `HeroBanner` arriba.
+- [ ] `docs/10-recomendaciones-coach-nutricion.md`, segunda ronda (resuelto en web
+      2026-08-17): TDEE/IMC editables en el perfil, macros visibles en receta/plan/
+      diario (con barra de progreso), músculos trabajados y segunda imagen
+      (posición final) en el detalle de ejercicio, ficha de rutina con
+      descanso/intensidad/tempo/orden y resumen por día, **plan del día + timer de
+      descanso durante la sesión activa** (`SessionPage`), gráfico de evolución de
+      métricas en Progreso. Es el bloque de paridad más grande pendiente — mobile no
+      tiene ninguna de estas mejoras.
+- **Explícitamente NO entra acá** (decisión del usuario, no un olvido): el panel
+  `/admin/ai` queda solo en web a propósito.
+- [ ] **Identidad de marca real, aplicada en web, pendiente en mobile** (llegó el logo
+      2026-08-18, dejó de estar bloqueado — ver `docs/11-identidad-marca.md` completo):
+      `mobile/lib/core/theme/app_colors.dart` (paleta, falta agregar un campo
+      `highlight` que hoy no existe), íconos de app (`mobile/web/icons/Icon-*.png`,
+      siguen siendo el placeholder de `flutter create`), logo en
+      `splash_screen.dart`, tipografía (`app_text_styles.dart`). Checklist exacto con
+      archivo por archivo en `docs/11-identidad-marca.md § Pendiente en mobile`.
+
+### Otras auditorías activas
+
+- **`docs/06-ux-ui-audit.md`**: fuente de verdad de deuda de diseño puro. Todo lo
+  accionable en web ya está resuelto (Parte 1 y 2, ver arriba); lo que resta es la
+  paridad Flutter (arriba) y el backlog bloqueado por marca/assets.
+- **`docs/10-recomendaciones-coach-nutricion.md`**: fuente de verdad de si el
+  *contenido* de entrenamiento/nutrición que genera y muestra la app tiene sentido
+  real (no solo si la UI es prolija). Actualizado 2026-08-18 — la mayoría del
+  roadmap original (22 hallazgos) más los 8 nuevos de la verificación en vivo (§I) ya
+  está resuelta. Queda sin cerrar, por decisión explícita de alcance o porque es
+  contenido/config y no código:
+  - [ ] **C.1** (parcial) — falta el chequeo de coherencia contra grupo muscular
+        esperado (el mínimo de 3 ejercicios por día ya se valida).
+  - [ ] **C.3** — videos de demostración para ejercicios compuestos (contenido).
+  - [ ] **H.2** — agrupación de superseries/circuitos (backlog, modelo de datos nuevo).
+  - [ ] **H.5 parte 2** — horario real por comida (backlog).
+  - [ ] **I.3** — imágenes para el catálogo de recetas (contenido; sin esto H.4 ya
+        implementado no se ve en la práctica).
+  - [ ] **I.5** — evaluar `llama3.2:latest` como default local de Ollama en vez de
+        `:1b` (config, no código).
 - [ ] **Rotar la password del admin seed** (`admin@micoach.dev`) — quedó en texto
       plano en el chat de esta sesión.
 - [ ] `.env` local todavía tiene `POSTGRES_DB=kineticos`/`POSTGRES_USER=kineticos`

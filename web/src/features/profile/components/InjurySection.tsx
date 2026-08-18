@@ -3,6 +3,7 @@ import { Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import {
   Dialog,
   DialogClose,
@@ -25,6 +26,7 @@ export function InjurySection({ injuries }: { injuries: UserInjury[] }) {
   const [bodyPart, setBodyPart] = useState('');
   const [injuryType, setInjuryType] = useState('');
   const [status, setStatus] = useState('active');
+  const [pendingDelete, setPendingDelete] = useState<UserInjury | null>(null);
 
   function handleAdd() {
     if (!bodyPart.trim() || !injuryType.trim()) return;
@@ -56,14 +58,7 @@ export function InjurySection({ injuries }: { injuries: UserInjury[] }) {
                   {(item.status && INJURY_STATUS_OPTIONS[item.status]) ?? item.status ?? ''}
                 </p>
               </div>
-              <Button
-                variant="ghost"
-                size="icon-sm"
-                aria-label="Borrar lesión"
-                onClick={() =>
-                  deleteInjury.mutate(item.id, { onError: (error) => toast.error(extractErrorMessage(error)) })
-                }
-              >
+              <Button variant="ghost" size="icon-sm" aria-label="Borrar lesión" onClick={() => setPendingDelete(item)}>
                 <Trash2 />
               </Button>
             </div>
@@ -93,6 +88,20 @@ export function InjurySection({ injuries }: { injuries: UserInjury[] }) {
               </DialogFooter>
             </DialogContent>
           </Dialog>
+          <ConfirmDeleteDialog
+            open={pendingDelete != null}
+            onOpenChange={(next) => !next && setPendingDelete(null)}
+            title="Borrar lesión"
+            message={`¿Seguro que querés borrar "${pendingDelete ? `${pendingDelete.bodyPart} — ${pendingDelete.injuryType}` : ''}"? Esta acción no se puede deshacer.`}
+            pending={deleteInjury.isPending}
+            onConfirm={() => {
+              if (!pendingDelete) return;
+              deleteInjury.mutate(pendingDelete.id, {
+                onSuccess: () => setPendingDelete(null),
+                onError: (error) => toast.error(extractErrorMessage(error)),
+              });
+            }}
+          />
         </AccordionContent>
       </AccordionItem>
     </Accordion>

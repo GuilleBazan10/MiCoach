@@ -26,6 +26,8 @@ export interface Exercise {
   instructions?: string | null;
   videoUrl?: string | null;
   imageUrl?: string | null;
+  /** Posición final/contraída del movimiento — ver ExerciseDetailDialog. */
+  imageUrlEnd?: string | null;
   /** 'reps' (default) o 'duration' — ej. Plancha se sostiene X segundos, no se repite X veces. */
   measurementType: string;
   aiGenerated: boolean;
@@ -83,6 +85,8 @@ export interface PlannedExerciseDraft {
   repsMin?: number | null;
   repsMax?: number | null;
   restSeconds?: number | null;
+  intensityPercent?: number | null;
+  tempo?: string | null;
 }
 
 export interface WorkoutDayDraft {
@@ -123,6 +127,8 @@ export function draftFromWorkout(workout: Workout): WorkoutDraft {
         repsMin: e.repsMin,
         repsMax: e.repsMax,
         restSeconds: e.restSeconds,
+        intensityPercent: e.intensityPercent,
+        tempo: e.tempo,
       })),
     })),
   };
@@ -146,6 +152,8 @@ export function workoutDraftToPayload(draft: WorkoutDraft) {
         repsMin: e.repsMin ?? null,
         repsMax: e.repsMax ?? null,
         restSeconds: e.restSeconds ?? null,
+        intensityPercent: e.intensityPercent ?? null,
+        tempo: e.tempo || null,
       })),
     })),
   };

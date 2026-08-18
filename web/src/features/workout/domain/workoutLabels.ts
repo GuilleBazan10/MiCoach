@@ -65,7 +65,14 @@ export function labelFor(labels: Record<string, string>, key?: string | null): s
  * el mismo rango numérico se expresa en segundos, no en repeticiones.
  */
 export function formatSetsReps(
-  exercise: { sets?: number | null; repsMin?: number | null; repsMax?: number | null },
+  exercise: {
+    sets?: number | null;
+    repsMin?: number | null;
+    repsMax?: number | null;
+    restSeconds?: number | null;
+    intensityPercent?: number | null;
+    tempo?: string | null;
+  },
   measurementType?: string,
 ): string {
   const unit = measurementType === 'duration' ? 'seg' : 'reps';
@@ -76,5 +83,24 @@ export function formatSetsReps(
         ? `${exercise.repsMin} ${unit}`
         : `${exercise.repsMin}-${exercise.repsMax} ${unit}`
       : null;
-  return [sets, amount].filter(Boolean).join(' · ') || 'Sin datos';
+  // docs/10-recomendaciones-coach-nutricion.md § H.1: el descanso y la intensidad son
+  // tan parte del estímulo de entrenamiento como el ejercicio elegido — antes se
+  // guardaban pero nunca se mostraban en modo lectura.
+  const rest = exercise.restSeconds != null ? `descanso ${exercise.restSeconds}s` : null;
+  const intensity = exercise.intensityPercent != null ? `${exercise.intensityPercent}% intensidad` : null;
+  const tempo = exercise.tempo ? `tempo ${exercise.tempo}` : null;
+  return [sets, amount, rest, intensity, tempo].filter(Boolean).join(' · ') || 'Sin datos';
+}
+
+/**
+ * Resumen de un día para poder escanear una rutina de varios días sin leer
+ * ejercicio por ejercicio (docs/10-recomendaciones-coach-nutricion.md § H.3).
+ */
+export function summarizeDay(day: { exercises: { sets?: number | null }[] }): string {
+  const count = day.exercises.length;
+  if (count === 0) return '';
+  const totalSets = day.exercises.reduce((sum, e) => sum + (e.sets ?? 0), 0);
+  const parts = [`${count} ejercicio${count === 1 ? '' : 's'}`];
+  if (totalSets > 0) parts.push(`~${totalSets} series`);
+  return parts.join(' · ');
 }

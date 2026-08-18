@@ -77,5 +77,12 @@ micoach:
     encryption-key: ${AES_SECRET:}
   # El proveedor de IA activo y sus credenciales ya no viven acá: se leen de la tabla
   # ai_provider_configs (sembrada en V11, editable desde /admin sin reiniciar el backend).
+  ai:
+    bootstrap:
+      # Solo para desarrollo local: si la tabla ai_provider_configs no tiene ninguna key
+      # cargada para Groq todavía, GroqApiKeyBootstrap la toma de acá una única vez y la
+      # guarda cifrada. No es una fuente de configuración en runtime — /admin sigue
+      # siendo la única forma de cambiarla después del primer arranque.
+      groq-api-key: ${GROQ_API_KEY:}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5050}

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Plus, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { ConfirmDeleteDialog } from '@/components/ConfirmDeleteDialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
@@ -16,6 +17,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 import { extractErrorMessage } from '@/core/api/apiError';
+import type { ShoppingListItem } from '../domain/nutritionTypes';
 import { useShoppingListDetail } from '../application/queries';
 import {
   useAddShoppingListItem,
@@ -36,6 +38,7 @@ export function ShoppingListDetailPage() {
 
   const [addOpen, setAddOpen] = useState(false);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [pendingDeleteItem, setPendingDeleteItem] = useState<ShoppingListItem | null>(null);
   const [itemName, setItemName] = useState('');
   const [amount, setAmount] = useState('');
   const [unit, setUnit] = useState('');
@@ -110,7 +113,7 @@ export function ShoppingListDetailPage() {
               variant="ghost"
               size="icon-sm"
               aria-label="Borrar ítem"
-              onClick={() => deleteItem.mutate(item.id, { onError: (error) => toast.error(extractErrorMessage(error)) })}
+              onClick={() => setPendingDeleteItem(item)}
             >
               <Trash2 className="size-4" />
             </Button>
@@ -160,6 +163,21 @@ export function ShoppingListDetailPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <ConfirmDeleteDialog
+        open={pendingDeleteItem != null}
+        onOpenChange={(next) => !next && setPendingDeleteItem(null)}
+        title="Borrar ítem"
+        message={`¿Seguro que querés borrar "${pendingDeleteItem?.itemName ?? 'este ítem'}"? Esta acción no se puede deshacer.`}
+        pending={deleteItem.isPending}
+        onConfirm={() => {
+          if (!pendingDeleteItem) return;
+          deleteItem.mutate(pendingDeleteItem.id, {
+            onSuccess: () => setPendingDeleteItem(null),
+            onError: (error) => toast.error(extractErrorMessage(error)),
+          });
+        }}
+      />
     </div>
   );
 }
