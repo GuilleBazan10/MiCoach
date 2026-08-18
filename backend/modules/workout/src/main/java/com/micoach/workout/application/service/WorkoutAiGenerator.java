@@ -53,7 +53,7 @@ class WorkoutAiGenerator {
                 Map.of("goal", goal, "catalog", catalogText, "profile", buildProfileText(userId, profile)));
 
         AiWorkoutJson parsed = parseJson(result);
-        return toWorkoutData(parsed, filteredCatalog);
+        return toWorkoutData(result, parsed, filteredCatalog);
     }
 
     /**
@@ -184,7 +184,13 @@ class WorkoutAiGenerator {
             Set.of("lose_fat", "gain_muscle", "maintain", "endurance", "strength", "general_health");
     private static final Set<String> VALID_LEVELS = Set.of("beginner", "intermediate", "advanced");
 
-    private WorkoutData toWorkoutData(AiWorkoutJson json, List<Exercise> catalog) {
+    // docs/10-recomendaciones-coach-nutricion.md § C.1: se vio en la práctica que el
+    // modelo puede devolver días con un solo ejercicio (ej. "Piernas" con una sola
+    // serie de crunches) — inutilizable como sesión real. Validación mínima viable:
+    // rechazar y pedir reintentar en vez de guardar una rutina que nadie puede usar.
+    private static final int MIN_EXERCISES_PER_DAY = 3;
+
+    private WorkoutData toWorkoutData(AiUseCase.GenerationResult result, AiWorkoutJson json, List<Exercise> catalog) {
         List<WorkoutDayData> days = new ArrayList<>();
         int dayIndex = 1;
         List<AiWorkoutDay> sourceDays = json.days() == null ? List.of() : json.days();
@@ -203,9 +209,16 @@ class WorkoutAiGenerator {
             // Un día con ejercicios reales no puede ser "restDay": true pase lo que pase el
             // modelo haya marcado (visto en la práctica: los marcó todos true igual).
             boolean restDay = exercises.isEmpty() && Boolean.TRUE.equals(day.restDay());
+            if (!restDay && exercises.size() < MIN_EXERCISES_PER_DAY) {
+                aiUseCase.markGenerationPartial(result.logId());
+                throw new DomainException(502, ErrorCode.INTERNAL_ERROR,
+                        "La IA generó un día de entrenamiento con muy pocos ejercicios ("
+                                + exercises.size() + "). Probá generar de nuevo.");
+            }
             days.add(new WorkoutDayData(dayIndex++, truncate(day.name(), 100), restDay, exercises));
         }
         if (days.isEmpty()) {
+            aiUseCase.markGenerationPartial(result.logId());
             throw new DomainException(502, ErrorCode.INTERNAL_ERROR, "La IA generó una rutina sin días");
         }
         String name = truncate(json.name(), 200);

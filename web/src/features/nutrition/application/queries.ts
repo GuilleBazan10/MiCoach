@@ -1,9 +1,9 @@
 // =====================================================================
 // MiCoach — Lecturas del módulo nutrition (TanStack Query).
 // =====================================================================
-import { useQuery } from '@tanstack/react-query';
+import { useQueries, useQuery } from '@tanstack/react-query';
 import { nutritionApi } from '../api/nutritionApi';
-import type { RecipeFilter } from '../domain/nutritionTypes';
+import type { MealPlanDay, RecipeFilter } from '../domain/nutritionTypes';
 
 export const nutritionKeys = {
   ingredients: (params: { category?: string; search?: string }) => ['nutrition', 'ingredients', params] as const,
@@ -34,6 +34,40 @@ export function useMealPlanList() {
 
 export function useMealPlanDetail(id: number) {
   return useQuery({ queryKey: nutritionKeys.mealPlan(id), queryFn: () => nutritionApi.getMealPlan(id) });
+}
+
+/**
+ * Suma calorías/macros de las comidas de un día (docs/10-recomendaciones-coach-nutricion.md
+ * § D.3). `null` mientras alguna receta todavía está cargando.
+ */
+export function useDayMacros(day: MealPlanDay): { calories: number; protein: number; carbs: number; fat: number } | null {
+  const mealsWithRecipe = day.meals.filter((m) => m.recipeId != null);
+  const results = useQueries({
+    queries: mealsWithRecipe.map((m) => ({
+      queryKey: nutritionKeys.recipe(m.recipeId as number),
+      queryFn: () => nutritionApi.getRecipe(m.recipeId as number),
+    })),
+  });
+
+  if (mealsWithRecipe.length === 0) {
+    return { calories: 0, protein: 0, carbs: 0, fat: 0 };
+  }
+  if (results.some((r) => !r.data)) {
+    return null;
+  }
+
+  return mealsWithRecipe.reduce(
+    (acc, meal, i) => {
+      const recipe = results[i].data!;
+      return {
+        calories: acc.calories + (recipe.caloriesPerServing ?? 0) * meal.servings,
+        protein: acc.protein + (recipe.proteinPerServing ?? 0) * meal.servings,
+        carbs: acc.carbs + (recipe.carbsPerServing ?? 0) * meal.servings,
+        fat: acc.fat + (recipe.fatPerServing ?? 0) * meal.servings,
+      };
+    },
+    { calories: 0, protein: 0, carbs: 0, fat: 0 },
+  );
 }
 
 export function useDailyIntake(date: string) {

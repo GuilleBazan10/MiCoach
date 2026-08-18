@@ -46,13 +46,13 @@ public final class WorkoutDtos {
 
     public record ExerciseResponse(Long id, String name, String description, String category,
                                    List<String> equipment, String difficulty, String instructions,
-                                   String videoUrl, String imageUrl, String measurementType,
+                                   String videoUrl, String imageUrl, String imageUrlEnd, String measurementType,
                                    boolean aiGenerated, List<ExerciseMuscleResponse> muscles) {
 
         static ExerciseResponse from(Exercise e) {
             return new ExerciseResponse(e.getId(), e.getName(), e.getDescription(), e.getCategory(),
                     e.getEquipment(), e.getDifficulty(), e.getInstructions(), e.getVideoUrl(),
-                    e.getImageUrl(), e.getMeasurementType(), e.isAiGenerated(),
+                    e.getImageUrl(), e.getImageUrlEnd(), e.getMeasurementType(), e.isAiGenerated(),
                     e.getMuscles().stream().map(ExerciseMuscleResponse::from).toList());
         }
     }

@@ -26,6 +26,8 @@ export interface Exercise {
   instructions?: string | null;
   videoUrl?: string | null;
   imageUrl?: string | null;
+  /** Posición final/contraída del movimiento — ver ExerciseDetailDialog. */
+  imageUrlEnd?: string | null;
   /** 'reps' (default) o 'duration' — ej. Plancha se sostiene X segundos, no se repite X veces. */
   measurementType: string;
   aiGenerated: boolean;

@@ -37,6 +37,10 @@ export function RecipeDetailDialog({
             <div className="flex flex-wrap gap-2">
               {recipe.difficulty && <Badge variant="secondary">{labelFor(RECIPE_DIFFICULTY_LABELS, recipe.difficulty)}</Badge>}
               {recipe.caloriesPerServing != null && <Badge variant="secondary">{recipe.caloriesPerServing} kcal/porción</Badge>}
+              {recipe.proteinPerServing != null && <Badge variant="outline">P {recipe.proteinPerServing}g</Badge>}
+              {recipe.carbsPerServing != null && <Badge variant="outline">C {recipe.carbsPerServing}g</Badge>}
+              {recipe.fatPerServing != null && <Badge variant="outline">G {recipe.fatPerServing}g</Badge>}
+              {recipe.fiberPerServing != null && <Badge variant="outline">Fibra {recipe.fiberPerServing}g</Badge>}
               {recipe.prepTimeMin != null && <Badge variant="outline">{recipe.prepTimeMin + (recipe.cookTimeMin ?? 0)} min</Badge>}
             </div>
 

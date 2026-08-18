@@ -6,6 +6,8 @@ import { ErrorState } from '@/components/ErrorState';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { extractErrorMessage } from '@/core/api/apiError';
+import { cn } from '@/lib/utils';
+import { useProfile } from '@/features/profile/application/useProfile';
 import { useDailyIntake } from '../application/queries';
 import { useDeleteIntake } from '../application/mutations';
 import { MEAL_TYPE_LABELS, labelFor } from '../domain/nutritionLabels';
@@ -19,6 +21,7 @@ function today(): string {
 export function DailyIntakeView() {
   const date = today();
   const { data: entries, isLoading, isError, refetch } = useDailyIntake(date);
+  const { data: profileData } = useProfile();
   const deleteIntake = useDeleteIntake(date);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [pendingDeleteId, setPendingDeleteId] = useState<number | null>(null);
@@ -33,15 +36,32 @@ export function DailyIntakeView() {
     { calories: 0, protein: 0, carbs: 0, fat: 0 },
   );
 
+  const target = profileData?.profile.tdeeCalories;
+  const pct = target ? (totals.calories / target) * 100 : null;
+
   return (
     <div className="flex flex-col gap-3">
       <Card>
-        <CardContent>
+        <CardContent className="flex flex-col gap-2">
           <p className="font-medium">Hoy</p>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {Math.round(totals.calories)} kcal · P {Math.round(totals.protein)}g · C {Math.round(totals.carbs)}g · G{' '}
             {Math.round(totals.fat)}g
           </p>
+          {target != null && (
+            <div className="flex flex-col gap-1">
+              <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+                <div
+                  className={cn('h-full rounded-full transition-all', pct! > 100 ? 'bg-destructive' : 'bg-primary')}
+                  style={{ width: `${Math.min(100, pct!)}%` }}
+                />
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {Math.round(totals.calories)} / {target} kcal objetivo
+                {pct! > 100 && ` — ${Math.round(pct! - 100)}% por encima`}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
