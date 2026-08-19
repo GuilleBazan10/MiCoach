@@ -22,4 +22,5 @@ public interface AiRepository {
     List<GenerationLog> findGenerationLogs(GenerationLogFilter filter);
     GenerationLog saveGenerationLog(GenerationLog log);
     void updateGenerationLogStatus(Long logId, String status);
+    void updateGenerationLogFeedback(Long logId, String feedback);
 }

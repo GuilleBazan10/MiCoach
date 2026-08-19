@@ -1,5 +1,6 @@
 package com.micoach.workout.application.service;
 
+import com.micoach.ai.application.port.in.AiUseCase;
 import com.micoach.shared.error.DomainException;
 import com.micoach.shared.error.ErrorCode;
 import com.micoach.workout.application.port.in.WorkoutUseCase;
@@ -24,10 +25,12 @@ public class WorkoutService implements WorkoutUseCase {
 
     private final WorkoutRepository repository;
     private final WorkoutAiGenerator aiGenerator;
+    private final AiUseCase aiUseCase;
 
-    public WorkoutService(WorkoutRepository repository, WorkoutAiGenerator aiGenerator) {
+    public WorkoutService(WorkoutRepository repository, WorkoutAiGenerator aiGenerator, AiUseCase aiUseCase) {
         this.repository = repository;
         this.aiGenerator = aiGenerator;
+        this.aiUseCase = aiUseCase;
     }
 
     // ------------------------- Catálogo -------------------------
@@ -89,14 +92,20 @@ public class WorkoutService implements WorkoutUseCase {
         List<Exercise> catalog = repository.findExercises(new ExerciseFilter(null, null, null, null));
         WorkoutData data = aiGenerator.generate(userId, goal, catalog);
         Workout workout = Workout.createAiGenerated(userId, data.name(), data.description(), data.objective(),
-                data.level(), data.durationWeeks(), toDays(data.days()));
+                data.level(), data.durationWeeks(), toDays(data.days()), data.generationLogId());
         return repository.saveWorkout(workout);
     }
 
     @Override
     @Transactional
     public void deleteWorkout(Long userId, Long workoutId) {
-        requireOwnedWorkout(userId, workoutId);
+        Workout workout = requireOwnedWorkout(userId, workoutId);
+        // Cierra el loop de memoria persistente: si el usuario descarta una rutina
+        // generada por IA sin haberla usado, esa señal queda registrada para la próxima
+        // generación de este mismo usuario (ver WorkoutAiGenerator.buildFeedbackHistory).
+        if (workout.isAiGenerated() && workout.getGenerationLogId() != null) {
+            aiUseCase.recordFeedback(workout.getGenerationLogId(), "discarded");
+        }
         repository.deleteWorkout(workoutId);
     }
 

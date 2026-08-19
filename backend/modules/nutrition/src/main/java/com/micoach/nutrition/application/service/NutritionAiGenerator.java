@@ -3,6 +3,8 @@ package com.micoach.nutrition.application.service;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.micoach.ai.application.port.in.AiUseCase;
+import com.micoach.ai.application.port.in.AiUseCase.GenerationLogFilter;
+import com.micoach.ai.domain.GenerationLog;
 import com.micoach.nutrition.application.port.in.NutritionUseCase.MealPlanData;
 import com.micoach.nutrition.application.port.in.NutritionUseCase.MealPlanDayData;
 import com.micoach.nutrition.application.port.in.NutritionUseCase.MealPlanMealData;
@@ -48,10 +50,27 @@ class NutritionAiGenerator {
                 .reduce((a, b) -> a + "\n" + b).orElse("");
 
         AiUseCase.GenerationResult result = aiUseCase.generate(userId, PROMPT_SLUG,
-                Map.of("goal", goal, "catalog", catalogText, "profile", buildProfileText(userId)));
+                Map.of("goal", goal, "catalog", catalogText, "profile", buildProfileText(userId),
+                        "feedbackHistory", buildFeedbackHistory(userId)));
 
         AiMealPlanJson parsed = parseJson(result);
         return toMealPlanData(parsed, catalog);
+    }
+
+    /**
+     * Mismo mecanismo de memoria persistente que {@code WorkoutAiGenerator} — acá solo
+     * la mitad "auto-corrección por validación" (no hay todavía un link explícito
+     * plan→generación como el de rutinas para capturar el descarte humano; ver
+     * docs/12-tp-fin-de-ciclo.md § Limitaciones y trabajo futuro).
+     */
+    private String buildFeedbackHistory(Long userId) {
+        List<GenerationLog> logs = aiUseCase.listGenerationLogs(new GenerationLogFilter(userId, PROMPT_SLUG));
+        if (logs.isEmpty() || !"partial".equals(logs.get(0).getStatus())) {
+            return "Sin antecedentes relevantes de generaciones anteriores.";
+        }
+        return "La generación anterior para este usuario fue rechazada automáticamente por no "
+                + "devolver un JSON válido o no cumplir el formato pedido — asegurate de devolver "
+                + "SOLO el JSON, sin texto adicional.";
     }
 
     private String buildProfileText(Long userId) {

@@ -69,6 +69,14 @@ public interface AiUseCase {
      */
     void markGenerationPartial(Long logId);
 
+    /**
+     * Cierra el loop de memoria persistente: registra qué hizo el usuario con lo que
+     * generó la IA ({@code "kept"} | {@code "discarded"}) para que la próxima
+     * generación de ese mismo usuario/prompt pueda tenerlo en cuenta (ver
+     * {@code WorkoutAiGenerator} — inyecta este historial como contexto adicional).
+     */
+    void recordFeedback(Long logId, String feedback);
+
     record PromptData(String slug, String provider, String model, String content, Map<String, Object> params) {
     }
 

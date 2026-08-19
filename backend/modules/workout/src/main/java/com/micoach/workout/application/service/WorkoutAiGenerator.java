@@ -3,6 +3,8 @@ package com.micoach.workout.application.service;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.micoach.ai.application.port.in.AiUseCase;
+import com.micoach.ai.application.port.in.AiUseCase.GenerationLogFilter;
+import com.micoach.ai.domain.GenerationLog;
 import com.micoach.shared.error.DomainException;
 import com.micoach.shared.error.ErrorCode;
 import com.micoach.user.application.port.in.UserProfileUseCase;
@@ -50,10 +52,36 @@ class WorkoutAiGenerator {
                 .reduce((a, b) -> a + "\n" + b).orElse("");
 
         AiUseCase.GenerationResult result = aiUseCase.generate(userId, PROMPT_SLUG,
-                Map.of("goal", goal, "catalog", catalogText, "profile", buildProfileText(userId, profile)));
+                Map.of("goal", goal, "catalog", catalogText, "profile", buildProfileText(userId, profile),
+                        "feedbackHistory", buildFeedbackHistory(userId)));
 
         AiWorkoutJson parsed = parseJson(result);
         return toWorkoutData(result, parsed, filteredCatalog);
+    }
+
+    /**
+     * Memoria persistente que retroalimenta la generación (no solo auditoría de solo
+     * lectura): mira el intento anterior de este mismo usuario para este prompt y, si
+     * quedó "partial" (la propia validación de acá abajo lo rechazó) o el usuario borró
+     * la rutina que produjo ("discarded", ver {@code WorkoutService.deleteWorkout}), se
+     * lo suma como contexto para que la IA no repita el mismo problema.
+     */
+    private String buildFeedbackHistory(Long userId) {
+        List<GenerationLog> logs = aiUseCase.listGenerationLogs(new GenerationLogFilter(userId, PROMPT_SLUG));
+        if (logs.isEmpty()) {
+            return "Sin antecedentes de generaciones anteriores.";
+        }
+        GenerationLog last = logs.get(0);
+        if ("partial".equals(last.getStatus())) {
+            return "La generación anterior para este usuario fue rechazada automáticamente por no "
+                    + "cumplir el formato o el mínimo de ejercicios por día — asegurate de dar JSON "
+                    + "válido con al menos 3 ejercicios variados por día de entrenamiento.";
+        }
+        if ("discarded".equals(last.getUserFeedback())) {
+            return "El usuario borró la última rutina generada sin usarla — probá variar más los "
+                    + "ejercicios y el enfoque respecto al intento anterior.";
+        }
+        return "Sin antecedentes relevantes de generaciones anteriores.";
     }
 
     /**
@@ -224,7 +252,7 @@ class WorkoutAiGenerator {
         String name = truncate(json.name(), 200);
         return new WorkoutData(name == null || name.isBlank() ? "Rutina generada con IA" : name,
                 truncate(json.description(), 1000), normalizeEnum(json.objective(), VALID_OBJECTIVES),
-                normalizeEnum(json.level(), VALID_LEVELS), json.durationWeeks(), days);
+                normalizeEnum(json.level(), VALID_LEVELS), json.durationWeeks(), days, result.logId());
     }
 
     private String normalizeEnum(String value, Set<String> allowed) {

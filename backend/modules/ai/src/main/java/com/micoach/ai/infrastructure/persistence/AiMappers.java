@@ -115,7 +115,7 @@ final class GenerationLogMapper {
     static GenerationLog toDomain(GenerationLogJpa jpa) {
         return GenerationLog.restore(jpa.getId(), jpa.getUserId(), jpa.getPromptSlug(), jpa.getPromptVersion(),
                 jpa.getProvider(), jpa.getModel(), jpa.getInputContext(), jpa.getOutput(), jpa.getDurationMs(),
-                jpa.getStatus(), jpa.getCreatedAt());
+                jpa.getStatus(), jpa.getUserFeedback(), jpa.getCreatedAt());
     }
 
     static GenerationLogJpa toJpa(GenerationLog domain) {
@@ -130,6 +130,7 @@ final class GenerationLogMapper {
                 .output(domain.getOutput())
                 .durationMs(domain.getDurationMs())
                 .status(domain.getStatus())
+                .userFeedback(domain.getUserFeedback())
                 .createdAt(domain.getCreatedAt())
                 .build();
     }

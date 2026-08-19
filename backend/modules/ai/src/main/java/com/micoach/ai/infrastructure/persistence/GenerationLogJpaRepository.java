@@ -20,4 +20,8 @@ public interface GenerationLogJpaRepository extends JpaRepository<GenerationLogJ
     @Modifying
     @Query("UPDATE GenerationLogJpa g SET g.status = :status WHERE g.id = :id")
     void updateStatus(@Param("id") Long id, @Param("status") String status);
+
+    @Modifying
+    @Query("UPDATE GenerationLogJpa g SET g.userFeedback = :feedback WHERE g.id = :id")
+    void updateUserFeedback(@Param("id") Long id, @Param("feedback") String feedback);
 }

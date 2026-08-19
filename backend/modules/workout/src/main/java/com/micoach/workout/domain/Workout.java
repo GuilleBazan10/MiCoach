@@ -24,12 +24,15 @@ public class Workout {
     private final boolean aiGenerated;
     private String status;
     private List<WorkoutDay> days;
+    /** Generación de IA que produjo esta rutina (null si no es IA, o si es previa a V22). */
+    private final Long generationLogId;
     private final Instant createdAt;
     private Instant updatedAt;
 
     private Workout(Long id, Long userId, String name, String description, String objective,
                     String level, Integer durationWeeks, boolean template, boolean aiGenerated,
-                    String status, List<WorkoutDay> days, Instant createdAt, Instant updatedAt) {
+                    String status, List<WorkoutDay> days, Long generationLogId, Instant createdAt,
+                    Instant updatedAt) {
         this.id = id;
         this.userId = userId;
         this.name = name;
@@ -41,6 +44,7 @@ public class Workout {
         this.aiGenerated = aiGenerated;
         this.status = status;
         this.days = days == null ? List.of() : days;
+        this.generationLogId = generationLogId;
         this.createdAt = createdAt;
         this.updatedAt = updatedAt;
     }
@@ -49,22 +53,24 @@ public class Workout {
                                  String level, Integer durationWeeks, List<WorkoutDay> days) {
         Instant now = Instant.now();
         return new Workout(null, userId, name, description, objective, level, durationWeeks,
-                false, false, "active", days, now, now);
+                false, false, "active", days, null, now, now);
     }
 
     public static Workout createAiGenerated(Long userId, String name, String description, String objective,
-                                            String level, Integer durationWeeks, List<WorkoutDay> days) {
+                                            String level, Integer durationWeeks, List<WorkoutDay> days,
+                                            Long generationLogId) {
         Instant now = Instant.now();
         return new Workout(null, userId, name, description, objective, level, durationWeeks,
-                false, true, "active", days, now, now);
+                false, true, "active", days, generationLogId, now, now);
     }
 
     public static Workout restore(Long id, Long userId, String name, String description,
                                   String objective, String level, Integer durationWeeks,
                                   boolean template, boolean aiGenerated, String status,
-                                  List<WorkoutDay> days, Instant createdAt, Instant updatedAt) {
+                                  List<WorkoutDay> days, Long generationLogId, Instant createdAt,
+                                  Instant updatedAt) {
         return new Workout(id, userId, name, description, objective, level, durationWeeks,
-                template, aiGenerated, status, days, createdAt, updatedAt);
+                template, aiGenerated, status, days, generationLogId, createdAt, updatedAt);
     }
 
     public void update(String name, String description, String objective, String level,

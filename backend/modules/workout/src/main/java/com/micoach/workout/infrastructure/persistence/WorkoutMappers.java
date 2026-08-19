@@ -56,8 +56,8 @@ final class WorkoutMapper {
     static Workout toDomain(WorkoutJpa jpa, List<WorkoutDay> days) {
         return Workout.restore(jpa.getId(), jpa.getUserId(), jpa.getName(), jpa.getDescription(),
                 jpa.getObjective(), jpa.getLevel(), NumberConversions.intValue(jpa.getDurationWeeks()),
-                jpa.isTemplate(), jpa.isAiGenerated(), jpa.getStatus(), days, jpa.getCreatedAt(),
-                jpa.getUpdatedAt());
+                jpa.isTemplate(), jpa.isAiGenerated(), jpa.getStatus(), days, jpa.getGenerationLogId(),
+                jpa.getCreatedAt(), jpa.getUpdatedAt());
     }
 
     static WorkoutJpa toJpa(Workout domain) {
@@ -72,6 +72,7 @@ final class WorkoutMapper {
                 .template(domain.isTemplate())
                 .aiGenerated(domain.isAiGenerated())
                 .status(domain.getStatus())
+                .generationLogId(domain.getGenerationLogId())
                 .createdAt(domain.getCreatedAt())
                 .updatedAt(domain.getUpdatedAt())
                 .build();

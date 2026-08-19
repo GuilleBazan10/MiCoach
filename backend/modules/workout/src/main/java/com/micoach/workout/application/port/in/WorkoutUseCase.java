@@ -59,7 +59,7 @@ public interface WorkoutUseCase {
     }
 
     record WorkoutData(String name, String description, String objective, String level,
-                       Integer durationWeeks, List<WorkoutDayData> days) {
+                       Integer durationWeeks, List<WorkoutDayData> days, Long generationLogId) {
     }
 
     record WorkoutDayData(Integer dayIndex, String name, boolean restDay,

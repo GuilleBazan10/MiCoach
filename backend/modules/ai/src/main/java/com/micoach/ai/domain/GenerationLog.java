@@ -23,11 +23,13 @@ public class GenerationLog {
     private final Map<String, Object> output;
     private final Integer durationMs;
     private final String status;
+    /** Qué hizo el usuario con lo generado: 'kept' | 'discarded' | null (todavía no se sabe). */
+    private final String userFeedback;
     private final Instant createdAt;
 
     private GenerationLog(Long id, Long userId, String promptSlug, Integer promptVersion, String provider,
                           String model, Map<String, Object> inputContext, Map<String, Object> output,
-                          Integer durationMs, String status, Instant createdAt) {
+                          Integer durationMs, String status, String userFeedback, Instant createdAt) {
         this.id = id;
         this.userId = userId;
         this.promptSlug = promptSlug;
@@ -38,21 +40,22 @@ public class GenerationLog {
         this.output = output;
         this.durationMs = durationMs;
         this.status = status;
+        this.userFeedback = userFeedback;
         this.createdAt = createdAt;
     }
 
     public static GenerationLog restore(Long id, Long userId, String promptSlug, Integer promptVersion,
                                         String provider, String model, Map<String, Object> inputContext,
                                         Map<String, Object> output, Integer durationMs, String status,
-                                        Instant createdAt) {
+                                        String userFeedback, Instant createdAt) {
         return new GenerationLog(id, userId, promptSlug, promptVersion, provider, model, inputContext, output,
-                durationMs, status, createdAt);
+                durationMs, status, userFeedback, createdAt);
     }
 
     public static GenerationLog create(Long userId, String promptSlug, Integer promptVersion, String provider,
                                        String model, Map<String, Object> inputContext, Map<String, Object> output,
                                        Integer durationMs, String status) {
         return new GenerationLog(null, userId, promptSlug, promptVersion, provider, model, inputContext, output,
-                durationMs, status, Instant.now());
+                durationMs, status, null, Instant.now());
     }
 }

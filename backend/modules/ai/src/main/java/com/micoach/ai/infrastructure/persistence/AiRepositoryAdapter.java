@@ -156,4 +156,9 @@ public class AiRepositoryAdapter implements AiRepository {
     public void updateGenerationLogStatus(Long logId, String status) {
         generationLogRepository.updateStatus(logId, status);
     }
+
+    @Override
+    public void updateGenerationLogFeedback(Long logId, String feedback) {
+        generationLogRepository.updateUserFeedback(logId, feedback);
+    }
 }

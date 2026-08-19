@@ -215,6 +215,16 @@ public class AiService implements AiUseCase {
         repository.updateGenerationLogStatus(logId, "partial");
     }
 
+    // REQUIRES_NEW por el mismo motivo: se llama desde mitad de otro caso de uso
+    // (ej. WorkoutService.deleteWorkout) y no debe atarse al resultado de esa
+    // transacción — el feedback es memoria de auditoría, tiene que sobrevivir aunque
+    // el borrado en sí falle después por otro motivo.
+    @Override
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void recordFeedback(Long logId, String feedback) {
+        repository.updateGenerationLogFeedback(logId, feedback);
+    }
+
     private ResolvedProvider resolve(AiProviderConfig config) {
         String apiKey = config.hasApiKey() ? encryptor.decrypt(config.getApiKeyEncrypted()) : null;
         return new ResolvedProvider(config.getProvider(), config.getBaseUrl(), apiKey, config.getModel());

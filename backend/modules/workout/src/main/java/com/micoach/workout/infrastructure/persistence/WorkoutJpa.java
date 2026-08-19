@@ -56,6 +56,9 @@ public class WorkoutJpa {
     @Column(name = "status", nullable = false)
     private String status;
 
+    @Column(name = "generation_log_id")
+    private Long generationLogId;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 

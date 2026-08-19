@@ -118,7 +118,7 @@ public class WorkoutController {
     private WorkoutData toWorkoutData(WorkoutRequest request) {
         List<WorkoutDayData> days = request.days().stream().map(this::toDayData).toList();
         return new WorkoutData(request.name(), request.description(), request.objective(),
-                request.level(), request.durationWeeks(), days);
+                request.level(), request.durationWeeks(), days, null);
     }
 
     private WorkoutDayData toDayData(WorkoutDayRequest request) {

@@ -61,6 +61,9 @@ public class GenerationLogJpa {
     @Column(name = "status", nullable = false)
     private String status;
 
+    @Column(name = "user_feedback")
+    private String userFeedback;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 }
