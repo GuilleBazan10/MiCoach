@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Pencil, Play, PlayCircle, Trash2 } from 'lucide-react';
+import { Copy, Pencil, Play, PlayCircle, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,7 +16,7 @@ import {
 import { extractErrorMessage } from '@/core/api/apiError';
 import { useAuth } from '@/features/auth/application/useAuth';
 import { useWorkoutDetail } from '../application/queries';
-import { useDeleteWorkout, useStartSession } from '../application/mutations';
+import { useCloneTemplate, useDeleteWorkout, useStartSession } from '../application/mutations';
 import { OBJECTIVE_LABELS, LEVEL_LABELS, labelFor, summarizeDay } from '../domain/workoutLabels';
 import { PlannedExerciseRow } from '../components/PlannedExerciseRow';
 
@@ -28,7 +28,18 @@ export function WorkoutDetailPage() {
   const { data: workout, isLoading, isError } = useWorkoutDetail(workoutId);
   const startSession = useStartSession();
   const deleteWorkout = useDeleteWorkout();
+  const cloneTemplate = useCloneTemplate();
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  function handleUseTemplate() {
+    cloneTemplate.mutate(workoutId, {
+      onSuccess: (copy) => {
+        toast.success('Plantilla copiada a tus rutinas');
+        navigate(`/workouts/${copy.id}`);
+      },
+      onError: (error) => toast.error(extractErrorMessage(error)),
+    });
+  }
 
   function handleStart(workoutDayId?: number) {
     startSession.mutate(
@@ -76,6 +87,11 @@ export function WorkoutDetailPage() {
               <Trash2 />
             </Button>
           </div>
+        )}
+        {workout.template && (
+          <Button size="sm" className="shrink-0" onClick={handleUseTemplate} disabled={cloneTemplate.isPending}>
+            <Copy /> Usar esta plantilla
+          </Button>
         )}
       </div>
 

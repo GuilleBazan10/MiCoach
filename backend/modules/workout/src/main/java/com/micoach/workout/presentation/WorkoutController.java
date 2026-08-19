@@ -115,6 +115,13 @@ public class WorkoutController {
         useCase.deleteWorkout(user.id(), workoutId);
     }
 
+    @PostMapping("/{workoutId}/clone")
+    @ResponseStatus(HttpStatus.CREATED)
+    public WorkoutResponse cloneTemplate(@AuthenticationPrincipal AuthenticatedUser user,
+                                         @PathVariable Long workoutId) {
+        return WorkoutResponse.from(useCase.cloneTemplate(user.id(), workoutId));
+    }
+
     private WorkoutData toWorkoutData(WorkoutRequest request) {
         List<WorkoutDayData> days = request.days().stream().map(this::toDayData).toList();
         return new WorkoutData(request.name(), request.description(), request.objective(),

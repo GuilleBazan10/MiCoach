@@ -59,29 +59,56 @@ class WorkoutAiGenerator {
         return toWorkoutData(result, parsed, filteredCatalog);
     }
 
+    // Cuántos intentos recientes de este mismo usuario se miran para construir el
+    // historial — un solo intento previo es una muestra demasiado chica (una rutina
+    // puede quedar "sin feedback" simplemente porque el usuario todavía no la probó).
+    private static final int FEEDBACK_HISTORY_WINDOW = 3;
+
     /**
      * Memoria persistente que retroalimenta la generación (no solo auditoría de solo
-     * lectura): mira el intento anterior de este mismo usuario para este prompt y, si
-     * quedó "partial" (la propia validación de acá abajo lo rechazó) o el usuario borró
-     * la rutina que produjo ("discarded", ver {@code WorkoutService.deleteWorkout}), se
-     * lo suma como contexto para que la IA no repita el mismo problema.
+     * lectura): mira los últimos {@link #FEEDBACK_HISTORY_WINDOW} intentos de este mismo
+     * usuario para este prompt y combina tres señales — rechazado por validación
+     * ("partial"), descartado por el usuario sin usarlo ("discarded", ver
+     * {@code WorkoutService.deleteWorkout}) y efectivamente usado ("kept", se marca al
+     * arrancar una sesión real sobre esa rutina en {@code WorkoutService.startSession})
+     * — en un único aviso que la IA recibe como contexto adicional. La señal positiva
+     * ("kept") es tan importante como las negativas: no alcanza con evitar el error
+     * anterior, conviene mantener lo que sí funcionó.
      */
     private String buildFeedbackHistory(Long userId) {
         List<GenerationLog> logs = aiUseCase.listGenerationLogs(new GenerationLogFilter(userId, PROMPT_SLUG));
         if (logs.isEmpty()) {
             return "Sin antecedentes de generaciones anteriores.";
         }
-        GenerationLog last = logs.get(0);
-        if ("partial".equals(last.getStatus())) {
-            return "La generación anterior para este usuario fue rechazada automáticamente por no "
-                    + "cumplir el formato o el mínimo de ejercicios por día — asegurate de dar JSON "
-                    + "válido con al menos 3 ejercicios variados por día de entrenamiento.";
+        List<GenerationLog> recent = logs.size() > FEEDBACK_HISTORY_WINDOW
+                ? logs.subList(0, FEEDBACK_HISTORY_WINDOW) : logs;
+
+        long partialCount = recent.stream().filter(l -> "partial".equals(l.getStatus())).count();
+        long discardedCount = recent.stream().filter(l -> "discarded".equals(l.getUserFeedback())).count();
+        long keptCount = recent.stream().filter(l -> "kept".equals(l.getUserFeedback())).count();
+
+        if (partialCount == 0 && discardedCount == 0 && keptCount == 0) {
+            return "Sin antecedentes relevantes de generaciones anteriores.";
         }
-        if ("discarded".equals(last.getUserFeedback())) {
-            return "El usuario borró la última rutina generada sin usarla — probá variar más los "
-                    + "ejercicios y el enfoque respecto al intento anterior.";
+
+        StringBuilder note = new StringBuilder();
+        if (partialCount > 0) {
+            note.append("De los últimos ").append(recent.size()).append(" intentos de este usuario, ")
+                    .append(partialCount).append(" fueron rechazados automáticamente por no cumplir el "
+                            + "formato o el mínimo de ejercicios por día — asegurate de dar JSON válido "
+                            + "con al menos 3 ejercicios variados por día de entrenamiento. ");
         }
-        return "Sin antecedentes relevantes de generaciones anteriores.";
+        if (discardedCount > 0) {
+            note.append("El usuario descartó ").append(discardedCount)
+                    .append(discardedCount == 1 ? " rutina generada reciente sin usarla" : " rutinas generadas recientes sin usarlas")
+                    .append(" — probá variar más los ejercicios y el enfoque respecto a esos intentos. ");
+        }
+        if (keptCount > 0) {
+            note.append("El usuario sí llegó a entrenar con una rutina generada recientemente — ese "
+                    + "enfoque funcionó, mantené un estilo similar (misma variedad y estructura de días) "
+                    + "salvo que el pedido actual indique explícitamente lo contrario. ");
+        }
+        return note.toString().trim();
     }
 
     /**

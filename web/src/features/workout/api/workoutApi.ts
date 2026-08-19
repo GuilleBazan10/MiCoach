@@ -48,6 +48,8 @@ export const workoutApi = {
 
   deleteWorkout: (id: number) => apiClient.delete(`/workouts/${id}`),
 
+  cloneTemplate: (id: number) => apiClient.post<Workout>(`/workouts/${id}/clone`).then((r) => r.data),
+
   listSessions: () => apiClient.get<WorkoutSession[]>('/workouts/sessions').then((r) => r.data),
 
   getSession: (id: number) => apiClient.get<WorkoutSession>(`/workouts/sessions/${id}`).then((r) => r.data),

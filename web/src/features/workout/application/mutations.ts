@@ -40,6 +40,16 @@ export function useUpdateWorkout(id: number) {
   });
 }
 
+export function useCloneTemplate() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => workoutApi.cloneTemplate(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: workoutKeys.list(false) });
+    },
+  });
+}
+
 export function useDeleteWorkout() {
   const queryClient = useQueryClient();
   return useMutation({

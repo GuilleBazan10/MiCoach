@@ -41,6 +41,13 @@ public interface WorkoutUseCase {
 
     void deleteWorkout(Long userId, Long workoutId);
 
+    /**
+     * Copia una plantilla global ({@code isTemplate = true}) a las rutinas propias del
+     * usuario — mismos días/ejercicios, editable después como cualquier rutina manual
+     * ({@code aiGenerated = false}). La plantilla original no se modifica.
+     */
+    Workout cloneTemplate(Long userId, Long templateId);
+
     // ------------------------- Sesiones -------------------------
 
     List<WorkoutSession> listSessions(Long userId);

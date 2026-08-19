@@ -135,6 +135,31 @@ public class WorkoutService implements WorkoutUseCase {
         eventPublisher.publishEvent(AuditLogEvent.of(userId, "WORKOUT_DELETE", "WORKOUT", workoutId));
     }
 
+    @Override
+    @Transactional
+    public Workout cloneTemplate(Long userId, Long templateId) {
+        log.info("Clonando plantilla ID: {} para el usuario ID: {}", templateId, userId);
+        Workout template = requireAccessibleWorkout(userId, templateId);
+        if (!template.isTemplate()) {
+            throw new DomainException(404, ErrorCode.NOT_FOUND, "Rutina no encontrada");
+        }
+        List<WorkoutDay> days = template.getDays().stream()
+                .map(day -> WorkoutDay.create(day.getDayIndex(), day.getName(), day.isRestDay(),
+                        day.getExercises().stream()
+                                .map(e -> PlannedExercise.create(e.getExerciseId(), e.getOrderIndex(), e.getSets(),
+                                        e.getRepsMin(), e.getRepsMax(), e.getRestSeconds(), e.getIntensityPercent(),
+                                        e.getTempo(), e.getNotes()))
+                                .toList()))
+                .toList();
+        Workout copy = Workout.create(userId, template.getName(), template.getDescription(),
+                template.getObjective(), template.getLevel(), template.getDurationWeeks(), days);
+        Workout saved = repository.saveWorkout(copy);
+
+        log.info("Plantilla ID: {} clonada como rutina ID: {} para el usuario ID: {}", templateId, saved.getId(), userId);
+        eventPublisher.publishEvent(AuditLogEvent.of(userId, "WORKOUT_CLONE_TEMPLATE", "WORKOUT", saved.getId()));
+        return saved;
+    }
+
     private List<WorkoutDay> toDays(List<WorkoutDayData> days) {
         if (days == null) {
             return List.of();
@@ -192,10 +217,16 @@ public class WorkoutService implements WorkoutUseCase {
     @Override
     @Transactional
     public WorkoutSession startSession(Long userId, StartSessionData data) {
-        log.info("Iniciando sesión de entrenamiento para el usuario ID: {} (Rutina ID: {}, Día ID: {})", 
+        log.info("Iniciando sesión de entrenamiento para el usuario ID: {} (Rutina ID: {}, Día ID: {})",
                 userId, data.workoutId(), data.workoutDayId());
         if (data.workoutId() != null) {
-            requireAccessibleWorkout(userId, data.workoutId());
+            Workout workout = requireAccessibleWorkout(userId, data.workoutId());
+            // Señal positiva del loop de memoria: arrancar una sesión real sobre una
+            // rutina de IA es evidencia más fuerte de que "sirvió" que simplemente no
+            // haberla borrado — ver WorkoutAiGenerator.buildFeedbackHistory().
+            if (workout.isAiGenerated() && workout.getGenerationLogId() != null) {
+                aiUseCase.recordFeedback(workout.getGenerationLogId(), "kept");
+            }
         }
         WorkoutSession session = repository.saveSession(WorkoutSession.start(userId, data.workoutId(), data.workoutDayId()));
         
