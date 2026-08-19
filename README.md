@@ -61,6 +61,11 @@ MiCoach/
 Requisitos: **Docker**, **JDK 21**, **Gradle** (se usa el wrapper), **Flutter SDK**
 (mobile), **Node.js ≥20.19 o ≥22.12** (web — Vite 8 no arranca con versiones menores).
 
+> **Atajo**: `./scripts/dev.sh up` (o `make dev-up`) levanta docker + backend +
+> frontend juntos en segundo plano — `./scripts/dev.sh down` los baja. Cubre los
+> pasos 1-3 y 5 de abajo (no incluye mobile). Ver `scripts/dev.sh status`/`logs`
+> para ver qué está corriendo o seguir los logs en vivo.
+
 ```bash
 # 1. Copiar variables de entorno
 cp .env.example .env        # Windows: copy .env.example .env
