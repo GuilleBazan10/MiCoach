@@ -3,6 +3,7 @@ package com.micoach.ai.application.service;
 import com.micoach.shared.crypto.TextEncryptor;
 import com.micoach.shared.error.DomainException;
 import com.micoach.shared.error.ErrorCode;
+import com.micoach.shared.event.AuditLogEvent;
 import com.micoach.ai.application.port.in.AiUseCase;
 import com.micoach.ai.application.port.out.AiProviderStrategy;
 import com.micoach.ai.application.port.out.AiRepository;
@@ -12,6 +13,8 @@ import com.micoach.ai.domain.ChatMessage;
 import com.micoach.ai.domain.Conversation;
 import com.micoach.ai.domain.GenerationLog;
 import com.micoach.ai.domain.Prompt;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,17 +28,21 @@ import java.util.Map;
  * a usar ya no es una property estática, se lee de {@code ai_provider_configs} (editable
  * en runtime desde el panel de admin, sin reiniciar el backend).
  */
+@Slf4j
 @Service
 public class AiService implements AiUseCase {
 
     private final AiRepository repository;
     private final List<AiProviderStrategy> strategies;
     private final TextEncryptor encryptor;
+    private final ApplicationEventPublisher eventPublisher;
 
-    public AiService(AiRepository repository, List<AiProviderStrategy> strategies, TextEncryptor encryptor) {
+    public AiService(AiRepository repository, List<AiProviderStrategy> strategies, 
+                     TextEncryptor encryptor, ApplicationEventPublisher eventPublisher) {
         this.repository = repository;
         this.strategies = strategies;
         this.encryptor = encryptor;
+        this.eventPublisher = eventPublisher;
     }
 
     // ------------------------- Config de proveedores (admin) -------------------------
@@ -49,31 +56,44 @@ public class AiService implements AiUseCase {
     @Override
     @Transactional
     public AiProviderConfig updateProviderConfig(String provider, ProviderConfigData data) {
+        log.info("Actualizando configuración del proveedor de IA: {}", provider);
         AiProviderConfig config = requireProviderConfig(provider);
         String newKeyEncrypted = data.apiKey() == null || data.apiKey().isBlank()
                 ? null
                 : encryptor.encrypt(data.apiKey());
         config.update(data.displayName(), data.baseUrl(), data.model(), newKeyEncrypted, data.enabled());
-        return repository.saveProviderConfig(config);
+        AiProviderConfig saved = repository.saveProviderConfig(config);
+        
+        log.info("Configuración del proveedor de IA: {} actualizada exitosamente", provider);
+        eventPublisher.publishEvent(AuditLogEvent.of(null, "AI_PROVIDER_UPDATE", "AI_PROVIDER", null, Map.of("provider", provider), null));
+        return saved;
     }
 
     @Override
     @Transactional
     public AiProviderConfig activateProvider(String provider) {
+        log.info("Activando proveedor de IA: {}", provider);
         AiProviderConfig config = requireProviderConfig(provider);
         repository.deactivateAllProviderConfigs();
         config.activate();
-        return repository.saveProviderConfig(config);
+        AiProviderConfig saved = repository.saveProviderConfig(config);
+        
+        log.info("Proveedor de IA: {} activado exitosamente", provider);
+        eventPublisher.publishEvent(AuditLogEvent.of(null, "AI_PROVIDER_ACTIVATE", "AI_PROVIDER", null, Map.of("provider", provider), null));
+        return saved;
     }
 
     @Override
     public ProviderTestResult testProvider(String provider) {
+        log.info("Probando conectividad del proveedor de IA: {}", provider);
         AiProviderConfig config = requireProviderConfig(provider);
         try {
             String reply = strategyFor(config.getProvider()).complete(
                     "Respondé únicamente con la palabra OK.", resolve(config));
+            log.info("Prueba de proveedor de IA: {} completada con éxito. Respuesta: {}", provider, reply);
             return new ProviderTestResult(true, reply == null ? "" : reply.trim());
         } catch (RuntimeException e) {
+            log.error("Prueba de proveedor de IA: {} fallida. Error: {}", provider, e.getMessage());
             return new ProviderTestResult(false, e.getMessage());
         }
     }
@@ -173,14 +193,10 @@ public class AiService implements AiUseCase {
 
     // ------------------------- Generación -------------------------
 
-    // REQUIRES_NEW: la llamada al proveedor de IA y su auditoría deben persistir aunque
-    // el llamador (ej. workout.generateWorkout, que arma el Workout con esta respuesta)
-    // termine haciendo rollback de su propia transacción por un error posterior — si no,
-    // Spring revierte también el INSERT en ai_generation_logs y se pierde justo el dato
-    // que hace falta para diagnosticar qué devolvió el modelo.
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public GenerationResult generate(Long userId, String promptSlug, Map<String, Object> variables) {
+        log.info("Iniciando solicitud de generación con IA para el usuario ID: {} (Slug del prompt: {})", userId, promptSlug);
         Prompt prompt = repository.findPrompts(promptSlug, true).stream().findFirst()
                 .orElseThrow(() -> new DomainException(404, ErrorCode.NOT_FOUND,
                         "No hay un prompt activo para '" + promptSlug + "'"));
@@ -196,22 +212,27 @@ public class AiService implements AiUseCase {
         try {
             output = strategy.complete(rendered, resolved);
         } catch (RuntimeException e) {
+            int errorDurationMs = (int) (System.currentTimeMillis() - start);
+            log.error("Error durante la generación con IA para el usuario ID: {} tras {} ms: {}", userId, errorDurationMs, e.getMessage());
             logAttempt(userId, prompt, resolved, variables, Map.of("error", String.valueOf(e.getMessage())),
-                    (int) (System.currentTimeMillis() - start), "error");
+                    errorDurationMs, "error");
+            eventPublisher.publishEvent(AuditLogEvent.of(userId, "AI_GENERATION_FAILED", "AI_GENERATION", null, Map.of("slug", promptSlug, "error", e.getMessage()), null));
             throw e;
         }
         int durationMs = (int) (System.currentTimeMillis() - start);
         GenerationLog saved = logAttempt(userId, prompt, resolved, variables, Map.of("raw", output), durationMs,
                 "success");
+        
+        log.info("Generación con IA completada exitosamente en {} ms para el usuario ID: {} (Log ID: {})", durationMs, userId, saved.getId());
+        eventPublisher.publishEvent(AuditLogEvent.of(userId, "AI_GENERATION_SUCCESS", "AI_GENERATION", saved.getId()));
+        
         return new GenerationResult(saved.getId(), output, resolved.provider(), resolved.model(), durationMs);
     }
 
-    // REQUIRES_NEW: igual que generate() arriba — si no, la DomainException que el
-    // llamador lanza justo después de marcar "partial" hace rollback de esta misma
-    // transacción y el UPDATE se pierde, dejando el log en "success" pese al rechazo.
     @Override
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void markGenerationPartial(Long logId) {
+        log.info("Marcando log de generación ID: {} como parcial", logId);
         repository.updateGenerationLogStatus(logId, "partial");
     }
 
